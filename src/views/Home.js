@@ -85,12 +85,13 @@ function Home() {
                 <Box>
                 <Paper sx={{  width: '90%', margin: '0 auto' }}>
                     <DataGrid
+                        rowHeight={100}
                         rows={rows}
                         columns={columns}
                         initialState={{ pagination: { paginationModel } }}
                         pageSizeOptions={[5, 10]}
-                        checkboxSelection
-                        sx={{ border: 0 }}
+                        hideFooter
+                        sx={{ border: 0, fontSize: '1rem', mb: 10 }}
                     />
                 </Paper>
                 </Box>

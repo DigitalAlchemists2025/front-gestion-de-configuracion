@@ -13,10 +13,6 @@ function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        // Mostrar alerta temporalmente
-        alert('Inicio de sesión exitoso');
-        navigate('/home')
-
         setLoading(true);
         /*        
         try {
@@ -56,43 +52,52 @@ function Login() {
     };
 
     return (
-        <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', mt: '10%' }}>
-            <Typography variant="h1" sx={{ fontSize: '3rem', mb: 4 }}>Gestión de Configuración</Typography>
-            <Paper elevation={3} sx={{ p: 4, width: '25%', maxWidth: 400, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                <Typography variant="h2" sx={{ fontSize: '2.5rem', mb: 4 }}>Iniciar Sesión</Typography>
+        <Box sx={{ 
+            display: 'flex', 
+            flexDirection: 'column', 
+            justifyContent: 'center', 
+            alignItems: 'center', 
+            background: 'linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%)',
+            minHeight: '100vh'
+        }}>
+            <Typography variant="h1" sx={{ fontSize: '2.5rem', mb: 6, color: '#ffffff', textAlign: 'center' }}>
+                Gestión de Configuración
+            </Typography>
+
+            <Paper elevation={3} sx={{ p: 4, borderRadius: 3, width: '30%', maxWidth: 400, boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)' }}>
+                <Typography variant="h2" sx={{ fontSize: '1.8rem', mb: 4, textAlign: 'center', color: 'rgb(1,9,149)' }}>
+                    Iniciar Sesión
+                </Typography>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography variant="body1" sx={{ width: '10rem', fontWeight: 'bold' }}>Correo:</Typography>
-                        <TextField
-                            type="email"
-                            name="username"
-                            value={auth.username}
-                            onChange={handleChange}
-                            fullWidth
-                            size="small"
-                            sx={{ '& .MuiInputBase-input': { height: '24px' } }} 
-                        />
-                    </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Typography variant="body1" sx={{ width: '10rem', fontWeight: 'bold' }}>Contraseña:</Typography>
-                        <TextField
-                            type="password"
-                            name="password"
-                            value={auth.password}
-                            onChange={handleChange}
-                            fullWidth
-                            size="small" 
-                            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
-                        />
-                    </Box>
+                    <TextField
+                        type="email"
+                        name="username"
+                        value={auth.username}
+                        onChange={handleChange}
+                        fullWidth
+                        size="small"
+                        label="Correo"
+                        sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+                    />
+                    <TextField
+                        type="password"
+                        name="password"
+                        value={auth.password}
+                        onChange={handleChange}
+                        fullWidth
+                        size="small"
+                        label="Contraseña"
+                        sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+                    />
                 </Box>
                 <Button
                     type="submit"
-                    variant="outlined"
+                    variant="contained"
                     color="primary"
                     onClick={handleSubmit}
                     disabled={isLoading}
-                    sx={{ mt: 4 }}
+                    sx={{ mt: 4, py: 1.5, borderRadius: 50, backgroundColor: '#007bff', '&:hover': { backgroundColor: '#0056b3' } }}
+                    fullWidth
                 >
                     {isLoading ? 'Cargando...' : 'Ingresar'}
                 </Button>

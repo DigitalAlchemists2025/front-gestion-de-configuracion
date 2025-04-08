@@ -8,96 +8,213 @@ function Home() {
     const navigate = useNavigate();
 
     const columns = [
-        { field: 'nombre', headerName: 'Nombre', width: 150 },
-        { field: 'id', headerName: 'ID', width: 150 },
-        { field: 'tipo', headerName: 'Tipo', width: 150 },
-        { field: 'estado', headerName: 'Estado', width: 150 }
+        { field: 'nombre', headerName: 'Nombre', flex: 1 },
+        { field: 'id', headerName: 'ID', flex: 1 },
+        { field: 'tipo', headerName: 'Tipo', flex: 1 },
+        { 
+            field: 'estado', 
+            headerName: 'Estado', 
+            flex: 1,
+            cellClassName: (params) => {
+                if (params.value === 'activo') {
+                  return 'estado-activo';
+                } else if (params.value === 'dado de baja') {
+                  return 'estado-baja';
+                }
+                return '';
+              }
+        }
     ];
 
     const rows = [
         { id: 1, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
         { id: 2, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
         { id: 3, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
-    ]
-    
+        { id: 4, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 5, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 6, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 7, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 8, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 9, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 10, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 11, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 12, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 13, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 14, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 15, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 16, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 17, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 18, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 19, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 20, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 21, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 22, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 23, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 24, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 25, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+        { id: 26, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
+        { id: 27, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
+        { id: 28, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
+    ];
+
     const paginationModel = { page: 0, pageSize: 5 };
 
     return (
-        <Box 
+        <Box
             sx={{
                 display: 'flex',
-                flexDirection: 'row'
+                flexDirection: 'row',
+                maxHeight: '100vh',
+                width: '100%',
+                background: 'linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%)',
+                overflow: 'hidden'
             }}
         >
-            {/* Componente personalizado para la barra de navegación */}   
-            <SideBar></SideBar>
-            {/* Parte derecha que por el momento incluye un header de búsqueda y la tabla de datos*/}
-            <Box
-                sx={{
+            {/* Barra lateral */}
+            <SideBar />
+
+            {/* Contenido principal */}
+            <Box sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '85%',
+                maxHeight: '90hv',
+                backdropFilter: 'blur(10px)',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '15px',
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+                mx: 'auto',
+                my: '2rem',
+                p: 4
+            }}>
+                {/* Header */}
+                <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    justifyContent: 'center',
+                    gap: 5,
+                    mb: 4,
+                }}>
+                    {/* Barra de búsqueda */}
+                    <Input
+                    startAdornment={
+                        <InputAdornment position="start">
+                            <Avatar
+                                variant="square"
+                                src="/search-icon.png"
+                                sx={{
+                                    p: 1,
+                                    mr: 1,
+                                    left: 0,
+                                    height: '20px',
+                                    width: '20px',
+                                    backgroundColor: 'rgba(33, 57, 85, 0.23)',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                }}
+                            />
+                        </InputAdornment>
+                    }
+                    placeholder="Buscar"
+                    sx={{
+                        border: '1px solid #ccc',
+                        borderRadius: '5px',
+                        backgroundColor: 'rgba(46, 76, 133, 0.26)',
+                        padding: '0.5rem',
+                        width: '100%',
+                        maxWidth: '30rem',
+                        boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+                        outline: 'none',
+                        border: 'none',
+                        color: 'rgb(174, 212, 255)',
+                        '&:hover': {
+                            borderColor: 'transparent',
+                        },
+                        '&:focus': {
+                            outline: 'none',
+                            boxShadow: '0px 2px 5px rgba(0, 0, 0, 0.1)',
+                        },
+                    }}
+                    size="small"
+                />
+                </Box>
+
+                {/* Tabla */}
+                <Box sx={{
                     display: 'flex',
                     flexDirection: 'column',
-                    width: '75%'
-                }}
-            >
-                {/* Aquí es el box para el header */}
-                <Box 
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        my: '2.5rem',
-                        justifyContent: 'center',
-                        gap: 5,
-                        minWidth: '1000px'
-                    }}
-                >
-                    <Box>
-                        <Button variant="outlined" sx={{py: 1, px:3, gap: 1}}>
-                            <Avatar variant="square" sx={{width: '1rem', height: '1rem'}} src="/filter-icon.png"></Avatar>
-                            <Typography sx={{ fontSize: '1rem' }}>filtrar</Typography>
-                        </Button>
-                    </Box>
-                    <Box sx={{display: 'flex', flexDirection: 'row'}}>
-                        <Input
-                        /* Falta hacer que la búsqueda sea responsive */
-                            startAdornment = {
-                            <Avatar variant='square' src="/search-icon.png"
-                                sx={{
-                                    p:1,
-                                    borderRight: '1px solid',
-                                    mr: 1,
-                                    height: '20px',
-                                    width: '20px'
-                                }}
-                            ></Avatar>
-                            }
-                            placeholder="Buscar"
-                            sx={{
-                                border: '1px solid black',
-                                borderRadius: '5px',
-                                width: '50em',
-                                minWidth: '2rem'
+                    flexGrow: 1,
+                    height: '100%',
+                    overflow: 'hidden',
+                }}>
+                    <Paper
+                        sx={{
+                            flexGrow: 1,
+                            mx: 'auto',
+                            my: 4,
+                            width: '90%',
+                            overflow: 'hidden',
+                            borderRadius: '16px',
+                            backgroundColor: 'transparent',
+                            boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+                        }}
+                        >
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            getRowClassName={(params) => {
+                                if (params.row.estado === 'activo') return 'fila-activa';
+                                if (params.row.estado === 'dado de baja') return 'fila-baja';
+                                return '';
                             }}
-                            size="small"
-                        ></Input>
-                    </Box>
-                </Box>
-                {/* Aquí es el box para la tabla */}
-                <Box>
-                <Paper sx={{  width: '90%', margin: '0 auto' }}>
-                    <DataGrid
-                        rowHeight={100}
-                        rows={rows}
-                        columns={columns}
-                        initialState={{ pagination: { paginationModel } }}
-                        pageSizeOptions={[5, 10]}
-                        hideFooter
-                        sx={{ border: 0, fontSize: '1rem', mb: 10 }}
-                    />
-                </Paper>
+                            initialState={{
+                                pagination: { paginationModel: { page: 0, pageSize: 10 } },
+                            }}
+                            pageSizeOptions={[5, 10, 15]}
+                            sx={{
+                                border: 'none',
+                                color: 'rgb(174, 212, 255)',
+                                fontSize: '1rem',
+                                background: 'transparent',
+                                '& .fila-activa': {
+                                    color: '#00eaff',
+                                },
+                                '& .fila-baja': {
+                                    color: '#a0a0a0',
+                                    fontStyle: 'italic',
+                                },
+                                '.MuiDataGrid-columnHeader': {
+                                    backgroundColor: 'rgb(43, 43, 117)',
+                                    borderBottom: 'none',
+                                },
+                                '.MuiDataGrid-cell': {
+                                    borderBottom: 'none',
+                                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                                },
+                                '.MuiDataGrid-row:hover': {
+                                    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                                    cursor: 'pointer',
+                                },
+                                '.MuiDataGrid-footerContainer': {
+                                    bgcolor: 'transparent',
+                                    borderTop: 'none',
+                                },
+                                '[class*="MuiTablePagination"]': {
+                                    color: 'rgb(0, 51, 109)',
+                                },
+                                '.MuiDataGrid-cell:focus': {
+                                    outline: 'none',
+                                },
+                                '.MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
+                                    outline: 'none',
+                                },
+                            }}
+                        />
+                        </Paper>
                 </Box>
             </Box>
         </Box>
-    )
+    );
 }
 
 export default Home;

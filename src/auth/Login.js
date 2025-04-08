@@ -1,30 +1,26 @@
 import React, { useState } from 'react';
 import { Box, Button, FormLabel, Paper, TextField, Typography } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
-import Home from '../views/Home';
+import axios from 'axios';
 
 function Login() {
-    const [auth, setAuth] = useState({ username: '', password: '' });
-    const [isPasswordVisible, setPasswordVisible] = useState(false);
+    const [auth, setAuth] = useState({ email: '', password: '' });
     const [isLoading, setLoading] = useState(false);
 
-    const navigate = useNavigate();
-
+    const BACKEND_URL = process.env.REACT_APP_BACK_URL;
+    
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setLoading(true);
-        /*        
         try {
-            const resp = await axios.post(`${BACKEND_URL}auth/signin`, {
-                username: auth.username.trim(),
+            const resp = await axios.post(`${BACKEND_URL}api/v1/auth/signin`, {
+                email: auth.email.trim(),
                 password: auth.password,
             });
             const { access_token } = resp.data;
             localStorage.setItem('token', access_token);
             localStorage.setItem('id_user', resp.data.id);
             if (access_token) {
-                localStorage.setItem('session', 'exito');
+                alert('Ha iniciado sesión correctamente')
                 window.location.replace('/home');
             } else {
                 console.log("Usuario no existe");
@@ -38,9 +34,7 @@ function Login() {
             }
         } finally {
             setLoading(false);
-        } 
-        */    
-        setLoading(false);
+        }    
     };
 
     const handleChange = (e) => {
@@ -71,8 +65,8 @@ function Login() {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <TextField
                         type="email"
-                        name="username"
-                        value={auth.username}
+                        name="email"
+                        value={auth.email}
                         onChange={handleChange}
                         fullWidth
                         size="small"

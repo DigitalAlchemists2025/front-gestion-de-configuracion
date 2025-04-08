@@ -1,30 +1,37 @@
-import { Button, Card, List, ListItem, ListItemText } from "@mui/material";
+import { Box } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ListButtonItem from "./ListButtonItem";
 
-function SideBar () {
-
+function SideBar() {
     const navigate = useNavigate();
 
     const HandleCerrarSesion = () => {
-        navigate('/login')
-        alert("Ha cerrado sesión correctamente")
-    }
+        alert("Ha cerrado sesión correctamente");
+        localStorage.clear();
+        navigate('/login');
+    };
 
-    return(
-        <List sx={{
-            width: '25%', 
-            mr: '2rem',
-            display: 'flex',
-            flexDirection: 'column'
-        }}>
-            <ListButtonItem nombre={'Ver Componentes'}></ListButtonItem>
-            <ListButtonItem nombre={'Agregar Componentes'}></ListButtonItem>
-            <ListButtonItem nombre={'Ver Historial'}></ListButtonItem>
-            <ListButtonItem nombre={'Cerrar Sesión'} onClick={HandleCerrarSesion}></ListButtonItem>
-        </List>
-    )
+    return (
+        <Box
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                width: '15%',
+                color: '#ffffff', // Texto blanco
+                p: 2, // Padding interno
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', // Sombra suave
+                borderRadius: '15px', // Bordes redondeados
+                height: '100vh', // Ocupar toda la altura de la pantalla
+            }}
+        >
+            {/* Botones de navegación */}
+            <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/ver-componentes')} />
+            <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
+            <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />
+            <ListButtonItem nombre="Cerrar Sesión" onClick={HandleCerrarSesion} />
+        </Box>
+    );
 }
 
 export default SideBar;

@@ -1,12 +1,18 @@
-import React, { useEffect, useState } from 'react';
-import { Box, Button, Paper, TextField, Typography } from '@mui/material';
+import React, { use, useEffect, useState } from 'react';
+import { Box, Button, Divider, Paper, TextField, Typography } from '@mui/material';
 import axios from 'axios';
+import { getAuth, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect } from 'firebase/auth';
+import { auth, provider } from '../firebase/config';
+import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
 function Login() {
-  const [auth, setAuth] = useState({ email: '', password: '' });
+  const [login, setLogin] = useState({ email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
   const [id, setId] = useState(null);
   const [user, setUser] = useState(null);
+  const navigate = useNavigate();
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
 
@@ -15,8 +21,8 @@ function Login() {
     setLoading(true);
     try {
       const resp = await axios.post(`${BACKEND_URL}/api/v1/auth/signin`, {
-        email: auth.email.trim(),
-        password: auth.password,
+        email: login.email.trim(),
+        password: login.password,
       });
       const { access_token } = resp.data;
       localStorage.setItem('token', access_token);
@@ -80,11 +86,29 @@ function Login() {
     fetchUser();
   }, [id]);
   
+  // Login Google con Popup
+  const handleGoogleLogin = () => {
+    console.log(auth);
+    signInWithPopup(auth, provider)
+      .then((result) => {
+        const _user = result.user;
+        localStorage.setItem('token', _user.accessToken);
+        localStorage.setItem('email', _user.email);
+        alert(`¡Bienvenido/a ${_user.displayName || _user.email}!`);
+        navigate('/home');
+      }).catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        const credential = GoogleAuthProvider.credentialFromError(error);
+        alert("Error al iniciar sesión con Google. Intenta más tarde.");
+        console.error("Error de Google:", errorCode, errorMessage, credential);
+    });
+  }; 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setAuth({
-      ...auth,
+    setLogin({
+      ...login,
       [name]: value,
     });
   };
@@ -124,7 +148,8 @@ function Login() {
           variant="h2"
           sx={{
             fontSize: '1.8rem',
-            mb: 4,
+            mb: 5,
+            gap: 5,
             textAlign: 'center',
             color: 'var(--login-paper-header)',
           }}
@@ -132,11 +157,26 @@ function Login() {
           Iniciar Sesión
         </Typography>
 
+
+        <Button
+          onClick={handleGoogleLogin}
+          variant="outlined"
+          color="secondary"
+          fullWidth
+          sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center', color: 'var(--login-button-hover)',border: '1px solid var(--login-button-hover)',gap: 1, borderRadius: 50, '&:hover': { backgroundColor: 'var(--login-button-hover)', color: 'white' } }}
+        >
+          <FontAwesomeIcon icon={faGoogle} />
+            Iniciar sesión con Google
+        </Button>
+
+        <Divider sx={{ borderColor: 'black', my: 5 }} />
+
+        <Typography sx={{ ml: 1, mb: 2}}>O iniciar sesión con credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             type="email"
             name="email"
-            value={auth.email}
+            value={login.email}
             onChange={handleChange}
             fullWidth
             size="small"
@@ -146,7 +186,7 @@ function Login() {
           <TextField
             type="password"
             name="password"
-            value={auth.password}
+            value={login.password}
             onChange={handleChange}
             fullWidth
             size="small"

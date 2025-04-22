@@ -2,11 +2,20 @@ import { Box } from "@mui/material";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import ListButtonItem from "./ListButtonItem";
+import { getAuth, signOut } from "firebase/auth";
 
 function SideBar() {
     const navigate = useNavigate();
 
     const HandleCerrarSesion = () => {
+        const auth = getAuth();
+        if (auth.currentUser) {
+            signOut(auth).then(() => {
+                console.log("Sesión cerrada correctamente");
+            }).catch((error) => {
+                console.error("Error al cerrar sesión:", error);
+            });
+        }
         alert("Ha cerrado sesión correctamente");
         localStorage.clear();
         navigate('/login');

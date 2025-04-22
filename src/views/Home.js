@@ -9,11 +9,7 @@ function Home() {
   const navigate = useNavigate();
   const [components, setComponents] = useState([]);
   const [loading, setLoading] = useState(false);
-  const rol = localStorage.getItem('role');
-  const [columnVisibilityModel, setColumnVisibilityModel] = useState({
-    _id: rol === '0',
-  });
-  
+  const rol = localStorage.getItem('role');  
   
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
   const token = localStorage.getItem('token');
@@ -22,7 +18,6 @@ function Home() {
   };
 
   const columns = [
-    { field: '_id', headerName: 'ID', flex: 1, },
     { field: 'name', headerName: 'Nombre', flex: 1, },
     { field: 'type', headerName: 'Tipo', flex: 1 },
     {
@@ -185,7 +180,6 @@ function Home() {
             <DataGrid
               rows={components}
               columns={columns}
-              columnVisibilityModel={columnVisibilityModel}
               showCellVerticalBorder
               showColumnVerticalBorder
               getRowId={(row) => row._id}

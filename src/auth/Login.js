@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Box, Button, Paper, TextField, Typography } from '@mui/material';
 import axios from 'axios';
 
 function Login() {
   const [auth, setAuth] = useState({ email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
+  const [id, setId] = useState(null);
+  const [user, setUser] = useState(null);
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
 
@@ -12,16 +14,15 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const resp = await axios.post(`${BACKEND_URL}api/v1/auth/signin`, {
+      const resp = await axios.post(`${BACKEND_URL}/api/v1/auth/signin`, {
         email: auth.email.trim(),
         password: auth.password,
       });
       const { access_token } = resp.data;
       localStorage.setItem('token', access_token);
-      localStorage.setItem('id_user', resp.data.id);
+      setId(resp.data.id);
       if (access_token) {
         alert('Ha iniciado sesión correctamente');
-        window.location.replace('/home');
       } else {
         console.log("Usuario no existe");
       }
@@ -36,6 +37,49 @@ function Login() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (!id) return;
+  
+    const fetchUser = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn("No se encontró token");
+        return;
+      }
+  
+      try {
+        const response = await axios.get(`${BACKEND_URL}/users/${id}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        console.log("Usuario obtenido:", response.data);
+  
+        const role = response.data.role;
+  
+        if (role === 'usuario') {
+          localStorage.setItem('role', '1');
+          console.log("Rol usuario guardado como 1");
+        } else if (role === 'administrador') {
+          localStorage.setItem('role', '0');
+          console.log("Rol admin guardado como 0");
+        } else {
+          console.warn("Rol desconocido:", role);
+        }
+  
+        setUser(response.data);
+        window.location.replace('/home');
+  
+      } catch (error) {
+        console.error("Error al obtener el usuario:", error);
+      }
+    };
+  
+    fetchUser();
+  }, [id]);
+  
 
   const handleChange = (e) => {
     const { name, value } = e.target;

@@ -18,16 +18,18 @@ function SideBar() {
                 display: 'flex',
                 flexDirection: 'column',
                 width: '15%',
-                color: '#ffffff', // Texto blanco
-                p: 2, // Padding interno
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', // Sombra suave
-                borderRadius: '15px', // Bordes redondeados
-                height: '100vh', // Ocupar toda la altura de la pantalla
+                color: '#ffffff', 
+                p: 2, 
+                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', 
+                borderRadius: '15px',
+                height: '100vh', 
             }}
         >
             {/* Botones de navegación */}
             <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/ver-componentes')} />
-            <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
+            {localStorage.getItem('role') === '0' && (
+                <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
+            )}
             <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />
             <ListButtonItem nombre="Cerrar Sesión" onClick={HandleCerrarSesion} />
         </Box>

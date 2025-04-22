@@ -1,24 +1,38 @@
-import { Avatar, Box, Input, InputAdornment, Paper } from "@mui/material";
-import React from "react";
+import { Avatar, Box, CircularProgress, Input, InputAdornment, Paper } from "@mui/material";
+import React, { useEffect, useState } from "react";
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
+import axios from "axios";
 
 function Home() {
   const navigate = useNavigate();
+  const [components, setComponents] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const rol = localStorage.getItem('role');
+  const [columnVisibilityModel, setColumnVisibilityModel] = useState({
+    _id: rol === '0',
+  });
+  
+  
+  const BACKEND_URL = process.env.REACT_APP_BACK_URL;
+  const token = localStorage.getItem('token');
+  if (!token) {
+    navigate('/login');
+  };
 
   const columns = [
-    { field: 'nombre', headerName: 'Nombre', flex: 1 },
-    { field: 'id', headerName: 'ID', flex: 1 },
-    { field: 'tipo', headerName: 'Tipo', flex: 1 },
+    { field: '_id', headerName: 'ID', flex: 1, },
+    { field: 'name', headerName: 'Nombre', flex: 1, },
+    { field: 'type', headerName: 'Tipo', flex: 1 },
     {
-      field: 'estado',
+      field: 'status',
       headerName: 'Estado',
       flex: 1,
       cellClassName: (params) => {
         if (params.value === 'activo') {
           return 'estado-activo';
-        } else if (params.value === 'dado de baja') {
+        } else if (params.value === 'de baja') {
           return 'estado-baja';
         }
         return '';
@@ -26,14 +40,30 @@ function Home() {
     }
   ];
 
-  const rows = [
-    { id: 1, nombre: 'Disco Duro', tipo: 'electrónica', estado: 'activo' },
-    { id: 2, nombre: 'Monitor', tipo: 'electrónica', estado: 'activo' },
-    { id: 3, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
-    // ... Resto de filas
-    { id: 28, nombre: 'mouse', tipo: 'electrónica', estado: 'dado de baja' },
-  ];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${BACKEND_URL}/components`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        console.log(response.data); 
+        setComponents(response.data); 
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [token]);
 
+  if (loading) return <CircularProgress />;
+  
   return (
     <Box
       sx={{
@@ -153,11 +183,18 @@ function Home() {
             }}
           >
             <DataGrid
-              rows={rows}
+              rows={components}
               columns={columns}
+              columnVisibilityModel={columnVisibilityModel}
+              showCellVerticalBorder
+              showColumnVerticalBorder
+              getRowId={(row) => row._id}
+              onRowClick={(params) => {
+                navigate(`/components/${params.row._id}`);
+              }}
               getRowClassName={(params) => {
-                if (params.row.estado === 'activo') return 'fila-activa';
-                if (params.row.estado === 'dado de baja') return 'fila-baja';
+                if (params.row.status === 'activo') return 'fila-activa';
+                if (params.row.status === 'de baja') return 'fila-baja';
                 return '';
               }}
               initialState={{
@@ -165,7 +202,8 @@ function Home() {
               }}
               pageSizeOptions={[5, 10, 15]}
               sx={{
-                border: 'none',
+                border: '1px solid white',
+                borderRadius: '25px',
                 color: 'var(--color-text-base)',
                 fontSize: '1rem',
                 background: 'transparent',

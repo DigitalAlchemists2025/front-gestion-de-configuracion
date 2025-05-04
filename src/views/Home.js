@@ -45,7 +45,6 @@ function Home() {
             'Authorization': `Bearer ${token}`,
           },
         });
-        console.log(response.data); 
         setComponents(response.data); 
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -66,7 +65,7 @@ function Home() {
         flexDirection: 'row',
         maxHeight: '100vh',
         width: '100%',
-        background: 'var(--color-bg-gradient)',  // Uso de variable
+        background: 'var(--color-bg-gradient)', 
         overflow: 'hidden',
       }}
     >
@@ -235,7 +234,6 @@ function Home() {
                 '.MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
                   outline: 'none',
                 },
-                // Filas pares e impares con color alterno
                 '& .MuiDataGrid-row:nth-of-type(even) .MuiDataGrid-cell': {
                   backgroundColor: 'var(--color-dg-cell-bg-even)',
                 },

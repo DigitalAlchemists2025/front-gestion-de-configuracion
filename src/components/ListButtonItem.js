@@ -12,8 +12,8 @@ const ListButtonItem = ({ nombre, onClick }) => {
                 fontSize: '1.1rem bold',
                 border: 'none',
                 borderRadius: '15px',
-                bgcolor: 'transparent',
-                color: 'rgb(174, 212, 255)',
+                bgcolor: 'MenuText',
+                color: 'rgb(255, 255, 255)',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
                 '&:hover': {
                     transform: 'scale(1.05)', 

@@ -21,8 +21,6 @@ const AgregarComponentes = () => {
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState("");
   const [estado, setEstado] = useState("activo");
-  const [descripcion, setDescripcion] = useState("");
-  const [padre, setPadre] = useState(null);
   const [componentes, setComponentes] = useState([]);
   const [caracteristicas, setCaracteristicas] = useState([]);
   
@@ -34,6 +32,7 @@ const AgregarComponentes = () => {
     window.location.href = "/login";
   }
 
+/* Sin uso por ahora
   useEffect(() => {
     const fetchComponentes = async () => {
       try {
@@ -46,17 +45,21 @@ const AgregarComponentes = () => {
       }
     };
     fetchComponentes();
-  }, []);
+  }, []); */
 
   const handleSubmit = () => {
+    const validDescriptions = caracteristicas.filter(
+      (c) => c.name.trim() && c.description.trim()
+    );
+  
     const payload = {
       name: nombre.trim(),
       type: tipo.trim(),
       status: estado,
-      description: descripcion.trim() || undefined,
-      componentFrom: padre?._id || undefined,
-      //characteristics: caracteristicas
+      descriptions: validDescriptions.length > 0 ? validDescriptions : undefined
     };
+    
+    console.log("Payload:", payload);
 
     axios.post(`${BACKEND_URL}/components`, payload, {
       headers: {
@@ -87,8 +90,8 @@ const AgregarComponentes = () => {
 
   const handleAddCaracteristica = () => {
     const nueva = {
-      nombre: newNombre.trim(),
-      descripcion: newDescripcion.trim()
+      name: newNombre.trim(),
+      description: newDescripcion.trim()
     };
 
     setCaracteristicas([...caracteristicas, nueva]);
@@ -175,11 +178,12 @@ const AgregarComponentes = () => {
                   maxHeight: "150px",
                   overflowY: "auto",
                   overflowX: "hidden",
+                  py: 1,
                 }}>
                   {caracteristicas.map((c, index) => (
                     <Chip
                       key={index}
-                      label={`${c.nombre}: ${c.descripcion}`}
+                      label={`${c.name}: ${c.description}`}
                       onDelete={() => handleDeleteCaracteristica(index)}
                       size="medium"
                       sx={{ m: 1, maxWidth: "100%" }}
@@ -191,15 +195,9 @@ const AgregarComponentes = () => {
                 variant="outlined"
                 onClick={handleOpenModal}
                 sx={{
-                  mt: 2,
                   borderColor: "var(--color-bg-accent)",
                   color: "var(--color-text-base)",
                   maxWidth: "10%",
-                  height: "80%",
-                  "&:hover": {
-                    borderColor: "var(--color-bg-accent-hover)",
-                    backgroundColor: "rgba(0,0,0,0.05)"
-                  }
                 }}
               >
                 +

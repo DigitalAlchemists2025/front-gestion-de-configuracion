@@ -55,8 +55,6 @@ function Home() {
     
     fetchData();
   }, [token]);
-
-  if (loading) return <CircularProgress />;
   
   return (
     <Box

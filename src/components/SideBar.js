@@ -35,7 +35,7 @@ function SideBar() {
             }}
         >
             {/* Botones de navegación */}
-            <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/ver-componentes')} />
+            <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
             {localStorage.getItem('role') === '0' && (
                 <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
             )}

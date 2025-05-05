@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 
-const AgregarComponentes = () => {
+const AddComponent = () => {
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
   const token = localStorage.getItem("token");
 
@@ -21,7 +21,6 @@ const AgregarComponentes = () => {
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState("");
   const [estado, setEstado] = useState("activo");
-  const [componentes, setComponentes] = useState([]);
   const [caracteristicas, setCaracteristicas] = useState([]);
   
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -30,24 +29,10 @@ const AgregarComponentes = () => {
 
   if (!token) {
     window.location.href = "/login";
-  }
-
-/* Sin uso por ahora
-  useEffect(() => {
-    const fetchComponentes = async () => {
-      try {
-        const { data } = await axios.get(`${BACKEND_URL}/components`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setComponentes(data);
-      } catch (error) {
-        console.error("Error al obtener componentes:", error);
-      }
-    };
-    fetchComponentes();
-  }, []); */
+  } 
 
   const handleSubmit = () => {
+    setLoading(true);
     const validDescriptions = caracteristicas.filter(
       (c) => c.name.trim() && c.description.trim()
     );
@@ -58,8 +43,6 @@ const AgregarComponentes = () => {
       status: estado,
       descriptions: validDescriptions.length > 0 ? validDescriptions : undefined
     };
-    
-    console.log("Payload:", payload);
 
     axios.post(`${BACKEND_URL}/components`, payload, {
       headers: {
@@ -75,7 +58,7 @@ const AgregarComponentes = () => {
     .catch((error) => {
       console.error("Error al guardar componente:", error);
       alert("Error al guardar el componente. Por favor, inténtalo de nuevo.");
-    });
+    }).finally(setLoading(false));
   };
 
   const handleOpenModal = () => {
@@ -280,4 +263,4 @@ const AgregarComponentes = () => {
   );
 };
 
-export default AgregarComponentes;
+export default AddComponent;

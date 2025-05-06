@@ -1,4 +1,4 @@
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Chip, Paper, Typography } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -30,7 +30,8 @@ const ManageComponents = () => {
             }
             return '';
           }
-        }
+        },
+        { field: 'descriptions', headerName: 'Descripciones', flex: 1 },
       ];
     
     useEffect(() => {
@@ -43,7 +44,15 @@ const ManageComponents = () => {
                     'Authorization': `Bearer ${token}`,
                     },
                 });
-                setComponents(response.data); 
+
+                const componentesMapped = response.data.map((component) => {
+                    return {
+                      ...component,
+                      descriptions: component.descriptions.map((d) => `${d.name}: ${d.description}`)
+                    };
+                });
+                  
+                setComponents(componentesMapped);
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -136,7 +145,7 @@ const ManageComponents = () => {
                     />
                 </Paper>
             </Box>
-        </Box>
+        x</Box>
     )
 }
 

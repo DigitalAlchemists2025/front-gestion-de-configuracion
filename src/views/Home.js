@@ -1,4 +1,4 @@
-import { Avatar, Box, CircularProgress, Input, InputAdornment, Paper } from "@mui/material";
+import { Avatar, Box, Input, InputAdornment, Paper } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,9 @@ import LoadingCircle from "../components/LoadingCircle";
 
 function Home() {
   const navigate = useNavigate();
+  const [allComponents, setAllComponents] = useState([]);
   const [components, setComponents] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const rol = localStorage.getItem('role');  
   
@@ -42,11 +44,19 @@ function Home() {
         setLoading(true);
         const response = await axios.get(`${BACKEND_URL}/components`, {
           headers: {
-            'Content-Type': 'application/json',
+            'Content-Type': 'application/json', 
             'Authorization': `Bearer ${token}`,
           },
         });
-        setComponents(response.data); 
+        
+        const componentsSorted = response.data.sort((a, b) => {
+          if (a.updatedAt < b.updatedAt) return 1;
+          if (a.updatedAt > b.updatedAt) return -1;
+          return 0;
+        });
+        
+        setAllComponents(componentsSorted);
+        setComponents(componentsSorted); 
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -56,6 +66,18 @@ function Home() {
     
     fetchData();
   }, [token]);
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+  
+    const searched = allComponents.filter((c) =>
+      c.name.toLowerCase().includes(value.toLowerCase()) ||
+      c.type.toLowerCase().includes(value.toLowerCase()) 
+      /* || c.hijos.name || c.hijos.type */
+    );
+  
+    setComponents(searched);
+  };  
   
   if (loading)
     return (
@@ -120,6 +142,8 @@ function Home() {
                 />
               </InputAdornment>
             }
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
             placeholder="Buscar"
             sx={{
               borderRadius: '8px',

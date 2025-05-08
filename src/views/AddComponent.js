@@ -100,7 +100,7 @@ const AddComponent = () => {
     <Box
       sx={{
         display: 'flex',
-        minHeight: '100vh',
+        minHeight: '95vh',
         width: '100%',
         background: 'var(--color-bg-gradient)',
       }}

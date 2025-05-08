@@ -2,6 +2,7 @@ import { Box, CircularProgress, Typography, Paper, Button, Modal, TextField } fr
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import LoadingCircle from "../components/LoadingCircle";
 
 const ComponentDetail = () => {
   const { id } = useParams();
@@ -30,7 +31,6 @@ const ComponentDetail = () => {
             Authorization: `Bearer ${token}`,
           },
         });  
-        console.log(rol === 0);
         setComponent(response.data);
       } catch (error) {
         console.error("Error al obtener componente:", error);
@@ -64,7 +64,6 @@ const ComponentDetail = () => {
       setNewNombre("");
       setNewDescripcion("");
       handleCloseModal();
-      isModalOpen(false);
     }
     catch (error) {
       console.error("Error al agregar descripción:", error);
@@ -107,17 +106,7 @@ const ComponentDetail = () => {
 
   if (loading)
     return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "80vh",
-          background: "var(--color-bg-gradient)",
-        }}
-      >
-        <CircularProgress sx={{ color: "var(--color-text-active)" }} />
-      </Box>
+      <LoadingCircle></LoadingCircle>
     );
 
   if (!component)

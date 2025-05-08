@@ -4,6 +4,7 @@ import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 import axios from "axios";
+import LoadingCircle from "../components/LoadingCircle";
 
 function Home() {
   const navigate = useNavigate();
@@ -56,6 +57,11 @@ function Home() {
     fetchData();
   }, [token]);
   
+  if (loading)
+    return (
+      <LoadingCircle></LoadingCircle>
+    );
+
   return (
     <Box
       sx={{

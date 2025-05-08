@@ -12,6 +12,7 @@ import {
   Chip
 } from "@mui/material";
 import axios from "axios";
+import LoadingCircle from "../components/LoadingCircle";
 
 const AddComponent = () => {
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
@@ -88,6 +89,11 @@ const AddComponent = () => {
     nuevas.splice(index, 1);
     setCaracteristicas(nuevas);
   };
+
+  if (loading)
+    return (
+      <LoadingCircle></LoadingCircle>
+    );
 
   return (
     <Box sx={{ background: "var(--color-bg-gradient)", minHeight: "100vh" }}>

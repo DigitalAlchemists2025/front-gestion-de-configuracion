@@ -3,6 +3,7 @@ import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingCircle from "../components/LoadingCircle";
 
 const ManageComponents = () => {
     const navigate = useNavigate();
@@ -62,6 +63,11 @@ const ManageComponents = () => {
         fetchData();
     }, [token]);
     
+    if (loading)
+        return (
+          <LoadingCircle></LoadingCircle>
+        );
+
     return (
         <Box 
             sx={{

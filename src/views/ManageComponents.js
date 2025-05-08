@@ -82,7 +82,6 @@ const ManageComponents = () => {
                     updatedAt: parsedUpdatedAt,
                     };
                 }).sort((a, b) => a.name.localeCompare(b.name)); 
-                console.log(componentesMappedAndSorted);
 
                 setAllComponents(componentesMappedAndSorted);
                 setComponents(componentesMappedAndSorted);

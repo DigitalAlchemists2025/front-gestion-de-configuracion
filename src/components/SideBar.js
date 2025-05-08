@@ -6,6 +6,7 @@ import { getAuth, signOut } from "firebase/auth";
 
 function SideBar() {
     const navigate = useNavigate();
+    const rol = localStorage.getItem('role');
 
     const HandleCerrarSesion = () => {
         const auth = getAuth();
@@ -27,16 +28,20 @@ function SideBar() {
                 display: 'flex',
                 flexDirection: 'column',
                 width: '15%',
-                color: '#ffffff', 
-                p: 2, 
-                boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)', 
+                backgroundColor: 'var(--bg-paper)',
+                color: 'var(--color-text-base)',
+                p: 2,
+                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
                 borderRadius: '15px',
-                height: '100vh', 
+                height: '95vh',
             }}
         >
-            {/* Botones de navegación */}
-            <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
-            {localStorage.getItem('role') === '0' && (
+            <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/home')} />
+            
+            {rol === '0' && (
+                <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
+            )}
+            {rol === '0' && (
                 <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
             )}
             <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />

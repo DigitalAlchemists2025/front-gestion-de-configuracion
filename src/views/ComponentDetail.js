@@ -119,31 +119,42 @@ const ComponentDetail = () => {
   return (
     <Box
       sx={{
-        minHeight: "100vh",
+        height: "90vh",
         background: "var(--color-bg-gradient)",
         color: "var(--color-text-base)",
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        px: 2,
+        py: 5,
+        overflowY: "hidden",
       }}
     >
       <Paper
         elevation={3}
         sx={{
-          backgroundColor: "rgba(191, 143, 255, 0.53)",
+          backgroundColor: "var(--bg-paper)",
           borderRadius: "16px",
           padding: "2rem 3rem",
           width: "100%",
           maxWidth: "600px",
-          height: "90hv",
-          boxShadow: "0px 8px 20px rgba(0,0,0,0.3)",
-          color: 'white'
+          boxShadow: "0px 8px 20px rgba(0,0,0,0.1)",
         }}
       >
+        <Button
+          variant="outlined"
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2, color: 'var(--color-text-base)', borderColor: 'rgba(0,0,0,0.2)' }}
+        >
+          ← Volver
+        </Button>
+  
         <Typography variant="h4" sx={{ mb: 3, color: "var(--color-dg-header-bg)" }}>
           {component.name}
         </Typography>
+  
         <Typography><strong>Tipo:</strong> {component.type}</Typography>
+  
         <Typography
           sx={{
             color:
@@ -154,14 +165,21 @@ const ComponentDetail = () => {
         >
           <strong>Estado:</strong> {component.status}
         </Typography>
-        <Button variant="contained" color="primary" onClick={cambiarEstado} sx={{ mt: 2 }}>
+  
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={cambiarEstado}
+          sx={{ mt: 2, backgroundColor: "var(--login-button-bg)", "&:hover": { backgroundColor: "var(--login-button-hover)" } }}
+        >
           {component.status === "activo" ? "Dar de baja" : "Activar"}
         </Button>
-        {component.descriptions && component.descriptions.length > 0 && (
-          <Box sx={{ mt: 2 }}>
-            <Typography variant="subtitle1" sx={{ mb: 1 }}>
-              <strong>Descripciones:</strong>
-            </Typography>
+  
+        <Typography variant="subtitle1" sx={{ mb: 1 }}>
+          <strong>Características:</strong>
+        </Typography>
+        {component.descriptions?.length > 0 && (
+          <Box sx={{ mt: 3 }}>
             <ul style={{ paddingLeft: "1.5rem" }}>
               {component.descriptions.map((desc, idx) => (
                 <li key={desc._id}>
@@ -170,39 +188,56 @@ const ComponentDetail = () => {
               ))}
             </ul>
           </Box>
+        ) || (
+          <Typography sx={{ mt: 2 }}>
+            No hay características disponibles para este componente.
+          </Typography>
         )}
-        {rol == '0' && (
-          <Box><Button variant="contained" color="primary" onClick={handleOpenModal} sx={{ mb: 2 }}>
-            + Agregar Característica  
-          </Button></Box>
+  
+        {rol === '0' && (
+          <Box>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleOpenModal}
+              sx={{ mt: 2 }}
+            >
+              + Agregar Característica
+            </Button>
+          </Box>
         )}
+  
         {component.createdAt && (
-          <Typography><strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}</Typography>
+          <Typography sx={{ mt: 2 }}>
+            <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
+          </Typography>
         )}
+  
         {component.updatedAt && (
-          <Typography><strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}</Typography>
+          <Typography>
+            <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
+          </Typography>
         )}
-
       </Paper>
-      <Modal
-        open={isModalOpen}
-        onClose={handleCloseModal}
-      >
-        <Box sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "white",
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2
-        }}>
+  
+      <Modal open={isModalOpen} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "white",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
           <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
             Agregar Característica
           </Typography>
-          
+  
           <TextField
             label="Nombre"
             value={newNombre}
@@ -211,7 +246,7 @@ const ComponentDetail = () => {
             margin="normal"
             variant="outlined"
           />
-          
+  
           <TextField
             label="Descripción"
             value={newDescripcion}
@@ -220,7 +255,7 @@ const ComponentDetail = () => {
             margin="normal"
             variant="outlined"
           />
-          
+  
           <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
             <Button onClick={handleCloseModal} color="secondary">
               Cancelar
@@ -235,7 +270,7 @@ const ComponentDetail = () => {
           </Box>
         </Box>
       </Modal>
-    </Box>
+    </Box>    
   );
 };
 

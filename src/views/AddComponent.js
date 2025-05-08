@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import LoadingCircle from "../components/LoadingCircle";
+import SideBar from "../components/SideBar";
 
 const AddComponent = () => {
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
@@ -96,86 +97,104 @@ const AddComponent = () => {
     );
 
   return (
-    <Box sx={{ background: "var(--color-bg-gradient)", minHeight: "100vh" }}>
+    <Box
+      sx={{
+        display: 'flex',
+        minHeight: '100vh',
+        width: '100%',
+        background: 'var(--color-bg-gradient)',
+      }}
+    >
+      <SideBar />
+  
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          pt: 10
+          flexGrow: 1,
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'flex-start',
+          py: 6,
+          px: 2,
         }}
       >
         <FormControl
           component={Paper}
           sx={{
-            px: 10,
+            px: 6,
             py: 5,
-            borderRadius: "15px",
-            backgroundColor: "var(--bg-paper)",
-            boxShadow: 3,
-            color: "var(--color-text-base)",
-            textAlign: "center",
-            width: "90%",
-            maxWidth: "500px",
-            margin: "auto"
+            borderRadius: '16px',
+            backgroundColor: 'var(--bg-paper)',
+            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+            color: 'var(--color-text-base)',
+            width: '100%',
+            maxWidth: '600px',
           }}
         >
-          <Typography variant="h4" sx={{ color: "var(--color-text-base)", mb: 3 }}>
+          <Typography variant="h4" sx={{ color: 'var(--color-text-base)', mb: 3, textAlign: 'center' }}>
             Agregar Componente
           </Typography>
-
-          <FormGroup sx={{ width: "90%", gap: 2, margin: "0 auto" }}>
+  
+          <FormGroup sx={{ gap: 2 }}>
             <TextField
               label="Nombre"
               variant="filled"
               fullWidth
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              sx={{ bgcolor: "var(--bg-inputs)" }}
+              sx={{ bgcolor: 'var(--bg-inputs)' }}
             />
-
+  
             <TextField
               label="Tipo"
               variant="filled"
               fullWidth
               value={tipo}
               onChange={(e) => setTipo(e.target.value)}
-              sx={{ bgcolor: "var(--bg-inputs)" }}
+              sx={{ bgcolor: 'var(--bg-inputs)' }}
             />
-
+  
             <TextField
               label="Estado"
               variant="filled"
               select
               value={estado}
               onChange={(e) => setEstado(e.target.value)}
-              sx={{ bgcolor: "var(--bg-inputs)", textAlign: "left" }}
+              sx={{ bgcolor: 'var(--bg-inputs)', textAlign: 'left' }}
             >
               <MenuItem value="activo">Activo</MenuItem>
               <MenuItem value="de baja">De baja</MenuItem>
             </TextField>
-            
-            <Box sx={{ display: 'flex', flexDirection: "row", gap: 2, width: "100%", alignItems: "center" }}>
-              <Box sx={{ px: 2, py: 1, bgcolor: "var(--bg-inputs)", borderRadius: 1, width: "90%" }}>
-                <Typography variant="subtitle2" sx={{ mb: 1, textAlign: "left", color: "rgb(96, 96, 96)" }}>
+  
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
+              <Box
+                sx={{
+                  px: 2,
+                  py: 1,
+                  bgcolor: 'var(--bg-inputs)',
+                  borderRadius: 1,
+                  width: '100%',
+                }}
+              >
+                <Typography variant="subtitle2" sx={{ mb: 1, color: 'rgb(96, 96, 96)' }}>
                   Características
                 </Typography>
-                <Box sx={{ 
-                  display: "flex", 
-                  flexWrap: "wrap", 
-                  gap: 1,
-                  maxHeight: "150px",
-                  overflowY: "auto",
-                  overflowX: "hidden",
-                  py: 1,
-                }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    flexWrap: 'wrap',
+                    gap: 1,
+                    maxHeight: '150px',
+                    overflowY: 'auto',
+                    py: 1,
+                  }}
+                >
                   {caracteristicas.map((c, index) => (
                     <Chip
                       key={index}
                       label={`${c.name}: ${c.description}`}
                       onDelete={() => handleDeleteCaracteristica(index)}
                       size="medium"
-                      sx={{ m: 1, maxWidth: "100%" }}
+                      sx={{ m: 1, maxWidth: '100%' }}
                     />
                   ))}
                 </Box>
@@ -184,26 +203,26 @@ const AddComponent = () => {
                 variant="outlined"
                 onClick={handleOpenModal}
                 sx={{
-                  borderColor: "var(--color-bg-accent)",
-                  color: "var(--color-text-base)",
-                  maxWidth: "10%",
+                  borderColor: 'var(--color-dg-header-bg)',
+                  color: 'var(--color-text-base)',
+                  height: 'fit-content',
                 }}
               >
                 +
               </Button>
             </Box>
           </FormGroup>
-
+  
           <Button
             variant="contained"
             sx={{
               mt: 4,
               py: 1.5,
               borderRadius: 50,
-              backgroundColor: "var(--login-button-bg)",
-              "&:hover": {
-                backgroundColor: "var(--login-button-hover)"
-              }
+              backgroundColor: 'var(--login-button-bg)',
+              '&:hover': {
+                backgroundColor: 'var(--login-button-hover)',
+              },
             }}
             onClick={handleSubmit}
             disabled={!nombre || !tipo || !estado || loading}
@@ -212,27 +231,25 @@ const AddComponent = () => {
           </Button>
         </FormControl>
       </Box>
-
-      {/* Modal para agregar característica */}
-      <Modal
-        open={isModalOpen}
-        onClose={handleCloseModal}
-      >
-        <Box sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "white",
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2
-        }}>
+  
+      <Modal open={isModalOpen} onClose={handleCloseModal}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 400,
+            bgcolor: 'white',
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
           <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
             Agregar Característica
           </Typography>
-          
+  
           <TextField
             label="Nombre"
             value={newNombre}
@@ -241,7 +258,7 @@ const AddComponent = () => {
             margin="normal"
             variant="outlined"
           />
-          
+  
           <TextField
             label="Descripción"
             value={newDescripcion}
@@ -250,8 +267,8 @@ const AddComponent = () => {
             margin="normal"
             variant="outlined"
           />
-          
-          <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+  
+          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
             <Button onClick={handleCloseModal} color="secondary">
               Cancelar
             </Button>
@@ -266,7 +283,7 @@ const AddComponent = () => {
         </Box>
       </Modal>
     </Box>
-  );
+  );    
 };
 
 export default AddComponent;

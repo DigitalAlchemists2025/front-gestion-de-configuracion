@@ -73,10 +73,9 @@ function Home() {
         overflow: 'hidden',
       }}
     >
-      {/* Barra lateral */}
+      {/* Barra lateral de opciones */}
       <SideBar />
 
-      {/* Contenido principal */}
       <Box
         sx={{
           display: 'flex',
@@ -86,13 +85,14 @@ function Home() {
           backdropFilter: 'blur(10px)',
           backgroundColor: 'var(--color-blur-bg)',
           borderRadius: '15px',
-          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.2)',
+          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
           mx: 'auto',
-          my: '2rem',
-          p: 4
+          p: 4,
+          overflow: 'hidden',
         }}
       >
-        {/* Header */}
+
+        {/* Barra de Búsqueda */}
         <Box
           sx={{
             display: 'flex',
@@ -102,7 +102,6 @@ function Home() {
             mb: 4,
           }}
         >
-          {/* Barra de búsqueda */}
           <Input
             startAdornment={
               <InputAdornment position="start">
@@ -115,14 +114,7 @@ function Home() {
                     height: '20px',
                     width: '20px',
                     backgroundColor: 'transparent',
-                    border: 'none',
-                    borderRadius: '4px',
-                    transition: 'filter 0.3s, transform 0.3s',
-                    filter: 'invert(70%)',
-                    '&.focus-icon': {
-                      filter: 'invert(100%)',
-                      transform: 'scale(1.1)',
-                    },
+                    filter: 'invert(20%)',
                   }}
                   className="search-icon"
                 />
@@ -131,19 +123,18 @@ function Home() {
             placeholder="Buscar"
             sx={{
               borderRadius: '8px',
-              backgroundColor: 'var(--color-celeste-claro)',
+              backgroundColor: 'var(--bg-inputs)',
               padding: '0.5rem 1rem',
               width: '100%',
               maxWidth: '30rem',
-              boxShadow: '0px 2px 6px rgba(0, 0, 0, 0.15)',
               color: 'var(--color-text-base)',
-              transition: 'all 0.3s ease',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
               '& input': {
                 color: 'var(--color-text-base)',
               },
               '&:focus-within': {
                 backgroundColor: 'var(--color-celeste-focus)',
-                boxShadow: '0px 0px 8px var(--color-celeste-focus)',
+                boxShadow: '0 0 5px var(--color-celeste-focus)',
               },
             }}
             onFocus={() => {
@@ -158,7 +149,7 @@ function Home() {
           />
         </Box>
 
-        {/* Tabla */}
+        {/* Tabla de Componentes */}
         <Box
           sx={{
             display: 'flex',
@@ -177,7 +168,7 @@ function Home() {
               overflow: 'hidden',
               borderRadius: '16px',
               backgroundColor: 'transparent',
-              boxShadow: '0 8px 20px rgba(0,0,0,0.2)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             }}
           >
             <DataGrid
@@ -199,7 +190,7 @@ function Home() {
               }}
               pageSizeOptions={[5, 10, 15]}
               sx={{
-                border: '1px solid white',
+                border: '1px solid #e0e0e0',
                 borderRadius: '25px',
                 color: 'var(--color-text-base)',
                 fontSize: '1rem',
@@ -213,8 +204,8 @@ function Home() {
                 },
                 '.MuiDataGrid-columnHeader': {
                   backgroundColor: 'var(--color-dg-header-bg)',
+                  color: '#ffffff',
                   borderBottom: 'none',
-                  color: '#fff',
                 },
                 '.MuiDataGrid-cell': {
                   borderBottom: 'none',
@@ -222,11 +213,11 @@ function Home() {
                   color: 'var(--color-datagrid-cell-text)',
                 },
                 '.MuiDataGrid-row:hover': {
-                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  backgroundColor: 'rgba(25, 118, 210, 0.05)',
                   cursor: 'pointer',
                 },
                 '.MuiDataGrid-footerContainer': {
-                  bgcolor: 'rgb(141, 169, 201)',
+                  bgcolor: '#e3f2fd',
                   borderTop: 'none',
                 },
                 '[class*="MuiTablePagination"]': {

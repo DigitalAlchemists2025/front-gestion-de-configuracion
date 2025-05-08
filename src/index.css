@@ -1,56 +1,42 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
 :root {
-  /* Gradiente de fondo principal */
+  /* Fondo general */
   --color-bg-gradient: linear-gradient(
     180deg,
-    rgba(195, 221, 255, 0.541) 0%,
-    rgb(255, 255, 255) 35%,
-    rgb(210, 219, 255) 100%
+    #f5f7fa 0%,
+    #ffffff 50%,
+    #e3eaf6 100%
   );
 
-  /* Color del circulo de loading */
-  --color-loading: #3700ff;
-  
-  /* Colores de apoyo */
-  --color-blur-bg: rgba(255, 217, 217, 0.1);
-  --color-celeste-claro: rgba(255, 255, 255, 0.25);
-  --color-celeste-focus: rgba(55, 129, 175, 0.35);
-  
+  /* Loading */
+  --color-loading: #1976d2;
+
+  /* Acentos */
+  --color-blur-bg: rgba(25, 118, 210, 0.08);
+  --color-celeste-claro: rgba(255, 255, 255, 0.6);
+  --color-celeste-focus: rgba(25, 118, 210, 0.3);
+
   /* Textos */
-  --color-text-base: #000000;       /* Texto general sobre oscuro */
-  --color-text-active: #33ff00;    /* Para filas activas */
-  --color-text-baja: #ff0000;      /* Para "dado de baja" */
-  --color-text-datagrid: rgb(255, 255, 255);
+  --color-text-base: #1c1c1e;
+  --color-text-active: #1a7f37;
+  --color-text-baja: #d32f2f;
+  --color-datagrid-cell-text: #1c1c1e;
 
   /* DataGrid */
-  --color-dg-header-bg: rgba(38, 0, 255, 0.9);
-  --color-dg-cell-bg: rgba(255, 255, 255, 0.6);
-  --color-dg-cell-bg-even: rgba(50, 80, 126, 0.5);
-  --color-dg-cell-bg-odd: rgba(4, 79, 122, 0.5);
+  --color-dg-header-bg: #1976d2;
+  --color-dg-cell-bg: #ffffff;
+  --color-dg-cell-bg-even: #f0f7ff;
+  --color-dg-cell-bg-odd: #ffffff;
 
   /* Paginación */
-  --color-pagination: rgba(255, 255, 255, 0.9);
+  --color-pagination: #1c1c1e;
 
   /* Formularios */
-  --login-gradient-bg: linear-gradient(180deg, rgba(2,0,36,1) 0%, rgba(9,9,121,1) 35%, rgba(0,212,255,1) 100%);
-  --login-title-color: #ffffff;
-  --login-paper-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  --login-paper-header: rgb(1, 9, 149);
-  --login-button-bg: #61adff;
-  --login-button-hover: #007bff;  
-  --bg-inputs: rgb(255, 255, 255);
-  --bg-paper: rgb(48, 15, 141);
+  --login-gradient-bg: linear-gradient(180deg, #e3f2fd 0%, #ffffff 100%);
+  --login-title-color: #0d47a1;
+  --login-paper-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+  --login-paper-header: #1976d2;
+  --login-button-bg: #1976d2;
+  --login-button-hover: #1565c0;
+  --bg-inputs: #f0f2f5;
+  --bg-paper: #ffffff;
 }

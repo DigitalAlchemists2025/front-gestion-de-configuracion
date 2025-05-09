@@ -7,28 +7,29 @@ import LoadingCircle from "../components/LoadingCircle";
 const ComponentDetail = () => {
   const { id } = useParams();
   const [component, setComponent] = useState(null);
-  // const [fetchedComponents, setFetchedComponents] = useState([]);
   
   const [loading, setLoading] = useState(true);
   const [loadingButtons, setLoadingButtons] = useState(false);
   const navigate = useNavigate();
   
+  /* Descripciones Componente */
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newNombre, setNewNombre] = useState("");
   const [newDescripcion, setNewDescripcion] = useState("");
+  const [descriptions, setDescriptions] = useState([]);
 
+  /* Sub Componente */
   const [isModalChildOpen, setIsModalChildOpen] = useState(false);
-  
-  //const [newChildComponent, setNewChildComponent] = useState(null); asociar componentes creados
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState("");
   const [estado, setEstado] = useState("");
   const [caracteristicas, setCaracteristicas] = useState([]);
   
+  /* Características para SubComponente */
   const [isCharModalOpen, setIsCharModalOpen] = useState(false);
-  const [newCharName, setNewCharName] = useState("");
-  const [newCharDescription, setNewCharDescription] = useState("");
-  const [newCaracteristicas, setNewCaracteristicas] = useState([]);
+  const [newSubName, setNewSubName] = useState("");
+  const [newSubDescription, setNewSubDescription] = useState("");
+  const [newSubCharacteristics, setNewSubCharacteristics] = useState([]);
 
   const token = localStorage.getItem("token");
   const rol = localStorage.getItem("role");
@@ -47,6 +48,7 @@ const ComponentDetail = () => {
           },
         });  
         setComponent(response.data);
+        setDescriptions(response.data.descriptions || []);
       } catch (error) {
         console.error("Error al obtener componente:", error);
       } finally {
@@ -117,79 +119,48 @@ const ComponentDetail = () => {
   };
 
   const handleOpenModalChild = () => {
-    // fetchComponentes() Asociar Componentes creados
-    // setNewChildComponent(null);
     setIsModalChildOpen(true);
     setNombre("");
     setTipo("");
     setEstado("activo");
     setCaracteristicas([]);
   };
+  
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setIsModalChildOpen(false);
+  };
 
+  /* Características para SubComponente */
   const handleOpenCharModal = () => {
     setIsCharModalOpen(true);
     setNewNombre("");
     setNewDescripcion("");
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setIsModalChildOpen(false);
-  };
-
   const handleCloseCharModal = () => {
     setIsCharModalOpen(false);
   };
-
-  const handleAddCaracteristica = () => {
-    const nueva = {
-      name: newNombre.trim(),
-      description: newDescripcion.trim()
-    };
-
-    setCaracteristicas([...caracteristicas, nueva]);
-    setIsModalOpen(false);
-    setNewNombre("");
-    setNewDescripcion("");
-  };
   
-  const handleAddNewCaracteristica = () => {
-    const nueva = {
-      name: newCharName.trim(),
-      description: newCharDescription.trim()
+  const handleAddNewSubCharacteristics = () => {
+    const newSubDesc = {
+      name: newSubName.trim(),
+      description: newSubDescription.trim()
     };
 
-    setNewCaracteristicas([...newCaracteristicas, nueva]);
+    setNewSubCharacteristics([...newSubCharacteristics, newSubDesc]);
     setIsModalOpen(false);
-    setNewCharName("");
-    setNewCharDescription("");
+    setNewSubName("");
+    setNewSubDescription("");
     handleCloseCharModal();
   };
 
-  const handleDeleteNewCaracteristica = (index) => {
-    const nuevas = [...newCaracteristicas];
-    nuevas.splice(index, 1);
-    setNewCaracteristicas(nuevas);
+  const handleDeleteNewSubCharacteristic = (index) => {
+    const news = [...newSubCharacteristics];
+    news.splice(index, 1);
+    setNewSubCharacteristics(news);
   };
 
-  /* Asociar componentes creados 
-  
-  const fetchComponentes = async () => { 
-    try {
-      setLoading(true);
-      const response = await axios.get(`${BACKEND_URL}/components`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setFetchedComponents(response.data);
-    } catch (error) {
-      console.error("Error al obtener componentes:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
- */
   const handleAddChildComponent = async () => {
     const validDescriptions = caracteristicas.filter(
       (c) => c.name.trim() && c.description.trim()
@@ -213,7 +184,6 @@ const ComponentDetail = () => {
         ...prev,
         components: nuevosComponentes,
       }));
-      // setNewChildComponent(null); Asociar componentes creados
       handleCloseModal();
     } catch (error) {
       console.error("Error al agregar componente hijo:", error);
@@ -229,24 +199,22 @@ const ComponentDetail = () => {
 
   if (!component)
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ p: 4, justifyContent: "center", alignItems: "center" }}>
         <Typography color="error">No se encontró el componente</Typography>
       </Box>
     );
 
   return (
     <Box sx={{
-      height: "90vh",
+      height: "95vh",
       background: "var(--color-bg-gradient)",
       color: "var(--color-text-base)",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
-      px: 2,
-      py: 5,
       overflowY: "hidden",
-      width: "100vw"
+      width: "99.1vw"
     }}>
       <Paper
         elevation={3}
@@ -254,7 +222,7 @@ const ComponentDetail = () => {
           backgroundColor: "var(--bg-paper)",
           borderRadius: "16px",
           padding: "2rem 3rem",
-          width: "80vw",
+          width: "80%",
           height: "80vh",
           boxShadow: "0px 8px 20px rgba(0,0,0,0.1)",
           display: "flex",
@@ -265,15 +233,14 @@ const ComponentDetail = () => {
         display: 'flex', 
         flexDirection: 'column', 
         justifyContent: 'space-between', 
-        width: '100%', 
-        gap: 2,
-        height: '100%',
+        width: '50%', 
+        height: '95%',
       }}>
           <Button
             variant= "outlined"
             color= "primary"
             onClick={() => navigate(-1)}
-            sx={{ mb: 10, color: 'var(--color-text-base)', borderColor: 'rgba(0,0,0,0.2)', width: "50%" }}
+            sx={{ mb: 2, color: 'var(--color-text-base)', borderColor: 'rgba(0,0,0,0.2)', width: "50%" }}
           >
             ← Volver
           </Button>
@@ -291,75 +258,81 @@ const ComponentDetail = () => {
             {component.name}
           </Typography>
     
-          <Typography sx={{fontSize: '1.1em'}}><strong>Tipo:</strong> {component.type}</Typography>
+          <Typography sx={{fontSize: '1rem'}}><strong>Tipo:</strong> {component.type}</Typography>
     
-          <Box sx={{ display: "flex", gap: 2, alignItems: "center", justifyContent: "flex-start" }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Typography
               sx={{
-                fontSize: "1.1em",
+                fontSize: "1rem",
+                width: "10rem",
                 color:
                   component.status === "activo"
                     ? "var(--color-text-active)"
                     : "var(--color-text-baja)",
               }}
             >
-              <strong>Estado:</strong> {component.status}
+              <strong>Estado:</strong> <em>{component.status}</em>
             </Typography>
       
             <Button
-              variant="text"
-              autoCapitalize="off"
+              variant="outlined"
               disabled={loadingButtons}
               onClick={cambiarEstado}
-              size="large"
-              color="secondary"
+              size="small"
+              sx={{
+                fontSize: "0.7rem", 
+                mr: 10,
+                color:
+                  component.status === "activo"
+                    ? "var(--color-text-baja)"
+                    : "var(--color-text-active)", 
+                    borderColor: "rgba(0,0,0,0.2)" 
+                }}
             >
-              {component.status === "activo" ? "Dar de baja" : "Activar"}
+              {component.status === "activo" ? "Retirar" : "Activar"}
             </Button>
           </Box>
     
-          <Typography sx={{ mb: 1, fontSize: "1.1em", mt: 3 }}>
+          <Typography sx={{ fontSize: "1rem" }}>
             <strong>Características:</strong>
           </Typography>
           {component.descriptions?.length > 0 && (
             <Box sx={{ 
-              mt: 1, 
-              maxHeight: "150px",
+              maxHeight: "10rem",
               wordBreak: "break-word",   
               whiteSpace: "normal",      
               overflowWrap: "break-word",
               overflowY: "auto",
-              mr: 10
+              mr: 10,
             }}>
               <ul style={{ paddingLeft: "1.5rem"}}>
                 {component.descriptions.map((desc) => (
                   <Card 
                     key={desc._id} 
                     sx={{ 
-                      my: "0.5rem", 
-                      fontSize: "1.1em",   
-                      width: "50%", 
+                      mb: "0.5rem", 
+                      fontSize: "1rem",   
+                      width: "75%", 
                       padding: "0.5rem 1rem", 
                     }}>
-                    {desc.name}: {desc.description}
+                    <strong>{desc.name}:</strong> {desc.description}
                   </Card>
                 ))}
               </ul>
             </Box>
           ) || (
-            <Typography sx={{ mt: 1 }}>
+            <Typography variant="overline">
               No hay características disponibles para este componente.
             </Typography>
           )}
     
           {rol === '0' && (
-            <Box sx={{ display: "flex", justifyContent: "center", transform: "translateX(-10%)" }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
               <Button
                 variant="outlined"
-                color="primary"
+                color="info"
                 onClick={handleOpenModal}
-                sx={{ mt: 2 }}
-                size="large"
+                size="small"
               >
                 + Agregar Característica
               </Button>
@@ -367,48 +340,46 @@ const ComponentDetail = () => {
           )}
     
           {component.createdAt && (
-            <Typography sx={{ mt: 5, fontSize: "1.1em" }}>
+            <Typography sx={{ fontSize: "1rem" }}>
               <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
             </Typography>
           )}
     
           {component.updatedAt && (
-            <Typography sx={{ mt: 1, fontSize: "1.1em" }}>
+            <Typography sx={{ fontSize: "1rem" }}>
               <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
             </Typography>
           )}
         </Box>
 
-        <Box sx={{ mt: 5, display: "flex", flexDirection: "column"}}>
+        <Box sx={{ mt: 2, justifyItems: "flex-start", maxWidth: "50%" }}>
           <Typography variant="h5" sx={{ mb: 1, mt: 5, }}>
-            <strong>Componentes Hijos:</strong>
+            <strong>Sub Componentes:</strong>
           </Typography>
-          <Box sx={{ mt: 5, justifyItems: "flex-end" }}>
-            {component.components?.length > 0 ? (
-              <Box sx={{ mt: 3, overflowY: "auto", maxHeight: "50vh", maxWidth: "100%" }}>
-                {component.components.map((child, idx) => (
-                  <Card key={idx} sx={{ padding: 2, mb: 1, flex: 1 }} onClick={() => navigate(`/components/${child._id}`)}>
-                    <Typography 
-                      variant="body1"
-                      sx={{
-                        mb: 3,
-                        wordBreak: "break-word",   
-                        whiteSpace: "normal",      
-                        overflowWrap: "break-word",
-                        maxWidth: "50%"
-                      }}
-                    >
-                      {child.name}</Typography>
-                  </Card>
-                ))}
-              </Box>
-            ) : (
-              <Typography sx={{ mt: 2 }}>
-                No hay componentes hijos disponibles para este componente.
-              </Typography>
-            )}  
-            <Button size="large" sx={{mt: 2}} onClick={handleOpenModalChild} >Agregar Componente Hijo</Button>
-          </Box>
+          {component.components?.length > 0 ? (
+            <Box sx={{ mt: 2, overflowY: "auto", maxHeight: "70%", width: "40vw" }}>
+              {component.components.map((child, idx) => (
+                <Card key={idx} sx={{ padding: 1, mb: 1, flex: 1 }} onClick={() => navigate(`/components/${child._id}`)}>
+                  <Typography 
+                    variant="body1"
+                    sx={{
+                      ml: 2,
+                      mb: 1,
+                      wordBreak: "break-word",   
+                      whiteSpace: "normal",      
+                      overflowWrap: "break-word",
+                    }}
+                  >
+                    {child.name}</Typography>
+                </Card>
+              ))}
+            </Box>
+          ) : (
+            <Typography variant="overline" sx={{ mt: 2 }}>
+              No hay sub componentes para este componente.
+            </Typography>
+          )}  
+          <Button size="large" sx={{ mt: 2, width: "40vw" }} onClick={handleOpenModalChild} >Agregar Sub Componente</Button>
         </Box>
       </Paper>
   
@@ -550,11 +521,11 @@ const ComponentDetail = () => {
                       py: 1,
                     }}
                   >
-                    {newCaracteristicas.map((c, index) => (
+                    {newSubCharacteristics.map((c, index) => (
                       <Chip
                         key={index}
                         label={`${c.name}: ${c.description}`}
-                        onDelete={() => handleDeleteNewCaracteristica(index)}
+                        onDelete={() => handleDeleteNewSubCharacteristic(index)}
                         size="medium"
                         sx={{ m: 1, maxWidth: '100%' }}
                       />
@@ -574,23 +545,25 @@ const ComponentDetail = () => {
                   </Button>
                 </Box>
               </FormGroup>
-          
-              <Button 
-                variant="contained" 
-                sx={{
-                  mt: 4,
-                  py: 1.5,
-                  borderRadius: 50,
-                  backgroundColor: 'var(--login-button-bg)',
-                  '&:hover': {
-                    backgroundColor: 'var(--login-button-hover)',
-                  },
-                }}
-                onClick={handleAddChildComponent}
-                disabled={!nombre || !tipo || !estado || loadingButtons}
-              >
-                Guardar Componente
-              </Button>
+                
+              <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly", alignItems: "center"}}>
+                <Button onClick={handleCloseModal}>Cancelar</Button>
+                <Button 
+                  variant="contained" 
+                  sx={{
+                    py: 1.5,
+                    borderRadius: 50,
+                    backgroundColor: 'var(--login-button-bg)',
+                    '&:hover': {
+                      backgroundColor: 'var(--login-button-hover)',
+                    },
+                  }}
+                  onClick={handleAddChildComponent}
+                  disabled={!nombre || !tipo || !estado || loadingButtons}
+                >
+                  Guardar Componente
+                </Button>
+              </Box>
             </FormControl>
         </Box>
       </Modal>
@@ -616,8 +589,8 @@ const ComponentDetail = () => {
   
           <TextField
             label="Nombre"
-            value={newCharName}
-            onChange={(e) => setNewCharName(e.target.value)}
+            value={newSubName}
+            onChange={(e) => setNewSubName(e.target.value)}
             fullWidth
             margin="normal"
             variant="outlined"
@@ -625,8 +598,8 @@ const ComponentDetail = () => {
   
           <TextField
             label="Descripción"
-            value={newCharDescription}
-            onChange={(e) => setNewCharDescription(e.target.value)}
+            value={newSubDescription}
+            onChange={(e) => setNewSubDescription(e.target.value)}
             fullWidth
             margin="normal"
             variant="outlined"
@@ -637,76 +610,15 @@ const ComponentDetail = () => {
               Cancelar
             </Button>
             <Button
-              onClick={handleAddNewCaracteristica}
+              onClick={handleAddNewSubCharacteristics}
               variant="contained"
-              disabled={!newCharName.trim() || !newCharDescription.trim() || loadingButtons}
+              disabled={!newSubName.trim() || !newSubDescription.trim() || loadingButtons}
             >
               Agregar
             </Button>
           </Box>
         </Box>
       </Modal>
-
-      {/* Modal Asociar Creados
-      <Modal open={isModalChildOpen} onClose={handleCloseModal}>
-        <Box sx={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          width: 400,
-          bgcolor: "white",
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2,
-          maxHeight: "70vh",
-          display: "flex",
-          flexDirection: "column",
-          overflow: "hidden"
-        }}>
-          <Box sx={{
-            flexGrow: 1, 
-            overflowY: "auto", 
-            pb: 6
-          }}>
-            <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
-              Agregar Componente Hijo
-            </Typography>
-
-            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-              {fetchedComponents.length > 0 &&
-                fetchedComponents.map((child, idx) => (
-                  <Card key={idx} sx={{ padding: 2 }} onClick={() => setNewChildComponent(child)}>
-                    <Typography variant="body1">{child.name}</Typography>
-                  </Card>
-                ))
-              }
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              px: 2,
-              py: 1,
-              backgroundColor: "var(--bg-paper)",
-              borderTop: "1px solid #ddd",
-            }}
-          >
-            <Button onClick={handleCloseModal} color="secondary">
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleAddChildComponent}
-              variant="contained"
-              disabled={!newChildComponent || loadingButtons}
-            >
-              Agregar
-            </Button>
-          </Box>
-        </Box>
-      </Modal> */}
     </Box>    
   );
 };

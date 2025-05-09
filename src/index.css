@@ -17,7 +17,7 @@
 
   /* Textos */
   --color-text-base: #1c1c1e;
-  --color-text-active: #1a7f37;
+  --color-text-active: #00c774;
   --color-text-baja: #d32f2f;
   --color-datagrid-cell-text: #1c1c1e;
 
@@ -38,5 +38,5 @@
   --login-button-bg: #1976d2;
   --login-button-hover: #1565c0;
   --bg-inputs: #f0f2f5;
-  --bg-paper: #ffffff;
+  --bg-paper: #9e9c9b5e;
 }

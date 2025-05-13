@@ -1,13 +1,18 @@
-import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip } from "@mui/material";
+import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, Icon, Avatar } from "@mui/material";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
 
 const ComponentDetail = () => {
   const { id } = useParams();
   const [component, setComponent] = useState(null);
-  
+  const [changes, setChanges] = useState(false);
+
+  const [mainComponentName, setMainComponentName] = useState("");
+  const [mainComponentType, setMainComponentType] = useState("");
+  const [mainDescriptions, setMainDescriptions] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [loadingButtons, setLoadingButtons] = useState(false);
   const navigate = useNavigate();
@@ -46,16 +51,19 @@ const ComponentDetail = () => {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        });  
-        setComponent(response.data);
-        setDescriptions(response.data.descriptions || []);
+        });
+        console.log(token)
+        const data = response.data;
+        setComponent(data);
+        setMainComponentName(data.name);
+        setMainComponentType(data.type);
+        setMainDescriptions(data.descriptions.map(d => ({ ...d })));
       } catch (error) {
         console.error("Error al obtener componente:", error);
       } finally {
         setLoading(false);
       }
     };
-  
     fetchComponent();
   }, [id]);
   
@@ -77,6 +85,8 @@ const ComponentDetail = () => {
         ...prev,
         descriptions: [...prev.descriptions, payload],
       }));
+
+        setMainDescriptions((prev) => [...prev, payload]);
 
       setNewNombre("");
       setNewDescripcion("");
@@ -161,6 +171,77 @@ const ComponentDetail = () => {
     setNewSubCharacteristics(news);
   };
 
+  const handleEditName = (e) => {
+    setMainComponentName(e.target.value);
+    setChanges(true);
+  };
+
+  const handleEditType = (e) => {
+    setMainComponentType(e.target.value);
+    setChanges(true);
+  };
+
+  const handleEditDescription = (index, field, value) => {
+    setMainDescriptions(descs =>
+      descs.map((d, i) =>
+        i === index
+          ? { ...d, [field]: value }
+          : d
+      )
+    );
+    setChanges(true);
+  };
+
+  const handleDeleteDescription = (index) => {
+    const updatedDescriptions = mainDescriptions.filter((_, i) => i !== index);
+    setMainDescriptions(updatedDescriptions);
+    setChanges(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (window.confirm("¿Esta segur@ de realizar estos cambios?")) {
+      if (!changes) return;
+      const filteredDescriptions = mainDescriptions.map(({ _id, ...cdr }) => cdr);
+  
+      const payload = {
+        name: mainComponentName,
+        type: mainComponentType,
+        descriptions: filteredDescriptions,
+      };
+  
+      try {
+        setLoadingButtons(true);
+        await axios.put(`${BACKEND_URL}/components/${id}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
+        setComponent({
+          ...component,
+          name: mainComponentName,
+          type: mainComponentType,
+          descriptions: mainDescriptions,
+        });
+        setChanges(false);
+        alert(`${mainComponentName} Actualizado Correctamente`)
+      } catch (error) {
+        console.error("Error al guardar cambios:", error);
+      } finally {
+        setLoadingButtons(false);
+      }
+    }
+  };
+
+  const resetChanges = () => {
+    setMainComponentName(component.name);
+    setMainComponentType(component.type);
+    setMainDescriptions(
+      (component.descriptions || []).map(d => ({ ...d }))
+    );
+    setChanges(false);
+  };
+
   const handleAddChildComponent = async () => {
     const validDescriptions = caracteristicas.filter(
       (c) => c.name.trim() && c.description.trim()
@@ -230,12 +311,12 @@ const ComponentDetail = () => {
         }}
       >
        <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        justifyContent: 'space-between', 
-        width: '50%', 
-        height: '95%',
-      }}>
+          display: 'flex', 
+          flexDirection: 'column', 
+          justifyContent: 'space-between', 
+          width: '50%', 
+          height: '95%',
+        }}>
           <Button
             variant= "outlined"
             color= "primary"
@@ -244,22 +325,57 @@ const ComponentDetail = () => {
           >
             ← Volver
           </Button>
-          <Typography
-            variant="h3"
-            sx={{
-              mb: 3,
-              color: "var(--color-dg-header-bg)",
-              wordBreak: "break-word",   
-              whiteSpace: "normal",      
-              overflowWrap: "break-word",
-              maxWidth: "70%",
+          
+          <TextField
+            fullWidth
+            variant="standard"
+            value={mainComponentName}
+            onChange={handleEditName}
+            disabled={rol !== '0'}
+            InputProps={{
+              disableUnderline: true,
+              style: {
+                fontSize: '4rem',
+                fontWeight: 500,
+                color: 'var(--color-dg-header-bg)'
+              }
             }}
-          >
-            {component.name}
-          </Typography>
-    
-          <Typography sx={{fontSize: '1rem'}}><strong>Tipo:</strong> {component.type}</Typography>
-    
+            sx={{
+              mb: 2,
+              px: 0,
+              py: 0,
+              "& .MuiInputBase-input.Mui-disabled": {
+                WebkitTextFillColor: "var(--color-dg-header-bg)",
+                color: "var(--color-dg-header-bg)",
+              },
+            }}
+          />
+
+          <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Typography sx={{ mr: 1 }}><strong>Tipo:</strong></Typography>
+            <TextField
+              variant="standard"
+              value={mainComponentType}
+              onChange={handleEditType}
+              disabled={rol !== '0'}
+              InputProps={{
+                disableUnderline: true,
+                style: {
+                  fontSize: '1rem',
+                  color: 'inherit'
+                }
+              }}
+              sx={{
+                width: '200px',
+                "& .MuiInputBase-input.Mui-disabled": {
+                  WebkitTextFillColor: "inherit",
+                  color: "inherit",
+                },
+              }}
+            />
+          </Box>
+
+
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
             <Typography
               sx={{
@@ -274,60 +390,100 @@ const ComponentDetail = () => {
               <strong>Estado:</strong> <em>{component.status}</em>
             </Typography>
       
-            <Button
-              variant="outlined"
-              disabled={loadingButtons}
-              onClick={cambiarEstado}
-              size="small"
-              sx={{
-                fontSize: "0.7rem", 
-                mr: 10,
-                color:
-                  component.status === "activo"
-                    ? "var(--color-text-baja)"
-                    : "var(--color-text-active)", 
-                    borderColor: "rgba(0,0,0,0.2)" 
-                }}
-            >
-              {component.status === "activo" ? "Retirar" : "Activar"}
-            </Button>
+            {rol === '0' && (
+              <Button
+                variant="outlined"
+                disabled={loadingButtons}
+                onClick={cambiarEstado}
+                size="medium"
+                sx={{
+                  fontSize: "0.7rem", 
+                  mr: 10,
+                  color:
+                    component.status === "activo"
+                      ? "var(--color-text-baja)"
+                      : "var(--color-text-active)", 
+                      borderColor: "rgba(0,0,0,0.2)" 
+                  }}
+              >
+                {component.status === "activo" ? "Retirar" : "Activar"}
+              </Button>
+            )}
           </Box>
     
-          <Typography sx={{ fontSize: "1rem" }}>
+          <Typography variant="body2" sx={{ fontSize: "1rem" }}>
             <strong>Características:</strong>
           </Typography>
           {component.descriptions?.length > 0 && (
-            <Box sx={{ 
-              maxHeight: "10rem",
-              wordBreak: "break-word",   
-              whiteSpace: "normal",      
-              overflowWrap: "break-word",
-              overflowY: "auto",
-              mr: 10,
+            <Box sx={{
+              maxHeight: '10rem',
+              overflowY: 'auto',
+              mr: 10
             }}>
-              <ul style={{ paddingLeft: "1.5rem"}}>
-                {component.descriptions.map((desc) => (
-                  <Card 
-                    key={desc._id} 
-                    sx={{ 
-                      mb: "0.5rem", 
-                      fontSize: "1rem",   
-                      width: "75%", 
-                      padding: "0.5rem 1rem", 
-                    }}>
-                    <strong>{desc.name}:</strong> {desc.description}
-                  </Card>
-                ))}
-              </ul>
+              {mainDescriptions.map((desc, i) => (
+                <Box key={i} sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  mb: 1,
+                  gap: 1,
+                  mr: 2,
+                }}>
+                  <Typography
+                    size="small"
+                    sx={{
+                      width: '20%',
+                      '& .MuiInputBase-input': { fontSize: '1rem' }
+                    }}
+                  >
+                    {desc.name}
+                  </Typography>
+                  <TextField
+                    fullWidth
+                    size="small"
+                    variant="outlined"
+                    value={desc.description}
+                    onChange={e => handleEditDescription(i, 'description', e.target.value)}
+                    disabled={rol !== '0'}
+                    InputProps={{
+                      style: {
+                        padding: '0.25rem 1rem',
+                        fontSize: '1rem'
+                      }
+                    }}
+                    sx={{
+                      '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                      bgcolor: '#ffffff',
+                      borderRadius: 1,
+                      "& .MuiInputBase-input.Mui-disabled": {
+                        WebkitTextFillColor: "black",
+                        color: "black",
+                      },
+                    }}
+                  />
+                  {rol === '0' && (
+                    <Button
+                      onClick={() => handleDeleteDescription(i)}
+                      size="small"
+                      sx={{
+                        minWidth: '32px',
+                        color: 'error.main',
+                        borderColor: 'error.main'
+                      }}
+                      variant="text"
+                    >
+                      ✕
+                    </Button>
+                  )}
+                </Box>
+              ))}
             </Box>
           ) || (
-            <Typography variant="overline">
+            <Typography variant="overline" mt={-5}>
               No hay características disponibles para este componente.
             </Typography>
           )}
-    
           {rol === '0' && (
-            <Box sx={{ display: "flex", justifyContent: "flex-start" }}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mr: '5rem' }}>
               <Button
                 variant="outlined"
                 color="info"
@@ -349,6 +505,25 @@ const ComponentDetail = () => {
             <Typography sx={{ fontSize: "1rem" }}>
               <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
             </Typography>
+          )}
+
+          {rol === '0' && (
+            <Box sx={{ mt: 3, display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
+              <Button
+                variant="outlined"
+                onClick={resetChanges}
+                disabled={!changes || loadingButtons}
+              >
+                Descartar Cambios
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleSaveChanges}
+                disabled={!changes || loadingButtons}
+              >
+                Guardar Cambios
+              </Button>
+            </Box>
           )}
         </Box>
 
@@ -379,10 +554,13 @@ const ComponentDetail = () => {
               No hay sub componentes para este componente.
             </Typography>
           )}  
-          <Button size="large" sx={{ mt: 2, width: "40vw" }} onClick={handleOpenModalChild} >Agregar Sub Componente</Button>
+          {rol === '0' && (
+            <Button size="large" sx={{ mt: 2, width: "40vw" }} onClick={handleOpenModalChild} >Agregar Sub Componente</Button>
+          )}
         </Box>
       </Paper>
-  
+
+      {/* Modal para añadir característica al padre */}
       <Modal open={isModalOpen} onClose={handleCloseModal}>
         <Box
           sx={{
@@ -468,14 +646,16 @@ const ComponentDetail = () => {
             </Typography>
     
             <FormGroup sx={{ gap: 2 }}>
-              <TextField
-                label="Nombre"
-                variant="filled"
-                fullWidth
-                value={nombre}
-                onChange={(e) => setNombre(e.target.value)}
-                sx={{ bgcolor: 'var(--bg-inputs)' }}
-              />
+              <Box sx={{ display: 'flex', flexDirection: "row"}}>
+                <TextField
+                  label="Nombre"
+                  variant="filled"
+                  fullWidth
+                  value={nombre}
+                  onChange={(e) => setNombre(e.target.value)}
+                  sx={{ bgcolor: 'var(--bg-inputs)' }}
+                />
+              </Box>
     
               <TextField
                 label="Tipo"

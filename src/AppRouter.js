@@ -5,6 +5,7 @@ import Home from './views/Home';
 import ComponentDetail from './views/ComponentDetail';
 import AddComponent from './views/AddComponent';
 import ManageComponents from './views/ManageComponents';
+import History from './views/Historial';
 
 function AppRouter() {
     const token = localStorage.getItem('token');
@@ -19,6 +20,7 @@ function AppRouter() {
           <Route path="/agregar-componentes" element={token? (!isOne? <AddComponent/> : <Home/>) : <Login/>} />
           <Route path="/components/:id" element={token? <ComponentDetail/> : <Login/>} />
           <Route path="/gestionar-componentes" element={token? <ManageComponents/> : <Login/>} />
+          <Route path="/ver-historial" element={token? <History/> : <Login/>} />
         </Routes>
       </Router>
     );

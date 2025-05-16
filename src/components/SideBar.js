@@ -39,12 +39,12 @@ function SideBar() {
             <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/home')} />
             
             {rol === '0' && (
-                <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
+                <>
+                    <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
+                    <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
+                    <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />
+                </>
             )}
-            {rol === '0' && (
-                <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
-            )}
-            <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />
             <ListButtonItem nombre="Cerrar Sesión" onClick={HandleCerrarSesion} />
         </Box>
     );

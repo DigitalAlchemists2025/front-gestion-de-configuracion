@@ -61,16 +61,12 @@ function Login() {
           },
         });
   
-        console.log("Usuario obtenido:", response.data);
-  
         const role = response.data.role;
   
         if (role === 'usuario') {
           localStorage.setItem('role', '1');
-          console.log("Rol usuario guardado como 1");
         } else if (role === 'administrador') {
           localStorage.setItem('role', '0');
-          console.log("Rol admin guardado como 0");
         } else {
           console.warn("Rol desconocido:", role);
         }
@@ -88,12 +84,18 @@ function Login() {
   
   // Login Google con Popup
   const handleGoogleLogin = () => {
-    console.log(auth);
     signInWithPopup(auth, provider)
-      .then((result) => {
+      .then(async (result) => {
         const _user = result.user;
         localStorage.setItem('token', _user.accessToken);
         localStorage.setItem('email', _user.email);
+        try {
+          const response = await axios.get(`${BACKEND_URL}/api/v1/auth/email/${_user.email}`);
+          (response.data.role && response.data.role === 'administrador') ? localStorage.setItem('role', '0') : localStorage.setItem('role', '1');
+        } catch(error) {
+          console.log("Email no encontrado");
+          localStorage.setItem('role', '1');
+        }
         alert(`¡Bienvenido/a ${_user.displayName || _user.email}!`);
         navigate('/home');
       }).catch((error) => {

@@ -23,23 +23,32 @@ function SideBar() {
     };
 
     return (
-        <Box
-            sx={{
-                display: 'flex',
-                flexDirection: 'column',
-                width: '15%',
-                backgroundColor: 'var(--bg-paper)',
-                color: 'var(--color-text-base)',
-                p: 2,
-                boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
-                borderRadius: '15px',
-                height: '95vh',
-            }}
-        >
-            <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/home')} />
-            
+        <Box sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            width: '25%',
+            minWidth: "15em",
+            backgroundColor: 'var(--color-bg-secondary)',
+            p: 2,
+            boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
+            height: '100vh',
+            position: "sticky"
+        }}>
+            <Box sx={{
+                display: "flex",
+                width: "100%",
+                maxHeight: "10%",
+                height: "10%",
+                py: 5,
+                gap: 3,
+                justifyContent: "space-evenly"
+            }}>
+                <img src="/logoUCN.png"></img>
+                <img src="/logoEIC.png"></img>
+            </Box>
             {rol === '0' && (
                 <>
+                    <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/home')} />
                     <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
                     <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
                     <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />

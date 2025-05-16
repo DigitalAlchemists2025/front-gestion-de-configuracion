@@ -168,10 +168,13 @@ const ManageComponents = () => {
     return (
         <Box sx={{
             display: 'flex',
-            minHeight: "95vh",
+            height: "100vh",
             width: "100%",
             background: "var(--color-bg-gradient)",
             color: "var(--color-text-base)",
+            position: "fixed",
+            top: 0,
+            left: 0,
         }}>
             <SideBar />
             <Box sx={{
@@ -181,13 +184,14 @@ const ManageComponents = () => {
                 textAlign: 'center',
                 my: 5,
             }}>
-            <Typography variant="h4" sx={{ mb: 4 }}>Gestión de Componentes</Typography>
                 <Box sx={{
                     display: 'flex',
                     flexDirection: 'row',
-                    justifyContent: 'center',
+                    justifyContent: 'space-evenly',
                     gap: 5,
+                    mx: "1.5rem",
                 }}>
+                    <Typography variant="h4" sx={{ fontSize: "1.5rem", p: 1, color: "var(--color-bg-secondary)"}}>Gestión de componentes</Typography>
                     <Input
                         startAdornment={
                         <InputAdornment position="start">
@@ -195,10 +199,9 @@ const ManageComponents = () => {
                             variant="square"
                             src="/search-icon.png"
                             sx={{
-                                p: 1,
-                                mr: 1,
                                 height: '20px',
                                 width: '20px',
+                                p: 1,
                                 backgroundColor: 'transparent',
                                 filter: 'invert(20%)',
                             }}
@@ -210,24 +213,23 @@ const ManageComponents = () => {
                         onChange={(e) => handleSearch(e.target.value)}
                         placeholder="Buscar"
                         sx={{
-                        borderRadius: '8px',
-                        backgroundColor: 'var(--bg-inputs)',
-                        padding: '0.5rem 1rem',
-                        width: '100%',
-                        maxWidth: '30rem',
-                        color: 'var(--color-text-base)',
-                        boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
-                        '& input': {
+                            borderRadius: '8px',
+                            backgroundColor: 'var(--bg-inputs)',
+                            width: '100%',
+                            maxWidth: '30rem',
                             color: 'var(--color-text-base)',
-                        },
-                        '&:focus-within': {
-                            backgroundColor: 'var(--color-celeste-focus)',
-                            boxShadow: '0 0 5px var(--color-celeste-focus)',
-                        },
-                        }}
-                        onFocus={() => {
-                        const icon = document.querySelector('.search-icon');
-                        icon?.classList.add('focus-icon');
+                            boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+                            '& input': {
+                                color: 'var(--color-text-base)',
+                            },
+                            '&:focus-within': {
+                                backgroundColor: 'var(--color-celeste-focus)',
+                                boxShadow: '0 0 5px var(--color-celeste-focus)',
+                            },
+                            }}
+                            onFocus={() => {
+                            const icon = document.querySelector('.search-icon');
+                            icon?.classList.add('focus-icon');
                         }}
                         onBlur={() => {
                         const icon = document.querySelector('.search-icon');
@@ -242,8 +244,8 @@ const ManageComponents = () => {
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: "center",
-                        py: 5,
-                        px: 2,
+                        my: 5,
+                        overflowY: "auto",
                     }}
                 >
 
@@ -281,7 +283,7 @@ const ManageComponents = () => {
                                     fontStyle: 'italic',
                                 },
                                 '.MuiDataGrid-columnHeader': {
-                                    backgroundColor: 'var(--color-dg-header-bg)',
+                                    backgroundColor: 'var(--color-bg-secondary)',
                                     color: '#ffffff',
                                     borderBottom: 'none',
                                 },

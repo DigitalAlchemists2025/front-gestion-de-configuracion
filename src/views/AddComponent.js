@@ -97,26 +97,25 @@ const AddComponent = () => {
     );
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        minHeight: '95vh',
-        width: '100%',
-        background: 'var(--color-bg-gradient)',
-      }}
-    >
+    <Box sx={{
+      display: 'flex',
+      height: '100vh',
+      width: '100%',
+      background: 'var(--color-bg-gradient)',
+      position: "fixed",
+      top: 0,
+      left: 0,
+    }}>
       <SideBar />
   
-      <Box
-        sx={{
-          flexGrow: 1,
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'flex-start',
-          py: 6,
-          px: 2,
-        }}
-      >
+      <Box sx={{
+        flexGrow: 1,
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'flex-start',
+        py: 6,
+        px: 2,
+      }}>
         <FormControl
           component={Paper}
           sx={{
@@ -206,6 +205,10 @@ const AddComponent = () => {
                   borderColor: 'var(--color-dg-header-bg)',
                   color: 'var(--color-text-base)',
                   height: 'fit-content',
+                  '&:hover': {
+                    backgroundColor: 'var(--login-button-hover)',
+                    color: 'white',
+                  },
                 }}
               >
                 +
@@ -219,7 +222,7 @@ const AddComponent = () => {
               mt: 4,
               py: 1.5,
               borderRadius: 50,
-              backgroundColor: 'var(--login-button-bg)',
+              backgroundColor: 'var(--color-bg-secondary)',
               '&:hover': {
                 backgroundColor: 'var(--login-button-hover)',
               },

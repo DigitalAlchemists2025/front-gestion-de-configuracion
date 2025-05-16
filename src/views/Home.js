@@ -89,10 +89,13 @@ function Home() {
       sx={{
         display: 'flex',
         flexDirection: 'row',
-        maxHeight: '100vh',
+        height: "100vh",
         width: '100%',
         background: 'var(--color-bg-gradient)', 
         overflow: 'hidden',
+        position: "fixed",
+        top: 0,
+        left: 0,
       }}
     >
       {/* Barra lateral de opciones */}
@@ -102,8 +105,9 @@ function Home() {
         sx={{
           display: 'flex',
           flexDirection: 'column',
+          position: "relative",
           width: '85%',
-          maxHeight: '90vh',
+          maxHeight: '100vh',
           backdropFilter: 'blur(10px)',
           backgroundColor: 'var(--color-blur-bg)',
           borderRadius: '15px',
@@ -227,7 +231,7 @@ function Home() {
                   fontStyle: 'italic',
                 },
                 '.MuiDataGrid-columnHeader': {
-                  backgroundColor: 'var(--color-dg-header-bg)',
+                  backgroundColor: 'var(--color-bg-secondary)',
                   color: '#ffffff',
                   borderBottom: 'none',
                 },

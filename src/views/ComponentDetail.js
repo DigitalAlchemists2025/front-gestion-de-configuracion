@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, Icon, Avatar } from "@mui/material";
+import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, Icon, Avatar, TextareaAutosize } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -201,6 +201,14 @@ const ComponentDetail = () => {
   const handleSaveChanges = async () => {
     if (window.confirm("¿Esta segur@ de realizar estos cambios?")) {
       if (!changes) return;
+      if (!mainComponentName || mainComponentName.trim() === "") {
+        alert("Error: Debe ingresar un nombre")
+        return;
+      }
+      if (!mainComponentType || mainComponentType.trim() === "") {
+        alert("Error: Debe ingresar un Tipo")
+        return;
+      }
       const filteredDescriptions = mainDescriptions.map(({ _id, ...cdr }) => cdr);
   
       const payload = {
@@ -250,6 +258,7 @@ const ComponentDetail = () => {
         name: nombre.trim(),
         type: tipo.trim(),
         status: estado,
+        isSubComponent: true,
         descriptions: validDescriptions.length > 0 ? validDescriptions : undefined
     };
     try {
@@ -287,20 +296,23 @@ const ComponentDetail = () => {
 
   return (
     <Box sx={{
-      height: "95vh",
-      background: "var(--color-bg-gradient)",
+      height: "100vh",
+      background: "var(--color-bg-secondary)",
       color: "var(--color-text-base)",
       display: "flex",
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
       overflowY: "hidden",
-      width: "99.1vw"
+      width: "100vw",
+      position: "fixed",
+      top: 0,
+      left: 0,
     }}>
       <Paper
         elevation={3}
         sx={{
-          backgroundColor: "var(--bg-paper)",
+          backgroundColor: "var(--color-bg-gradient)",
           borderRadius: "16px",
           padding: "2rem 3rem",
           width: "80%",
@@ -326,28 +338,21 @@ const ComponentDetail = () => {
             ← Volver
           </Button>
           
-          <TextField
-            fullWidth
-            variant="standard"
+          <TextareaAutosize
             value={mainComponentName}
-            onChange={handleEditName}
+            onChange={(e) => handleEditName(e)}
             disabled={rol !== '0'}
-            InputProps={{
-              disableUnderline: true,
-              style: {
-                fontSize: '4rem',
-                fontWeight: 500,
-                color: 'var(--color-dg-header-bg)'
-              }
-            }}
-            sx={{
-              mb: 2,
-              px: 0,
-              py: 0,
-              "& .MuiInputBase-input.Mui-disabled": {
-                WebkitTextFillColor: "var(--color-dg-header-bg)",
-                color: "var(--color-dg-header-bg)",
-              },
+            style={{
+              fontSize: '2rem',
+              fontWeight: 500,
+              color: 'var(--color-dg-header-bg)',
+              width: '100%',
+              resize: 'none',
+              border: 'none',
+              outline: 'none',
+              background: 'transparent',
+              overflow: 'hidden',
+              lineHeight: 1.2
             }}
           />
 

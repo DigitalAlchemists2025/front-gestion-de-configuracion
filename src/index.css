@@ -1,11 +1,6 @@
 :root {
   /* Fondo general */
-  --color-bg-gradient: linear-gradient(
-    180deg,
-    #f5f7fa 0%,
-    #ffffff 50%,
-    #e3eaf6 100%
-  );
+  --color-bg-gradient: #fff;
 
   --color-bg-secondary: #003057;
 

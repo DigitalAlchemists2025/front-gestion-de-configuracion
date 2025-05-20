@@ -19,6 +19,8 @@
 
   /* Textos */
   --color-text-base: #1c1c1e;
+  --color-title-primary: #003057;
+  --color-title-secondary: #ffff;
   --color-text-active: #00c774;
   --color-text-baja: #d32f2f;
   --color-datagrid-cell-text: #1c1c1e;

@@ -27,7 +27,7 @@ function SideBar() {
             display: 'flex',
             flexDirection: 'column',
             width: '25%',
-            minWidth: "15em",
+            minWidth: "20em",
             backgroundColor: 'var(--color-bg-secondary)',
             p: 2,
             boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)',
@@ -38,7 +38,7 @@ function SideBar() {
                 display: "flex",
                 width: "100%",
                 maxHeight: "10%",
-                height: "10%",
+                height: "7.5%",
                 py: 5,
                 gap: 3,
                 justifyContent: "space-evenly"

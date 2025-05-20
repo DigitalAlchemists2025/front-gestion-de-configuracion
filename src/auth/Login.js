@@ -87,17 +87,15 @@ function Login() {
     signInWithPopup(auth, provider)
       .then(async (result) => {
         const _user = result.user;
-        localStorage.setItem('token', _user.accessToken);
-        localStorage.setItem('email', _user.email);
         try {
           const response = await axios.get(`${BACKEND_URL}/api/v1/auth/email/${_user.email}`);
-          (response.data.role && response.data.role === 'administrador') ? localStorage.setItem('role', '0') : localStorage.setItem('role', '1');
+          localStorage.setItem('token', response.data.access_token);
+          localStorage.setItem('role', response.data.role === 'administrador' ? '0' : '1');
         } catch(error) {
           console.log("Email no encontrado");
-          localStorage.setItem('role', '1');
         }
         alert(`¡Bienvenido/a ${_user.displayName || _user.email}!`);
-        navigate('/home');
+        window.location.replace("/home");
       }).catch((error) => {
         const errorCode = error.code;
         const errorMessage = error.message;
@@ -119,17 +117,34 @@ function Login() {
     <Box sx={{ 
       display: 'flex', 
       flexDirection: 'column', 
-      justifyContent: 'center', 
       alignItems: 'center', 
-      background: 'var(--login-gradient-bg)',
-      minHeight: '100vh'
+      justifyContent: 'center',
+      background: 'var(--color-bg-secondary)',
+      minHeight: '100vh',
+      width: "100vw",
+      position: "fixed",
+      top: 0,
+      left: 0,
     }}>
+      <Box sx={{
+        maxWidth: "50%",
+        maxHeight: "15%",
+        display: "flex",
+        gap: 5,
+        justifyContent: "center",
+        alignItems: "center",
+        position: 'fixed',
+        top: "2rem",
+      }}>
+        <img style={{ width: "5rem", height: "15%" }} src="/logoUCN.png"></img>
+        <img style={{ width: "10rem", height: "15%" }} src="/logoEIC.png"></img>
+      </Box>
       <Typography
         variant="h1"
         sx={{
           fontSize: '2.5rem',
           mb: 6,
-          color: 'var(--login-title-color)',
+          color: 'var(--color-title-secondary)',
           textAlign: 'center',
         }}
       >
@@ -167,7 +182,7 @@ function Login() {
           fullWidth
           sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center', color: 'var(--login-button-hover)',border: '1px solid var(--login-button-hover)',gap: 1, borderRadius: 50, '&:hover': { backgroundColor: 'var(--login-button-hover)', color: 'white' } }}
         >
-          <FontAwesomeIcon icon={faGoogle} />
+          <FontAwesomeIcon icon={faGoogle} style={{ color: "var(--color-title-primary)"}} />
             Iniciar sesión con Google
         </Button>
 
@@ -207,7 +222,7 @@ function Login() {
             mt: 4,
             py: 1.5,
             borderRadius: 50,
-            backgroundColor: 'var(--login-button-bg)',
+            backgroundColor: 'var(--color-bg-secondary)',
             '&:hover': {
               backgroundColor: 'var(--login-button-hover)',
             },

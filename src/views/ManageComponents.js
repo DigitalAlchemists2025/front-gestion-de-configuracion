@@ -6,6 +6,8 @@ import { useNavigate } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
 import SideBar from "../components/SideBar";
 import { GridMoreVertIcon } from "@mui/x-data-grid";
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import DateTimeParser from "../components/DateTimeParser";
 
 const ManageComponents = () => {
@@ -13,16 +15,15 @@ const ManageComponents = () => {
     const [allComponents, setAllComponents] = useState([]);
     const [components, setComponents] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');    const [loading, setLoading] = useState(false);
-    const rol = localStorage.getItem('role');  
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [selectedRow, setSelectedRow] = useState(null);
 
+    const [expandedRows, setExpandedRows] = useState({});
+
     const BACKEND_URL = process.env.REACT_APP_BACK_URL;
     const token = localStorage.getItem('token');
-    if (!token) {
-        navigate('/login');
-    }
+    if (!token) navigate('/login');
 
     const columns = [
         { field: 'name', headerName: 'Nombre', flex: 1, },
@@ -40,6 +41,26 @@ const ManageComponents = () => {
         { field: 'createdAt', headerName: 'Creado', flex: 1 },
         { field: 'updatedAt', headerName: 'Actualizado', flex: 1 },
         {
+            field: 'components', 
+            headerName: '', 
+            width: 20,
+            sortable: false,
+            filterable: false, 
+            renderCell: (params) => {
+                const isExpanded = expandedRows[params.row._id];
+                return (
+                    params.row.components?.length > 0 && !params.row.isSub ? (
+                        <IconButton onClick={(e) => {
+                            e.stopPropagation();
+                            showSubComponents(e, params.row);
+                        }}>
+                            {isExpanded ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+                        </IconButton>
+                    ) : null
+                );
+            }
+        },
+        {
             field: 'options',
             headerName: '',
             sortable: false,
@@ -51,7 +72,7 @@ const ManageComponents = () => {
                     e.stopPropagation();
                     handleMenuOpen(e, params.row)
                 }}>
-                    <GridMoreVertIcon />
+                    <GridMoreVertIcon/>
                 </IconButton>
               </>
             )
@@ -163,6 +184,48 @@ const ManageComponents = () => {
         }
     };
 
+    const showSubComponents = async (event, row) => {
+        const isExpanded = expandedRows[row._id];
+        
+        if (isExpanded) {
+            setComponents((prev) => prev.filter((c) => c.parentId !== row._id));
+            setExpandedRows((prev) => ({ ...prev, [row._id]: false }));
+        } else {
+            try {
+                const res = await axios.get(`${BACKEND_URL}/components/${row._id}`, {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+
+                /* Falta arreglar la linea subcomponente desfazada */
+                const populated = res.data.components.slice(0, 3);
+
+                const subRows = populated.map((sub, i) => ({
+                    ...sub,
+                    _id: `${row._id}-sub${i}`,
+                    parentId: row._id,
+                    name: `> ${sub.name}`,
+                    status: sub.status,
+                    type: sub.type,
+                    createdAt: DateTimeParser(sub.createdAt),
+                    updatedAt: DateTimeParser(sub.updatedAt),
+                    isSub: true,
+                }));
+
+                const index = components.findIndex((c) => c._id === row._id);
+                const newList = [
+                    ...components.slice(0, index + 1),
+                    ...subRows,
+                    ...components.slice(index + 1),
+                ];
+
+                setComponents(newList);
+                setExpandedRows((prev) => ({ ...prev, [row._id]: true }));
+            } catch (error) {
+                console.error("Error cargando subcomponentes:", error);
+            }
+        }
+    };
+
     if (loading) return <LoadingCircle />;
 
     return (
@@ -261,6 +324,7 @@ const ManageComponents = () => {
                             columns={columns}
                             getRowId={(row) => row._id}
                             getRowClassName={(params) => {
+                                if (params.row.isSub) return 'fila-subcomponente';
                                 if (params.row.status === 'activo') return 'fila-activa';
                                 if (params.row.status === 'de baja') return 'fila-baja';
                                 return '';
@@ -312,6 +376,13 @@ const ManageComponents = () => {
                                 '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
                                     backgroundColor: 'var(--color-dg-cell-bg-odd)',
                                 },
+                                '& .MuiDataGrid-row.fila-subcomponente': {
+                                    fontStyle: 'italic',
+                                },
+                                '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
+                                    backgroundColor:"var(--color-dg-cell-child)" ,
+                                    pl: 2,
+                                }
                             }}
                         />
                     </Paper>

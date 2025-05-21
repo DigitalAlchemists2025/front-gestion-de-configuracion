@@ -113,7 +113,7 @@ const AddComponent = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        py: 6,
+        py: 20,
         px: 2,
       }}>
         <FormControl
@@ -126,10 +126,11 @@ const AddComponent = () => {
             boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
             color: 'var(--color-text-base)',
             width: '100%',
+            height: "60%",
             maxWidth: '600px',
           }}
         >
-          <Typography variant="h4" sx={{ color: 'var(--color-text-base)', mb: 3, textAlign: 'center' }}>
+          <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center' }}>
             Agregar Componente
           </Typography>
   
@@ -202,13 +203,14 @@ const AddComponent = () => {
                 variant="outlined"
                 onClick={handleOpenModal}
                 sx={{
-                  borderColor: 'var(--color-dg-header-bg)',
-                  color: 'var(--color-text-base)',
-                  height: 'fit-content',
-                  '&:hover': {
-                    backgroundColor: 'var(--login-button-hover)',
-                    color: 'white',
-                  },
+                  borderColor: 'var(--color-bg-secondary)',
+                    backgroundColor: 'var(--color-bg-gradient)',
+                    color: 'var(--color-title-primary)',
+                    height: 'fit-content',
+                    '&:hover': {
+                      borderColor: 'var(--color-bg-secondary-hover)',
+                      backgroundColor: 'var(--color-bg-secondary-hover)',
+                    },
                 }}
               >
                 +
@@ -222,9 +224,14 @@ const AddComponent = () => {
               mt: 4,
               py: 1.5,
               borderRadius: 50,
-              backgroundColor: 'var(--color-bg-secondary)',
+              backgroundColor: 'var(--color-bg-gradient)',
+              color: 'var(--color-title-primary)',
               '&:hover': {
-                backgroundColor: 'var(--login-button-hover)',
+                backgroundColor: 'var(--color-bg-secondary-hover)',
+              },
+              '&:disabled': {
+                backgroundColor: '#fff',
+                color: "rgb(65, 92, 117)",
               },
             }}
             onClick={handleSubmit}
@@ -272,12 +279,13 @@ const AddComponent = () => {
           />
   
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={handleCloseModal} color="secondary">
+            <Button onClick={handleCloseModal} color="secondary" sx={{ color: "var(--color-title-primary)"}}>
               Cancelar
             </Button>
             <Button
               onClick={handleAddCaracteristica}
               variant="contained"
+              sx={{ backgroundColor: "var(--color-bg-secondary)" }}
               disabled={!newNombre.trim() || !newDescripcion.trim()}
             >
               Agregar

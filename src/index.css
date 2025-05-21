@@ -1,8 +1,9 @@
 :root {
   /* Fondo general */
   --color-bg-gradient: #fff;
-
   --color-bg-secondary: #003057;
+  --color-bg-secondary-hover: #e5f4ff;
+  --bg-inputs: #fff;
 
   /* Loading */
   --color-loading: #1976d2;
@@ -25,6 +26,7 @@
   --color-dg-cell-bg: #ffffff;
   --color-dg-cell-bg-even: #f0f7ff;
   --color-dg-cell-bg-odd: #ffffff;
+  --color-dg-cell-child: #d2e7ffa6;
 
   /* Paginación */
   --color-pagination: #1c1c1e;
@@ -37,5 +39,5 @@
   --login-button-bg: #1976d2;
   --login-button-hover: #1565c0;
   --bg-inputs: #f0f2f5;
-  --bg-paper: #e5fff9ce;
+  --bg-paper: #003057;
 }

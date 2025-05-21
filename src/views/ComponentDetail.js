@@ -333,7 +333,7 @@ const ComponentDetail = () => {
             variant= "outlined"
             color= "primary"
             onClick={() => navigate(-1)}
-            sx={{ mb: 2, color: 'var(--color-text-base)', borderColor: 'rgba(0,0,0,0.2)', width: "50%" }}
+            sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%" }}
           >
             ← Volver
           </Button>
@@ -404,12 +404,13 @@ const ComponentDetail = () => {
                 sx={{
                   fontSize: "0.7rem", 
                   mr: 10,
-                  color:
-                    component.status === "activo"
-                      ? "var(--color-text-baja)"
-                      : "var(--color-text-active)", 
-                      borderColor: "rgba(0,0,0,0.2)" 
-                  }}
+                  color: component.status === "activo"
+                    ? "var(--color-text-baja)"
+                    : "var(--color-text-active)", 
+                  borderColor: component.status === "activo"
+                    ? "var(--color-text-baja)"
+                    : "var(--color-text-active)", 
+                }}
               >
                 {component.status === "activo" ? "Retirar" : "Activar"}
               </Button>
@@ -436,7 +437,8 @@ const ComponentDetail = () => {
                   <Typography
                     size="small"
                     sx={{
-                      width: '20%',
+                      width: '30%',
+                      wordWrap: "break-word",
                       '& .MuiInputBase-input': { fontSize: '1rem' }
                     }}
                   >
@@ -492,6 +494,7 @@ const ComponentDetail = () => {
               <Button
                 variant="outlined"
                 color="info"
+                sx={{ color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)" }}
                 onClick={handleOpenModal}
                 size="small"
               >
@@ -516,6 +519,7 @@ const ComponentDetail = () => {
             <Box sx={{ mt: 3, display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
               <Button
                 variant="outlined"
+                sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)"}}
                 onClick={resetChanges}
                 disabled={!changes || loadingButtons}
               >
@@ -524,6 +528,7 @@ const ComponentDetail = () => {
               <Button
                 variant="contained"
                 onClick={handleSaveChanges}
+                sx={{ bgcolor: "var(--color-bg-secondary)"}}
                 disabled={!changes || loadingButtons}
               >
                 Guardar Cambios
@@ -532,8 +537,8 @@ const ComponentDetail = () => {
           )}
         </Box>
 
-        <Box sx={{ mt: 2, justifyItems: "flex-start", maxWidth: "50%" }}>
-          <Typography variant="h5" sx={{ mb: 1, mt: 5, }}>
+        <Box sx={{ mt: 2, ml: 5, justifyItems: "flex-start", width: "50%" }}>
+          <Typography variant="h5" sx={{ mb: 1, mt: 5, color: "var(--color-title-primary)" }}>
             <strong>Sub Componentes:</strong>
           </Typography>
           {component.components?.length > 0 ? (
@@ -560,7 +565,15 @@ const ComponentDetail = () => {
             </Typography>
           )}  
           {rol === '0' && (
-            <Button size="large" sx={{ mt: 2, width: "40vw" }} onClick={handleOpenModalChild} >Agregar Sub Componente</Button>
+            <Box sx={{ display: "flex", justifyContent: "end", width: "100%" }}>
+              <Button 
+                size="large" 
+                sx={{ mt: 2, width: "50%", color: "var(--color-title-primary)" }} 
+                onClick={handleOpenModalChild} 
+              >
+                Agregar Sub Componente
+              </Button>
+            </Box>
           )}
         </Box>
       </Paper>
@@ -580,7 +593,7 @@ const ComponentDetail = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+          <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)" }}>
             Agregar Característica
           </Typography>
   
@@ -603,12 +616,13 @@ const ComponentDetail = () => {
           />
   
           <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button onClick={handleCloseModal} color="secondary">
+            <Button onClick={handleCloseModal} color="primary" sx={{ color: "var(--color-title-primary)"}}>
               Cancelar
             </Button>
             <Button
               onClick={handleAddDescripcion}
               variant="contained"
+              sx={{ backgroundColor: "var(--color-bg-secondary)"}}
               disabled={!newNombre.trim() || !newDescripcion.trim() || loadingButtons}
             >
               Agregar
@@ -646,7 +660,7 @@ const ComponentDetail = () => {
               maxWidth: '600px',
             }}
           >
-            <Typography variant="h4" sx={{ color: 'var(--color-text-base)', mb: 3, textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center' }}>
               Agregar Componente
             </Typography>
     
@@ -721,9 +735,14 @@ const ComponentDetail = () => {
                     variant="outlined"
                     onClick={handleOpenCharModal}
                     sx={{
-                      borderColor: 'var(--color-dg-header-bg)',
-                      color: 'var(--color-text-base)',
+                      borderColor: 'var(--color-bg-secondary)',
+                      backgroundColor: 'var(--color-bg-gradient)',
+                      color: 'var(--color-title-primary)',
                       height: 'fit-content',
+                      '&:hover': {
+                        borderColor: 'var(--color-bg-secondary-hover)',
+                        backgroundColor: 'var(--color-bg-secondary-hover)',
+                      },
                     }}
                   >
                     +
@@ -731,16 +750,30 @@ const ComponentDetail = () => {
                 </Box>
               </FormGroup>
                 
-              <Box sx={{ display: "flex", flexDirection: "row", justifyContent: "space-evenly", alignItems: "center"}}>
-                <Button onClick={handleCloseModal}>Cancelar</Button>
+              <Box sx={{ display: "flex", mt: 5, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center"}}>
+                <Button 
+                  onClick={handleCloseModal} 
+                  sx={{ 
+                    py: 1.5,
+                    borderRadius: 50,
+                    color: '#fff' 
+                  }}
+                >
+                  Cancelar
+                </Button>
                 <Button 
                   variant="contained" 
                   sx={{
                     py: 1.5,
                     borderRadius: 50,
-                    backgroundColor: 'var(--login-button-bg)',
+                    backgroundColor: 'var(--color-bg-gradient)',
+                    color: 'var(--color-title-primary)',
                     '&:hover': {
-                      backgroundColor: 'var(--login-button-hover)',
+                      backgroundColor: 'var(--color-bg-secondary-hover)',
+                    },
+                    '&:disabled': {
+                      backgroundColor: '#fff',
+                      color: "rgb(65, 92, 117)",
                     },
                   }}
                   onClick={handleAddChildComponent}
@@ -768,7 +801,7 @@ const ComponentDetail = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+          <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)" }}>
             Agregar Característica
           </Typography>
   
@@ -791,12 +824,13 @@ const ComponentDetail = () => {
           />
   
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={handleCloseCharModal} color="secondary">
+            <Button onClick={handleCloseCharModal} color="secondary" sx={{ color: "var(--color-title-primary)"}}>
               Cancelar
             </Button>
             <Button
               onClick={handleAddNewSubCharacteristics}
               variant="contained"
+              sx={{ backgroundColor: "var(--color-bg-secondary)"}}
               disabled={!newSubName.trim() || !newSubDescription.trim() || loadingButtons}
             >
               Agregar

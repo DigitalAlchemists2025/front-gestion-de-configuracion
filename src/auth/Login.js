@@ -133,8 +133,8 @@ function Login() {
         gap: 5,
         justifyContent: "center",
         alignItems: "center",
-        position: 'fixed',
-        top: "2rem",
+        top: "1rem",
+        mb: 5,
       }}>
         <img style={{ width: "5rem", height: "15%" }} src="/logoUCN.png"></img>
         <img style={{ width: "10rem", height: "15%" }} src="/logoEIC.png"></img>

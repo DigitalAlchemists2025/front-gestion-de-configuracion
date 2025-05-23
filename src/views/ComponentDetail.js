@@ -24,7 +24,11 @@ const ComponentDetail = () => {
   const [descriptions, setDescriptions] = useState([]);
 
   /* Sub Componente */
+  const [allComponentes, setAllComponents] = useState([]);
   const [isModalChildOpen, setIsModalChildOpen] = useState(false);
+
+
+  const [isModalNewChildOpen, setIsModalNewChildOpen] = useState(false);
   const [nombre, setNombre] = useState("");
   const [tipo, setTipo] = useState("");
   const [estado, setEstado] = useState("");
@@ -36,7 +40,7 @@ const ComponentDetail = () => {
   const [newSubDescription, setNewSubDescription] = useState("");
   const [newSubCharacteristics, setNewSubCharacteristics] = useState([]);
 
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token").trim();
   const rol = localStorage.getItem("role");
   if (!token) {
     navigate("/login");
@@ -52,7 +56,6 @@ const ComponentDetail = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(token)
         const data = response.data;
         setComponent(data);
         setMainComponentName(data.name);
@@ -128,16 +131,53 @@ const ComponentDetail = () => {
     setNewDescripcion("");
   };
 
-  const handleOpenModalChild = () => {
-    setIsModalChildOpen(true);
+  const handleOpenModalNewChild = () => {
+    setIsModalNewChildOpen(true);
     setNombre("");
     setTipo("");
     setEstado("activo");
     setCaracteristicas([]);
   };
+
+  const handleAddExistingComponentAsChild = async (childId) => {
+    try {
+      setLoadingButtons(true)
+      const res = await axios.post(`${BACKEND_URL}/components/${component._id}/associate/${childId}`,{},
+        { 
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setComponent(res.data);
+      alert('¡Componente añadido correctamente!');
+      setIsModalChildOpen(false);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setLoadingButtons(false)
+    }
+  };
+
+  const handleOpenModalChild = async () => {
+    try {
+      const response = await axios.get(`${BACKEND_URL}/components`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const components = response.data.filter((c) => !c.isSubComponent && c.name !== component.name);
+      setAllComponents(components);
+      setIsModalChildOpen(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setIsModalNewChildOpen(false);
     setIsModalChildOpen(false);
   };
 
@@ -268,7 +308,6 @@ const ComponentDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      console.log("Componente hijo guardado:", response.data); 
       const nuevosComponentes = [...component.components, response.data];   
       setComponent((prev) => ({
         ...prev,
@@ -417,7 +456,7 @@ const ComponentDetail = () => {
             )}
           </Box>
     
-          <Typography variant="body2" sx={{ fontSize: "1rem" }}>
+          <Typography variant="body2" sx={{ fontSize: "1rem", mb: 3, }}>
             <strong>Características:</strong>
           </Typography>
           {component.descriptions?.length > 0 && (
@@ -631,8 +670,95 @@ const ComponentDetail = () => {
         </Box>
       </Modal>
 
-      {/* Modal para agregar componente hijo */}
+      {/* Modal para agregar sub componentes ya existentes */}
       <Modal open={isModalChildOpen} onClose={handleCloseModal}>
+        <Box sx={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+          width: "70vw",
+          height: "60vh",
+          bgcolor: "white",
+          boxShadow: 24,
+          p: 4,
+          borderRadius: 2,
+          display: "flex",
+        }}>
+          <Box sx={{ 
+            flex: 1, 
+            pr: 3, 
+            display: "grid", 
+            justifyContent: "flex-start",  
+            height: "100%", 
+            borderRight: "1px solid #e0e0e0", 
+            gridTemplateRows: "auto 1fr auto"
+          }}>
+            <Typography variant="h6" sx={{ mb: 2, fontSize: '2rem', color: "var(--color-title-primary)" }}>
+              {component.name}
+            </Typography>
+            <Box>
+              <Typography variant="subtitle1" sx={{ mb: 1, color: "var(--color-title-primary)" }}>
+                Subcomponentes actuales:
+              </Typography>
+              <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+                {component.components?.length > 0
+                  ? component.components.map((sub, i) => (
+                      <Chip
+                        key={sub._id}
+                        label={sub.name}
+                        sx={{ bgcolor: "var(--color-bg-secondary)", color: "var(--color-title-secondary)" }}
+                        size="small"
+                      />
+                    ))
+                  : <Typography color="text.secondary" fontSize="0.95rem">Sin subcomponentes.</Typography>}
+              </Box>
+            </Box>
+            <Button onClick={handleOpenModalNewChild} sx={{ color: "var(--color-title-primary)", bottom: 0}}>
+              Crear subcomponente
+            </Button>
+          </Box>
+
+          <Box sx={{ flex: 1.5, pl: 3, overflowY: "auto", maxHeight: "55vh" }}>
+            <Typography variant="subtitle1" sx={{ mb: 2, color: "#444" }}>
+              Componentes existentes:
+            </Typography>
+            {allComponentes.length === 0 ? (
+              <Typography color="text.secondary">No hay componentes disponibles.</Typography>
+            ) : (
+              allComponentes.map((c) => (
+                <Card
+                  key={c._id}
+                  variant="outlined"
+                  sx={{
+                    mb: 2,
+                    p: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body1"><strong>{c.name}</strong></Typography>
+                    <Typography variant="caption" color="text.secondary">{c.type}</Typography>
+                  </Box>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    sx={{ ml: 2, bgcolor: "var(--color-bg-secondary)" }}
+                    onClick={() => handleAddExistingComponentAsChild(c._id)}
+                  >
+                    +
+                  </Button>
+                </Card>
+              ))
+            )}
+          </Box>
+        </Box>
+      </Modal>
+
+      {/* Modal para crear nuevo componente hijo */}
+      <Modal open={isModalNewChildOpen} onClose={handleCloseModal}>
         <Box sx={{
           flexGrow: 1,
           display: 'flex',

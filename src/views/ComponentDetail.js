@@ -3,6 +3,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
+import RemoveIcon from '@mui/icons-material/Remove';
 
 const ComponentDetail = () => {
   const { id } = useParams();
@@ -26,7 +27,6 @@ const ComponentDetail = () => {
   /* Sub Componente */
   const [allComponentes, setAllComponents] = useState([]);
   const [isModalChildOpen, setIsModalChildOpen] = useState(false);
-
 
   const [isModalNewChildOpen, setIsModalNewChildOpen] = useState(false);
   const [nombre, setNombre] = useState("");
@@ -166,7 +166,7 @@ const ComponentDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const components = response.data.filter((c) => !c.isSubComponent && c.name !== component.name);
+      const components = response.data.filter((c) => !c.parent && c.name !== component.name);
       setAllComponents(components);
       setIsModalChildOpen(true);
     } catch (error) {
@@ -298,7 +298,7 @@ const ComponentDetail = () => {
         name: nombre.trim(),
         type: tipo.trim(),
         status: estado,
-        isSubComponent: true,
+        parent: component._id,
         descriptions: validDescriptions.length > 0 ? validDescriptions : undefined
     };
     try {
@@ -319,6 +319,10 @@ const ComponentDetail = () => {
     } finally {
       setLoadingButtons(false);
     }
+  };
+
+  const handleRemoveSubComponent = () => {
+    /* Proximo remove sub component */
   };
 
   if (loading)
@@ -583,18 +587,31 @@ const ComponentDetail = () => {
           {component.components?.length > 0 ? (
             <Box sx={{ mt: 2, overflowY: "auto", maxHeight: "70%", width: "40vw" }}>
               {component.components.map((child, idx) => (
-                <Card key={idx} sx={{ padding: 1, mb: 1, flex: 1 }} onClick={() => navigate(`/components/${child._id}`)}>
-                  <Typography 
-                    variant="body1"
-                    sx={{
-                      ml: 2,
-                      mb: 1,
-                      wordBreak: "break-word",   
-                      whiteSpace: "normal",      
-                      overflowWrap: "break-word",
-                    }}
-                  >
-                    {child.name}</Typography>
+                <Card key={idx} sx={{ padding: 1, mb: 1, flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }} onClick={() => navigate(`/components/${child._id}`)}>
+                  <Typography variant="body1" sx={{
+                    ml: 2,
+                    wordBreak: "break-word",   
+                    whiteSpace: "normal",      
+                    overflowWrap: "break-word",
+                  }}>
+                    {child.name}
+                  </Typography>
+                  {rol === '0' && (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleRemoveSubComponent(idx);
+                      }}
+                      size="large"
+                      sx={{
+                        minWidth: '32px',
+                        borderColor: 'error.main'
+                      }}
+                      variant="text"
+                    >
+                      <RemoveIcon/>
+                    </Button>
+                  )}
                 </Card>
               ))}
             </Box>
@@ -711,7 +728,8 @@ const ComponentDetail = () => {
                         size="small"
                       />
                     ))
-                  : <Typography color="text.secondary" fontSize="0.95rem">Sin subcomponentes.</Typography>}
+                  : <Typography color="text.secondary" fontSize="0.95rem">Sin subcomponentes.</Typography>
+                }
               </Box>
             </Box>
             <Button onClick={handleOpenModalNewChild} sx={{ color: "var(--color-title-primary)", bottom: 0}}>

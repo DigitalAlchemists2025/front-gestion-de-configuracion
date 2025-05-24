@@ -5,7 +5,7 @@ import Home from './views/Home';
 import ComponentDetail from './views/ComponentDetail';
 import AddComponent from './views/AddComponent';
 import ManageComponents from './views/ManageComponents';
-import History from './views/Historial';
+import History from './views/History';
 
 function AppRouter() {
     const token = localStorage.getItem('token');

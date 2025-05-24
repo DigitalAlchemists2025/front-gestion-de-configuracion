@@ -17,7 +17,7 @@ function Home() {
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
   const token = localStorage.getItem('token');
   if (!token) {
-    navigate('/login');
+    window.location.replace('/login');
   };
 
   const columns = [

@@ -1,4 +1,4 @@
-import { Avatar, Box, Input, InputAdornment, Paper } from "@mui/material";
+import { Avatar, Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Input, InputAdornment, Paper, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from "react-router-dom";
@@ -53,7 +53,7 @@ function Home() {
           if (a.updatedAt > b.updatedAt) return -1;
           return 0;
         });
-        
+        console.log('Componentes obtenidos:', componentsSorted);
         setAllComponents(componentsSorted);
         setComponents(componentsSorted); 
       } catch (error) {
@@ -180,95 +180,57 @@ function Home() {
           />
         </Box>
 
-        {/* Tabla de Componentes */}
+        {/* Cartas de Componentes */}
         <Box
           sx={{
             display: 'flex',
-            flexDirection: 'column',
+            flexDirection: 'row',
             flexGrow: 1,
+            flexWrap: 'wrap',
+            justifyContent: 'center',
             height: '100%',
-            overflow: 'hidden',
+            overflowY: 'auto',
           }}
         >
-          <Paper
-            sx={{
-              flexGrow: 1,
-              mx: 'auto',
-              my: 4,
-              width: '90%',
-              overflow: 'hidden',
-              borderRadius: '16px',
-              backgroundColor: 'transparent',
-              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            }}
-          >
-            <DataGrid
-              rows={components}
-              columns={columns}
-              showCellVerticalBorder
-              showColumnVerticalBorder
-              getRowId={(row) => row._id}
-              onRowClick={(params) => {
-                navigate(`/components/${params.row._id}`);
-              }}
-              getRowClassName={(params) => {
-                if (params.row.status === 'activo') return 'fila-activa';
-                if (params.row.status === 'de baja') return 'fila-baja';
-                return '';
-              }}
-              initialState={{
-                pagination: { paginationModel: { page: 0, pageSize: 10 } },
-              }}
-              pageSizeOptions={[5, 10, 15]}
-              sx={{
-                border: '1px solid #e0e0e0',
-                borderRadius: '25px',
-                color: 'var(--color-text-base)',
-                fontSize: '1rem',
-                background: 'transparent',
-                '& .fila-activa': {
-                  color: 'var(--color-text-active)',
-                },
-                '& .fila-baja': {
-                  color: 'var(--color-text-baja)',
-                  fontStyle: 'italic',
-                },
-                '.MuiDataGrid-columnHeader': {
-                  backgroundColor: 'var(--color-bg-secondary)',
-                  color: '#ffffff',
-                  borderBottom: 'none',
-                },
-                '.MuiDataGrid-cell': {
-                  borderBottom: 'none',
-                  backgroundColor: 'var(--color-dg-cell-bg)',
-                  color: 'var(--color-datagrid-cell-text)',
-                },
-                '.MuiDataGrid-row:hover': {
-                  backgroundColor: 'rgba(25, 118, 210, 0.05)',
-                  cursor: 'pointer',
-                },
-                '.MuiDataGrid-footerContainer': {
-                  bgcolor: '#e3f2fd',
-                  borderTop: 'none',
-                },
-                '[class*="MuiTablePagination"]': {
-                  color: 'var(--color-pagination)',
-                },
-                '.MuiDataGrid-cell:focus': {
-                  outline: 'none',
-                },
-                '.MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
-                  outline: 'none',
-                },
-                '& .MuiDataGrid-row:nth-of-type(even) .MuiDataGrid-cell': {
-                  backgroundColor: 'var(--color-dg-cell-bg-even)',
-                },
-                '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
-                  backgroundColor: 'var(--color-dg-cell-bg-odd)',
-                },
-              }}
-            />
-          </Paper>
+          {allComponents.length === 0 ? (
+            <Typography color="text.secondary">No hay componentes disponibles.</Typography>
+          ) : (
+            allComponents.map((c, idx) => (
+              <Card key={idx} sx={{ width: '30%', minWidth: "30%", height: "50%", m: 2, borderRadius: '15px', boxShadow: 3, display: 'grid', flexDirection: 'column', color: "var(--color-title-primary)" }}>
+                <Box sx={{ px: 2, pt: 2, gap: 1, display: 'flex', flexDirection: 'column' }}>
+                  <Typography variant="h4" sx={{ color: "var(--color-title-primary)" }}>
+                    {c.name}
+                  </Typography>
+                  <Typography variant="h6" component="div" gutterBottom>
+                    {c.type}
+                  </Typography>
+                </Box>
+                <CardContent sx={{ px: 2, maxHeight: '60%', overflowY: 'auto',  }}>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+                    {c.status}
+                  </Typography>
+                  {c.descriptions.length > 0 && (
+                    <Typography sx={{ mb: 1 }}>Características:</Typography>
+                  )}
+                  {c.descriptions.length > 0 && c.descriptions.map((d, index) => (
+                    <Chip
+                      key={index}
+                      label={`${d.name}: ${d.description}`}
+                      size="small"
+                      sx={{ m: 1, maxWidth: '90%' }}
+                    />
+                  ))}
+                </CardContent>
+                <CardActions sx={{ justifyContent: "space-between", px: 2 }}>
+                  <Typography variant="body2" color="text.secondary">
+                    {c.properties}
+                  </Typography>
+                  <Button variant="contained" size="small">
+                    Ver más
+                  </Button>
+                </CardActions>
+              </Card>
+          )))}
         </Box>
       </Box>
     </Box>

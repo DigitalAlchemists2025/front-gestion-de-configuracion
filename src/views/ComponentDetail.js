@@ -834,6 +834,10 @@ const ComponentDetail = () => {
                   <Card
                     key={c._id}
                     variant="outlined"
+                    onClick={() =>{ 
+                      navigate(`/components/${c._id}`);
+                      handleCloseModal();
+                    }}
                     sx={{
                       m: "1em auto",
                       p: 1.5,
@@ -842,6 +846,9 @@ const ComponentDetail = () => {
                       justifyContent: "space-between",
                       cursor: "pointer",
                       width: "90%",
+                      '&:hover': {
+                        backgroundColor: "var(--color-bg-secondary-hover)",
+                      },
                     }}
                   >
                     <Box>

@@ -67,14 +67,20 @@ const ManageComponents = () => {
             filterable: false,
             width: 50,
             renderCell: (params) => (
-              <>
-                <IconButton onClick={(e) => {
-                    e.stopPropagation();
-                    handleMenuOpen(e, params.row)
-                }}>
-                    <GridMoreVertIcon/>
+                !params.row.isSub ? (
+                <IconButton
+                    onClick={(event) => handleMenuOpen(event, params.row)}
+                    aria-label="more"
+                    aria-controls="long-menu"
+                    aria-haspopup="true"
+                    sx={{
+                    color: 'var(--color-text-base)',
+                    '&:hover': { backgroundColor: 'transparent' }
+                    }}
+                >
+                    <GridMoreVertIcon />
                 </IconButton>
-              </>
+                ) : null
             )
         },
     ];
@@ -201,7 +207,7 @@ const ManageComponents = () => {
 
                 const subRows = populated.map((sub, i) => ({
                     ...sub,
-                    _id: `${row._id}-sub${i}`,
+                    _id: `${sub._id}-sub-${i}`,
                     parentId: row._id,
                     name: `> ${sub.name}`,
                     status: sub.status,

@@ -1,41 +1,25 @@
-import { Avatar, Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Input, InputAdornment, Paper, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, CardActions, CardContent, Chip, Input, InputAdornment, ListItem, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
-import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 import axios from "axios";
 import LoadingCircle from "../components/LoadingCircle";
 
 function Home() {
-  const navigate = useNavigate();
   const [allComponents, setAllComponents] = useState([]);
+
   const [components, setComponents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [count, setCount] = useState(6);
+
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
   const token = localStorage.getItem('token');
   if (!token) {
     window.location.replace('/login');
   };
-
-  const columns = [
-    { field: 'name', headerName: 'Nombre', flex: 1, },
-    { field: 'type', headerName: 'Tipo', flex: 1 },
-    {
-      field: 'status',
-      headerName: 'Estado',
-      flex: 1,
-      cellClassName: (params) => {
-        if (params.value === 'activo') {
-          return 'estado-activo';
-        } else if (params.value === 'de baja') {
-          return 'estado-baja';
-        }
-        return '';
-      }
-    }
-  ];
 
   useEffect(() => {
     const fetchData = async () => {
@@ -53,7 +37,6 @@ function Home() {
           if (a.updatedAt > b.updatedAt) return -1;
           return 0;
         });
-        console.log('Componentes obtenidos:', componentsSorted);
         setAllComponents(componentsSorted);
         setComponents(componentsSorted); 
       } catch (error) {
@@ -72,15 +55,34 @@ function Home() {
 
   const handleSearch = (value) => {
     setSearchTerm(value);
-  
-    const searched = allComponents.filter((c) =>
-      c.name.toLowerCase().includes(value.toLowerCase()) ||
-      c.type.toLowerCase().includes(value.toLowerCase()) 
-      /* || c.hijos.name || c.hijos.type */
-    );
-  
+
+    const lowerValue = value.toLowerCase();
+
+    const searched = allComponents.filter((c) => {
+      if (
+        c.name?.toLowerCase().includes(lowerValue) ||
+        c.type?.toLowerCase().includes(lowerValue)
+      ) return true;
+
+      if (
+        c.descriptions?.some(d =>
+          d.name?.toLowerCase().includes(lowerValue) ||
+          d.description?.toLowerCase().includes(lowerValue)
+        )
+      ) return true;
+
+      if (
+        c.components?.some(sub =>
+          sub.name?.toLowerCase().includes(lowerValue)
+        )
+      ) return true;
+
+      return false;
+    });
+
     setComponents(searched);
-  };  
+    setCount(6);
+  };
   
   if (loading)
     return (
@@ -192,45 +194,82 @@ function Home() {
             overflowY: 'auto',
           }}
         >
-          {allComponents.length === 0 ? (
+          {components.length === 0 ? (
             <Typography color="text.secondary">No hay componentes disponibles.</Typography>
           ) : (
-            allComponents.map((c, idx) => (
-              <Card key={idx} sx={{ width: '30%', minWidth: "30%", height: "50%", m: 2, borderRadius: '15px', boxShadow: 3, display: 'grid', flexDirection: 'column', color: "var(--color-title-primary)" }}>
+            components.slice(0, count).map((c, idx) => (
+              <Card key={idx} sx={{ 
+                width: '30%', 
+                minWidth: "30%", 
+                height: "55%", 
+                minHeight: "300px",
+                m: 2, 
+                borderRadius: '15px', 
+                boxShadow: 3, 
+                display: 'grid',
+                gridTemplateRows: 'auto 1fr auto', 
+                color: "var(--color-title-primary)"
+              }}>
                 <Box sx={{ px: 2, pt: 2, gap: 1, display: 'flex', flexDirection: 'column' }}>
                   <Typography variant="h4" sx={{ color: "var(--color-title-primary)" }}>
-                    {c.name}
+                    {c.name.length > 30? `${c.name.slice(0, 30)}...` : c.name}
                   </Typography>
                   <Typography variant="h6" component="div" gutterBottom>
                     {c.type}
                   </Typography>
                 </Box>
-                <CardContent sx={{ px: 2, maxHeight: '60%', overflowY: 'auto',  }}>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                    {c.status}
+                <CardContent sx={{ px: 2, maxHeight: '100%', overflowY: 'auto'  }}>
+                  <Typography variant="body1" color={c.status === 'de baja' ? 'textSecondary' : 'var(--color-title-primary)'} sx={{ mb: 1 }}>
+                    Estado: {c.status}
                   </Typography>
                   {c.descriptions.length > 0 && (
-                    <Typography sx={{ mb: 1 }}>Características:</Typography>
+                    <Typography>Características:</Typography>
                   )}
-                  {c.descriptions.length > 0 && c.descriptions.map((d, index) => (
+                  {c.descriptions.length > 0 && c.descriptions.slice(0, 3).map((d, index) => (
                     <Chip
                       key={index}
                       label={`${d.name}: ${d.description}`}
                       size="small"
-                      sx={{ m: 1, maxWidth: '90%' }}
+                      sx={{ mt: 1, maxWidth: '90%' }}
                     />
                   ))}
+                  {c.components.length > 0 && (
+                    <Typography sx={{ mt: 2, mb: 1 }}>Sub Componentes:</Typography>
+                  )}
+                  {c.components.length > 0 && c.components.slice(0, 3).map((sub, index) => (
+                    <ListItem
+                      key={index}
+                      size="small"
+                      sx={{ maxWidth: '90%', }}
+                    >
+                      {`${sub.name}`}
+                    </ListItem>
+                  ))}
                 </CardContent>
-                <CardActions sx={{ justifyContent: "space-between", px: 2 }}>
-                  <Typography variant="body2" color="text.secondary">
-                    {c.properties}
-                  </Typography>
-                  <Button variant="contained" size="small">
-                    Ver más
+                <Box sx={{ px: 2, pb: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
+                  <Button variant="contained" size="small" onClick={() => navigate(`/components/${c._id}`)} sx={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    color: 'var(--color-title-secondary)',
+                    maxHeight: '30px',
+                    '&:hover': {
+                      backgroundColor: 'var(--color-bg-primary-hover)',
+                    },
+                  }}>
+                    Ver Detalles
                   </Button>
-                </CardActions>
+                </Box>
               </Card>
           )))}
+          {count < components.length && (
+            <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center', my: 2 }}>
+              <Button
+                variant="outlined"
+                onClick={() => setCount((prev) => prev + 6)}
+              >
+                Ver más
+              </Button>
+            </Box>
+          )}
         </Box>
       </Box>
     </Box>

@@ -1,5 +1,5 @@
 import { Avatar, Box, Input, InputAdornment, Paper } from "@mui/material";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { DataGrid } from '@mui/x-data-grid';
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
@@ -12,7 +12,6 @@ function Home() {
   const [components, setComponents] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
-  const rol = localStorage.getItem('role');  
   
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
   const token = localStorage.getItem('token');
@@ -59,6 +58,10 @@ function Home() {
         setComponents(componentsSorted); 
       } catch (error) {
         console.error('Error fetching data:', error);
+        if (error.response.data.error.statusCode === 401) {
+          localStorage.clear();
+          window.location.replace("/login")
+        }
       } finally {
         setLoading(false);
       }

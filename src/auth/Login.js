@@ -1,9 +1,8 @@
-import React, { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Box, Button, Divider, Paper, TextField, Typography } from '@mui/material';
 import axios from 'axios';
-import { getAuth, getRedirectResult, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect } from 'firebase/auth';
+import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { auth, provider } from '../firebase/config';
-import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
@@ -11,8 +10,6 @@ function Login() {
   const [login, setLogin] = useState({ email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
   const [id, setId] = useState(null);
-  const [user, setUser] = useState(null);
-  const navigate = useNavigate();
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
 
@@ -71,7 +68,6 @@ function Login() {
           console.warn("Rol desconocido:", role);
         }
   
-        setUser(response.data);
         window.location.replace('/home');
   
       } catch (error) {
@@ -84,25 +80,26 @@ function Login() {
   
   // Login Google con Popup
   const handleGoogleLogin = () => {
-    signInWithPopup(auth, provider)
-      .then(async (result) => {
-        const _user = result.user;
-        try {
-          const response = await axios.get(`${BACKEND_URL}/api/v1/auth/email/${_user.email}`);
-          localStorage.setItem('token', response.data.access_token);
-          localStorage.setItem('role', response.data.role === 'administrador' ? '0' : '1');
-        } catch(error) {
-          console.log("Email no encontrado");
-        }
-        alert(`¡Bienvenido/a ${_user.displayName || _user.email}!`);
-        window.location.replace("/home");
-      }).catch((error) => {
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        const credential = GoogleAuthProvider.credentialFromError(error);
-        alert("Error al iniciar sesión con Google. Intenta más tarde.");
-        console.error("Error de Google:", errorCode, errorMessage, credential);
+    setLoading(true);
+    signInWithPopup(auth, provider).then(async (result) => {
+      const _user = result.user;
+      try {
+        const response = await axios.get(`${BACKEND_URL}/api/v1/auth/email/${_user.email}`);
+        localStorage.setItem('token', response.data.access_token);
+        localStorage.setItem('role', response.data.role === 'administrador' ? '0' : '1');
+      } catch(error) {
+        console.log("Email no encontrado");
+      }
+      alert(`¡Bienvenido/a ${_user.displayName || _user.email}!`);
+      window.location.replace("/home");
+    }).catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      const credential = GoogleAuthProvider.credentialFromError(error);
+      alert("Error al iniciar sesión con Google. Intenta más tarde.");
+      console.error("Error de Google:", errorCode, errorMessage, credential);
     });
+    setLoading(false);
   }; 
 
   const handleChange = (e) => {
@@ -178,6 +175,7 @@ function Login() {
         <Button
           onClick={handleGoogleLogin}
           variant="outlined"
+          disabled={isLoading}
           color="secondary"
           fullWidth
           sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center', color: 'var(--login-button-hover)',border: '1px solid var(--login-button-hover)',gap: 1, borderRadius: 50, '&:hover': { backgroundColor: 'var(--login-button-hover)', color: 'white' } }}
@@ -217,7 +215,7 @@ function Login() {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={isLoading}
+          disabled={isLoading || login.password === "" || login.email === ""}
           sx={{
             mt: 4,
             py: 1.5,

@@ -14,6 +14,7 @@ const ListButtonItem = ({ nombre, onClick }) => {
                 backgroundColor: 'var(--color-bg-gradient)',
                 color: 'var(--color-title-primary)',
                 transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+                minHeight: "1.5rem",
                 '&:hover': {
                     transform: 'scale(1.03)',
                     boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',

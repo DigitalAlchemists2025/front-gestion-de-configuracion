@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Button,
@@ -113,23 +113,27 @@ const AddComponent = () => {
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'flex-start',
-        py: 20,
         px: 2,
+        py: 10, 
+        height: "100vh",
+        width: "100%",
+        minHeight: 0, 
+        overflow: 'hidden', 
       }}>
-        <FormControl
-          component={Paper}
-          sx={{
-            px: 6,
-            py: 5,
-            borderRadius: '16px',
-            backgroundColor: 'var(--bg-paper)',
-            boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
-            color: 'var(--color-text-base)',
-            width: '100%',
-            height: "60%",
-            maxWidth: '600px',
-          }}
-        >
+        <FormControl component={Paper} sx={{
+          flex: 1,
+          px: { xs: 2, md: 6 }, 
+          py: { xs: 2, md: 5 },
+          borderRadius: '16px',
+          backgroundColor: 'var(--bg-paper)',
+          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+          color: 'var(--color-text-base)',
+          width: { xs: '100%', md: '80%' },
+          maxWidth: 700,
+          minWidth: 320,
+          maxHeight: '90vh',
+          overflowY: 'hidden', 
+        }}>
           <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center' }}>
             Agregar Componente
           </Typography>

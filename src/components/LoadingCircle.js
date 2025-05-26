@@ -9,7 +9,6 @@ const LoadingCircle = () => {
                 alignItems: "center",
                 minHeight: "80vh",
                 background: "var(--color-bg-gradient)",
-                minHeight: "100vh",
             }}
         >
             <CircularProgress sx={{ color: "var(--color-loading)" }} />

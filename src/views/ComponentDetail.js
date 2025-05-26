@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, Icon, Avatar, TextareaAutosize } from "@mui/material";
+import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -22,7 +22,6 @@ const ComponentDetail = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newNombre, setNewNombre] = useState("");
   const [newDescripcion, setNewDescripcion] = useState("");
-  const [descriptions, setDescriptions] = useState([]);
 
   /* Sub Componente */
   const [allComponentes, setAllComponents] = useState([]);
@@ -153,7 +152,7 @@ const ComponentDetail = () => {
       alert('¡Componente añadido correctamente!');
       setIsModalChildOpen(false);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoadingButtons(false)
     }
@@ -166,11 +165,12 @@ const ComponentDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const components = response.data.filter((c) => !c.parent && c.name !== component.name);
+      const components = response.data.filter((c) => c.parent === null && c.name !== component.name);
       setAllComponents(components);
+      console.log(components)
       setIsModalChildOpen(true);
     } catch (error) {
-      console.log(error);
+      console.error(error);
     }
   };
 
@@ -321,8 +321,23 @@ const ComponentDetail = () => {
     }
   };
 
-  const handleRemoveSubComponent = () => {
-    /* Proximo remove sub component */
+  const handleRemoveSubComponent = async (childId) => {
+    try {
+      setLoadingButtons(true);
+      await axios.post(`${BACKEND_URL}/components/${id}/disassociate/${childId}`, {}, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      setComponent((prev) => ({
+      ...prev,
+      components: prev.components.filter((c) => c._id !== childId),
+    }));
+    } catch(error) {
+      console.error(`Error: ${error}`)
+    } finally {
+      setLoadingButtons(false);
+    }
   };
 
   if (loading)
@@ -333,7 +348,15 @@ const ComponentDetail = () => {
   if (!component)
     return (
       <Box sx={{ p: 4, justifyContent: "center", alignItems: "center" }}>
-        <Typography color="error">No se encontró el componente</Typography>
+        <Button
+          variant= "outlined"
+          color= "primary"
+          onClick={() => navigate(-1)}
+          sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%" }}
+        >
+            ← Volver
+          </Button>        
+          <Alert severity="warning" color="error">No se encontró el componente</Alert>
       </Box>
     );
 
@@ -600,7 +623,7 @@ const ComponentDetail = () => {
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        handleRemoveSubComponent(idx);
+                        handleRemoveSubComponent(child._id);
                       }}
                       size="large"
                       sx={{

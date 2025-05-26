@@ -19,14 +19,14 @@ function SideBar() {
         }
         alert("Ha cerrado sesión correctamente");
         localStorage.clear();
-        navigate('/login');
+        window.location.replace('/login');
     };
 
     return (
         <Box sx={{
             display: 'flex',
             flexDirection: 'column',
-            width: '25%',
+            width: '25%vw',
             minWidth: "20em",
             backgroundColor: 'var(--color-bg-secondary)',
             p: 2,
@@ -37,8 +37,8 @@ function SideBar() {
             <Box sx={{
                 display: "flex",
                 width: "100%",
-                maxHeight: "10%",
                 height: "7.5%",
+                minHeight: "5em",
                 py: 5,
                 gap: 3,
                 justifyContent: "space-evenly"

@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert } from "@mui/material";
+import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -24,7 +24,7 @@ const ComponentDetail = () => {
   const [newDescripcion, setNewDescripcion] = useState("");
 
   /* Sub Componente */
-  const [allComponentes, setAllComponents] = useState([]);
+  const [allComponents, setAllComponents] = useState([]);
   const [isModalChildOpen, setIsModalChildOpen] = useState(false);
 
   const [isModalNewChildOpen, setIsModalNewChildOpen] = useState(false);
@@ -38,6 +38,10 @@ const ComponentDetail = () => {
   const [newSubName, setNewSubName] = useState("");
   const [newSubDescription, setNewSubDescription] = useState("");
   const [newSubCharacteristics, setNewSubCharacteristics] = useState([]);
+
+  /* Búsqueda de subcomponentes */
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchedComponents, setSearchedComponents] = useState([]);
 
   const token = localStorage.getItem("token").trim();
   const rol = localStorage.getItem("role");
@@ -167,14 +171,13 @@ const ComponentDetail = () => {
       });
       const components = response.data.filter((c) => c.parent === null && c.name !== component.name);
       setAllComponents(components);
-      console.log(components)
+      setSearchedComponents(components);
       setIsModalChildOpen(true);
     } catch (error) {
       console.error(error);
     }
   };
 
-  
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setIsModalNewChildOpen(false);
@@ -290,6 +293,8 @@ const ComponentDetail = () => {
     setChanges(false);
   };
 
+  /* Lógica para agregar o quitar subcomponente */
+
   const handleAddChildComponent = async () => {
     const validDescriptions = caracteristicas.filter(
       (c) => c.name.trim() && c.description.trim()
@@ -338,6 +343,17 @@ const ComponentDetail = () => {
     } finally {
       setLoadingButtons(false);
     }
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+  
+    const searched = allComponents.filter((c) =>
+      c.name.toLowerCase().includes(value.toLowerCase()) ||
+      c.type.toLowerCase().includes(value.toLowerCase()) 
+    );
+  
+    setSearchedComponents(searched);
   };
 
   if (loading)
@@ -759,41 +775,91 @@ const ComponentDetail = () => {
               Crear subcomponente
             </Button>
           </Box>
-
-          <Box sx={{ flex: 1.5, pl: 3, overflowY: "auto", maxHeight: "55vh" }}>
-            <Typography variant="subtitle1" sx={{ mb: 2, color: "#444" }}>
-              Componentes existentes:
-            </Typography>
-            {allComponentes.length === 0 ? (
-              <Typography color="text.secondary">No hay componentes disponibles.</Typography>
-            ) : (
-              allComponentes.map((c) => (
-                <Card
-                  key={c._id}
-                  variant="outlined"
-                  sx={{
-                    mb: 2,
-                    p: 1.5,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Box>
-                    <Typography variant="body1"><strong>{c.name}</strong></Typography>
-                    <Typography variant="caption" color="text.secondary">{c.type}</Typography>
-                  </Box>
-                  <Button
-                    variant="contained"
-                    size="small"
-                    sx={{ ml: 2, bgcolor: "var(--color-bg-secondary)" }}
-                    onClick={() => handleAddExistingComponentAsChild(c._id)}
+          <Box sx={{ display: "flex", flexDirection: "column", flex: 2, pl: 3, height: "100%", width: "100%" }}>
+            <Input
+              startAdornment={
+                <InputAdornment position="start">
+                  <Avatar
+                    variant="square"
+                    src="/search-icon.png"
+                    sx={{
+                      p: 1,
+                      mr: 1,
+                      height: '20px',
+                      width: '20px',
+                      backgroundColor: 'transparent',
+                      filter: 'invert(20%)',
+                    }}
+                    className="search-icon"
+                  />
+                </InputAdornment>
+              }
+              value={searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              placeholder="Buscar"
+              sx={{
+                borderRadius: '8px',
+                backgroundColor: 'var(--bg-inputs)',
+                padding: '0.5rem 1rem',
+                margin: '0 auto',
+                width: '80%',
+                color: 'var(--color-text-base)',
+                boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+                '& input': {
+                  color: 'var(--color-text-base)',
+                },
+                '&:focus-within': {
+                  backgroundColor: 'var(--color-celeste-focus)',
+                  boxShadow: '0 0 5px var(--color-celeste-focus)',
+                },
+              }}
+              onFocus={() => {
+                const icon = document.querySelector('.search-icon');
+                icon?.classList.add('focus-icon');
+              }}
+              onBlur={() => {
+                const icon = document.querySelector('.search-icon');
+                icon?.classList.remove('focus-icon');
+              }}
+              size="small"
+            />
+            <Box sx={{ flex: 1.5, mx: 3, overflowY: "auto", maxHeight: "55vh", width: "100%", mt: 2 }}>
+              <Typography variant="subtitle1" sx={{ mb: 2, color: "#444" }}>
+                Componentes existentes:
+              </Typography>
+              {searchedComponents.length === 0 ? (
+                <Typography color="text.secondary">No hay componentes disponibles.</Typography>
+              ) : (
+                searchedComponents.map((c) => (
+                  <Card
+                    key={c._id}
+                    variant="outlined"
+                    sx={{
+                      m: "1em auto",
+                      p: 1.5,
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                      width: "90%",
+                    }}
                   >
-                    +
-                  </Button>
-                </Card>
-              ))
-            )}
+                    <Box>
+                      <Typography variant="body1"><strong>{c.name}</strong></Typography>
+                      <Typography variant="caption" color="text.secondary">{c.type}</Typography>
+                    </Box>
+                    <Button
+                      variant="contained"
+                      size="small"
+                      sx={{ ml: 2, bgcolor: "var(--color-bg-secondary)" }}
+                      onClick={() => handleAddExistingComponentAsChild(c._id)}
+                    >
+                      +
+                    </Button>
+                  </Card>
+                ))
+              )}
+            </Box>
           </Box>
         </Box>
       </Modal>

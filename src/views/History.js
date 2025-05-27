@@ -34,6 +34,7 @@ const History = () => {
                     if (a.date > b.date) return -1;
                     return 0;
                 });
+                console.log("Historial de cambios:", sortedHistory);
                 setHistoryRecords(sortedHistory);
             } catch (error) {
                 console.log("Error:", error);
@@ -106,7 +107,7 @@ const History = () => {
                             flexDirection: "column",
                             gap: 1,
                             fontSize: "1.2rem",
-                            maxHeight: "70vh",
+                            maxHeight: "80vh",
                             overflowY: "auto",
                             mt: 2,
                         }}>
@@ -119,7 +120,7 @@ const History = () => {
                                         p: 3,
                                         cursor: "pointer",
                                         boxShadow: 1,
-                                        overflowY: "auto",
+                                        overflowY: "hidden",
                                         "&:hover": {
                                             boxShadow: 4,
                                             backgroundColor: "var(--color-bg-primary-hover)",
@@ -127,7 +128,7 @@ const History = () => {
                                     }}
                                     onClick={() => handleOpenDetail(record)}
                                 >
-                                    <strong>{record.user_id?.username || "Usuario desconocido"}</strong> - {record.action}: <em>{record.component_id?.name || "Componente desconocido"}</em>
+                                    <strong>{record.user_id?.username || "Usuario desconocido"}</strong> - {record.action}: <em>{record.component_name || "Componente desconocido"}</em>
                                 </Card>
                             ))) : (
                                 <Typography color="text.secondary" fontSize="0.95rem"> No existen registros.</Typography>
@@ -206,14 +207,14 @@ const History = () => {
                                     }}
                                 >
                                     <Typography variant="body1" fontSize={"1.1rem"}>
-                                        <strong>Nombre:</strong> {selectedRecord.component_id?.name || "Desconocido"}
+                                        <strong>Nombre:</strong> {selectedRecord.component_name || "Desconocido"}
                                     </Typography>
                                     <Typography variant="body1" fontSize={"1.1rem"}>
-                                        <strong>Tipo:</strong> {selectedRecord.component_id?.type}
+                                        <strong>Tipo:</strong> {selectedRecord.component_type}
                                     </Typography>
-                                    <Typography variant="body1" fontSize={"1.1rem"}>
+                                    {selectedRecord.component_id?.status && (<Typography variant="body1" fontSize={"1.1rem"}>
                                         <strong>Estado:</strong> {selectedRecord.component_id?.status || "Desconocido"}
-                                    </Typography>
+                                    </Typography>)}
                                     <Alert variant="filled" severity="info" sx={{ color: "var(--color-title-secondary)", fontSize: "0.7rem"}} >
                                         Pulse el cuadro para ver más detalles
                                     </Alert>

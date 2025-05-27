@@ -67,7 +67,6 @@ const ManageComponents = () => {
             filterable: false,
             width: 50,
             renderCell: (params) => (
-                !params.row.isSub ? (
                 <IconButton
                     onClick={(event) => handleMenuOpen(event, params.row)}
                     aria-label="more"
@@ -80,7 +79,6 @@ const ManageComponents = () => {
                 >
                     <GridMoreVertIcon />
                 </IconButton>
-                ) : null
             )
         },
     ];
@@ -148,11 +146,18 @@ const ManageComponents = () => {
     };
 
     const changeStatus = async () => {
+        let idComponent = selectedRow._id || null;
         const payload = {
           status: selectedRow.status === "activo" ? "de baja" : "activo",
         };
+
+        if (selectedRow.isSub) {
+            const newId = selectedRow._id.split('-sub-')[0];
+            idComponent = newId;
+        }
+
         try {
-            await axios.put(`${BACKEND_URL}/components/${selectedRow._id}`, payload, {
+            await axios.put(`${BACKEND_URL}/components/${idComponent}`, payload, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                 },
@@ -250,6 +255,7 @@ const ManageComponents = () => {
                 display: 'flex',
                 flexDirection: 'column',
                 width: '100%',
+                height: '90vh',
                 textAlign: 'center',
                 my: 5,
             }}>
@@ -314,6 +320,7 @@ const ManageComponents = () => {
                         flexDirection: 'column',
                         alignItems: "center",
                         my: 5,
+                        height: "100%",
                         overflowY: "auto",
                     }}
                 >
@@ -324,11 +331,13 @@ const ManageComponents = () => {
                         borderRadius: '16px',
                         backgroundColor: 'transparent',
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        height: '100%',
                     }}>
                         <DataGrid
                             rows={components}
                             columns={columns}
                             getRowId={(row) => row._id}
+                            isRowSelectable={() => {false}}
                             getRowClassName={(params) => {
                                 if (params.row.isSub) return 'fila-subcomponente';
                                 if (params.row.status === 'activo') return 'fila-activa';
@@ -340,6 +349,7 @@ const ManageComponents = () => {
                             }}
                             pageSizeOptions={[5, 10, 15]}
                             sx={{
+                                height: '100%',
                                 border: '1px solid #e0e0e0',
                                 borderRadius: '25px',
                                 fontSize: '1rem',
@@ -400,7 +410,12 @@ const ManageComponents = () => {
                 >
                     <MenuItem onClick={() => {
                         handleMenuClose();
-                        navigate(`/components/${selectedRow._id}`)
+                        if (!selectedRow.isSub){
+                            navigate(`/components/${selectedRow._id}`)
+                        } else {
+                            const newId = selectedRow._id.split('-sub-')[0];
+                            navigate(`/components/${newId}`);
+                        }
                     }}>
                         Editar
                     </MenuItem>
@@ -411,7 +426,12 @@ const ManageComponents = () => {
                         {selectedRow?.status === "activo" ? "Retirar" : "Activar"}  
                     </MenuItem>
                     <MenuItem onClick={() => {
-                        handleDeleteComponent(selectedRow._id);
+                        if (!selectedRow.isSub){
+                            handleDeleteComponent(selectedRow._id);
+                        } else {
+                            const newId = selectedRow._id.split('-sub-')[0];
+                            handleDeleteComponent(newId);
+                        }
                         handleMenuClose();
                     }}>
                         Eliminar

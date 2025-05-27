@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, Card, CardActions, CardContent, Chip, Input, InputAdornment, ListItem, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, CardContent, Chip, Input, InputAdornment, ListItem, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";

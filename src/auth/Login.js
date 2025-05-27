@@ -6,6 +6,7 @@ import { auth, provider } from '../firebase/config';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
+
 function Login() {
   const [login, setLogin] = useState({ email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
@@ -90,7 +91,7 @@ function Login() {
       } catch(error) {
         console.log("Email no encontrado");
       }
-      alert(`¡Bienvenido/a ${_user.displayName || _user.email}!`);
+      alert(`¡Bienvenido/a ${_user.displayName.split(' ')[0] || _user.email}!`);
       window.location.replace("/home");
     }).catch((error) => {
       const errorCode = error.code;
@@ -140,6 +141,7 @@ function Login() {
         variant="h1"
         sx={{
           fontSize: '2.5rem',
+          fontFamily: 'var(--font-source)',
           mb: 6,
           color: 'var(--color-title-secondary)',
           textAlign: 'center',
@@ -162,6 +164,7 @@ function Login() {
           variant="h2"
           sx={{
             fontSize: '1.8rem',
+            fontFamily: 'var(--font-source)',
             mb: 5,
             gap: 5,
             textAlign: 'center',
@@ -178,7 +181,19 @@ function Login() {
           disabled={isLoading}
           color="secondary"
           fullWidth
-          sx={{ flex: 1, flexDirection: 'row', justifyContent: 'center', color: 'var(--login-button-hover)',border: '1px solid var(--login-button-hover)',gap: 1, borderRadius: 50, '&:hover': { backgroundColor: 'var(--login-button-hover)', color: 'white' } }}
+          sx={{ 
+            flex: 1, 
+            flexDirection: 'row', 
+            justifyContent: 'center', 
+            color: 'var(--login-button-hover)',
+            border: '1px solid var(--login-button-hover)',
+            gap: 1, 
+            borderRadius: 50,
+            fontFamily: 'var(--font-source)',
+            '&:hover': { 
+              backgroundColor: 'var(--login-button-hover)', color: 'white' 
+            } 
+          }}
         >
           <FontAwesomeIcon icon={faGoogle} style={{ color: "var(--color-title-primary)"}} />
             Iniciar sesión con Google
@@ -186,7 +201,7 @@ function Login() {
 
         <Divider sx={{ borderColor: 'black', my: 5 }} />
 
-        <Typography sx={{ ml: 1, mb: 2}}>O iniciar sesión con credenciales:</Typography>
+        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>O iniciar sesión con credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
             type="email"
@@ -221,6 +236,7 @@ function Login() {
             py: 1.5,
             borderRadius: 50,
             backgroundColor: 'var(--color-bg-secondary)',
+            fontFamily: 'var(--font-source)', 
             '&:hover': {
               backgroundColor: 'var(--login-button-hover)',
             },

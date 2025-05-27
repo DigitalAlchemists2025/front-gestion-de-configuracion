@@ -134,7 +134,7 @@ const AddComponent = () => {
           maxHeight: '90vh',
           overflowY: 'hidden', 
         }}>
-          <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center' }}>
+          <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center', fontFamily: 'var(--font-montserrat)' }}>
             Agregar Componente
           </Typography>
   
@@ -145,7 +145,7 @@ const AddComponent = () => {
               fullWidth
               value={nombre}
               onChange={(e) => setNombre(e.target.value)}
-              sx={{ bgcolor: 'var(--bg-inputs)' }}
+              sx={{ bgcolor: 'var(--bg-inputs)'}}
             />
   
             <TextField
@@ -198,7 +198,7 @@ const AddComponent = () => {
                       label={`${c.name}: ${c.description}`}
                       onDelete={() => handleDeleteCaracteristica(index)}
                       size="medium"
-                      sx={{ m: 1, maxWidth: '100%' }}
+                      sx={{ m: 1, maxWidth: '100%', fontFamily: 'var(--font-source)' }}
                     />
                   ))}
                 </Box>
@@ -211,6 +211,7 @@ const AddComponent = () => {
                     backgroundColor: 'var(--color-bg-gradient)',
                     color: 'var(--color-title-primary)',
                     height: 'fit-content',
+                    fontFamily: 'var(--font-source)',
                     '&:hover': {
                       borderColor: 'var(--color-bg-secondary-hover)',
                       backgroundColor: 'var(--color-bg-secondary-hover)',
@@ -230,6 +231,7 @@ const AddComponent = () => {
               borderRadius: 50,
               backgroundColor: 'var(--color-bg-gradient)',
               color: 'var(--color-title-primary)',
+              fontFamily: 'var(--font-source)',
               '&:hover': {
                 backgroundColor: 'var(--color-bg-secondary-hover)',
               },
@@ -260,7 +262,7 @@ const AddComponent = () => {
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" sx={{ mb: 2 }}>
+          <Typography variant="h6" component="h2" sx={{ mb: 2, fontFamily: "var(--font-montserrat)" }}>
             Agregar Característica
           </Typography>
   
@@ -283,13 +285,13 @@ const AddComponent = () => {
           />
   
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={handleCloseModal} color="secondary" sx={{ color: "var(--color-title-primary)"}}>
+            <Button onClick={handleCloseModal} color="secondary" sx={{ color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
               Cancelar
             </Button>
             <Button
               onClick={handleAddCaracteristica}
               variant="contained"
-              sx={{ backgroundColor: "var(--color-bg-secondary)" }}
+              sx={{ backgroundColor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
               disabled={!newNombre.trim() || !newDescripcion.trim()}
             >
               Agregar

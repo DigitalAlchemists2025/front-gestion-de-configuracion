@@ -1,7 +1,7 @@
 import { Box, Paper, Typography, IconButton, Menu, MenuItem, Input, InputAdornment, Avatar } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
 import SideBar from "../components/SideBar";
@@ -46,6 +46,9 @@ const ManageComponents = () => {
             width: 20,
             sortable: false,
             filterable: false, 
+            disableColumnMenu: true,
+            disableReorder: true,
+            stopPropagation: true,
             renderCell: (params) => {
                 const isExpanded = expandedRows[params.row._id];
                 return (
@@ -66,15 +69,20 @@ const ManageComponents = () => {
             sortable: false,
             filterable: false,
             width: 50,
+            disableColumnMenu: true,
+            disableReorder: true,
             renderCell: (params) => (
                 <IconButton
-                    onClick={(event) => handleMenuOpen(event, params.row)}
+                    onClick={(event) => {
+                        handleMenuOpen(event, params.row);
+                        event.stopPropagation();
+                    }}
                     aria-label="more"
                     aria-controls="long-menu"
                     aria-haspopup="true"
                     sx={{
-                    color: 'var(--color-text-base)',
-                    '&:hover': { backgroundColor: 'transparent' }
+                        color: 'var(--color-text-base)',
+                        '&:hover': { backgroundColor: 'transparent' }
                     }}
                 >
                     <GridMoreVertIcon />
@@ -237,14 +245,12 @@ const ManageComponents = () => {
         }
     };
 
-    if (loading) return <LoadingCircle />;
-
     return (
         <Box sx={{
             display: 'flex',
             height: "100vh",
             width: "100%",
-            background: "var(--color-bg-gradient)",
+            background: "var(--color-blur-bg)",
             color: "var(--color-text-base)",
             position: "fixed",
             top: 0,
@@ -266,7 +272,7 @@ const ManageComponents = () => {
                     gap: 5,
                     mx: "1.5rem",
                 }}>
-                    <Typography variant="h4" sx={{ fontSize: "1.5rem", p: 1, color: "var(--color-bg-secondary)"}}>Gestión de componentes</Typography>
+                    <Typography variant="h5" sx={{ p: 1, color: "var(--color-bg-secondary)", fontFamily: "var(--font-montserrat)" }}>Gestión de componentes</Typography>
                     <Input
                         startAdornment={
                         <InputAdornment position="start">
@@ -313,6 +319,9 @@ const ManageComponents = () => {
                         size="small"
                     />
                 </Box>
+
+                {loading && <LoadingCircle />}
+
                 <Box
                     sx={{
                         flexGrow: 1,
@@ -347,6 +356,14 @@ const ManageComponents = () => {
                             initialState={{
                                 pagination: { paginationModel: { page: 0, pageSize: 10 } },
                             }}
+                            onRowClick={(params) => {
+                                if (!params.isSub){
+                                    navigate(`/components/${params.row._id}`)
+                                } else {
+                                    const newId = params.row._id.split('-sub-')[0];
+                                    navigate(`/components/${newId}`);
+                                }
+                            }}
                             pageSizeOptions={[5, 10, 15]}
                             sx={{
                                 height: '100%',
@@ -355,6 +372,7 @@ const ManageComponents = () => {
                                 fontSize: '1rem',
                                 background: 'transparent',
                                 color: 'var(--color-text-base)',
+                                fontFamily: "var(--font-source)",
                                 '& .fila-activa': {
                                     color: 'var(--color-text-active)',
                                 },
@@ -403,37 +421,44 @@ const ManageComponents = () => {
                         />
                     </Paper>
                 </Box>
+
                 <Menu
                     anchorEl={anchorEl}
                     open={Boolean(anchorEl)}
                     onClose={handleMenuClose}
                 >
                     <MenuItem onClick={() => {
-                        handleMenuClose();
-                        if (!selectedRow.isSub){
-                            navigate(`/components/${selectedRow._id}`)
-                        } else {
-                            const newId = selectedRow._id.split('-sub-')[0];
-                            navigate(`/components/${newId}`);
-                        }
-                    }}>
-                        Editar
+                            handleMenuClose();
+                            if (!selectedRow.isSub){
+                                navigate(`/components/${selectedRow._id}`)
+                            } else {
+                                const newId = selectedRow._id.split('-sub-')[0];
+                                navigate(`/components/${newId}`);
+                            }
+                        }}
+                        sx={{ fontFamily: 'var(--font-source)', color: 'var(--color-text-primary)' }}
+                    >
+                        Ver / Editar
                     </MenuItem>
                     <MenuItem onClick={() => {
-                        changeStatus();
-                        handleMenuClose();
-                    }}>
+                            changeStatus();
+                            handleMenuClose();
+                        }}
+                        sx={{ fontFamily: 'var(--font-source)', color: 'var(--color-text-primary)' }}
+                    >
                         {selectedRow?.status === "activo" ? "Retirar" : "Activar"}  
                     </MenuItem>
                     <MenuItem onClick={() => {
-                        if (!selectedRow.isSub){
-                            handleDeleteComponent(selectedRow._id);
-                        } else {
-                            const newId = selectedRow._id.split('-sub-')[0];
-                            handleDeleteComponent(newId);
-                        }
-                        handleMenuClose();
-                    }}>
+                            if (!selectedRow.isSub){
+                                handleDeleteComponent(selectedRow._id);
+                            } else {
+                                const newId = selectedRow._id.split('-sub-')[0];
+                                handleDeleteComponent(newId);
+                            }
+                            handleMenuClose();
+                        }}
+                        sx={{ fontFamily: 'var(--font-source)', color: 'var(--color-text-primary)' }}
+                    >
                         Eliminar
                     </MenuItem>
                 </Menu>

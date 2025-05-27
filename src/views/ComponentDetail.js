@@ -45,10 +45,14 @@ const ComponentDetail = () => {
 
   const token = localStorage.getItem("token").trim();
   const rol = localStorage.getItem("role");
+
   if (!token) {
     navigate("/login");
   }
 
+  if (!id || id === undefined) {
+    navigate(-1);
+  }
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
 
   useEffect(() => {
@@ -368,11 +372,11 @@ const ComponentDetail = () => {
           variant= "outlined"
           color= "primary"
           onClick={() => navigate(-1)}
-          sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%" }}
+          sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%", fontFamily: "var(--font-source)" }}
         >
             ← Volver
           </Button>        
-          <Alert severity="warning" color="error">No se encontró el componente</Alert>
+          <Alert severity="warning" color="error" sx={{ fontFamily: "var(--font-source)" }}>No se encontró el componente</Alert>
       </Box>
     );
 
@@ -415,7 +419,7 @@ const ComponentDetail = () => {
             variant= "outlined"
             color= "primary"
             onClick={() => navigate(-1)}
-            sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%" }}
+            sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%", fontFamily: "var(--font-source)" }}
           >
             ← Volver
           </Button>
@@ -427,19 +431,20 @@ const ComponentDetail = () => {
             style={{
               fontSize: '2rem',
               fontWeight: 500,
-              color: 'var(--color-dg-header-bg)',
+              color: 'var(--color-title-primary)',
               width: '100%',
               resize: 'none',
               border: 'none',
               outline: 'none',
               background: 'transparent',
               overflow: 'hidden',
-              lineHeight: 1.2
+              lineHeight: 1.2,
+              fontFamily: 'var(--font-montserrat)',
             }}
           />
 
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography sx={{ mr: 1 }}><strong>Tipo:</strong></Typography>
+            <Typography sx={{ mr: 1, fontSize: "1rem", color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}><strong>Tipo:</strong></Typography>
             <TextField
               variant="standard"
               value={mainComponentType}
@@ -449,7 +454,8 @@ const ComponentDetail = () => {
                 disableUnderline: true,
                 style: {
                   fontSize: '1rem',
-                  color: 'inherit'
+                  color: 'var(--color-title-primary)',
+                  fontFamily: 'var(--font-source)',
                 }
               }}
               sx={{
@@ -467,6 +473,7 @@ const ComponentDetail = () => {
             <Typography
               sx={{
                 fontSize: "1rem",
+                fontFamily: "var(--font-source)",
                 width: "10rem",
                 color:
                   component.status === "activo"
@@ -485,6 +492,7 @@ const ComponentDetail = () => {
                 size="medium"
                 sx={{
                   fontSize: "0.7rem", 
+                  fontFamily: "var(--font-source)",
                   mr: 10,
                   color: component.status === "activo"
                     ? "var(--color-text-baja)"
@@ -499,7 +507,7 @@ const ComponentDetail = () => {
             )}
           </Box>
     
-          <Typography variant="body2" sx={{ fontSize: "1rem", mb: 3, }}>
+          <Typography variant="h5" sx={{ fontFamily: "var(--font-source)", mb: 3, }}>
             <strong>Características:</strong>
           </Typography>
           {component.descriptions?.length > 0 && (
@@ -521,6 +529,7 @@ const ComponentDetail = () => {
                     sx={{
                       width: '30%',
                       wordWrap: "break-word",
+                      fontFamily: 'var(--font-source)',
                       '& .MuiInputBase-input': { fontSize: '1rem' }
                     }}
                   >
@@ -536,7 +545,8 @@ const ComponentDetail = () => {
                     InputProps={{
                       style: {
                         padding: '0.25rem 1rem',
-                        fontSize: '1rem'
+                        fontSize: '1rem',
+                        fontFamily: "var(--font-source)",
                       }
                     }}
                     sx={{
@@ -567,7 +577,7 @@ const ComponentDetail = () => {
               ))}
             </Box>
           ) || (
-            <Typography variant="overline" mt={-5}>
+            <Typography variant="overline" fontFamily={"var(--font-source)"} mt={-5}>
               No hay características disponibles para este componente.
             </Typography>
           )}
@@ -576,7 +586,7 @@ const ComponentDetail = () => {
               <Button
                 variant="outlined"
                 color="info"
-                sx={{ color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)" }}
+                sx={{ color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", fontFamily: "var(--font-source)", width: "50%" }}
                 onClick={handleOpenModal}
                 size="small"
               >
@@ -586,13 +596,13 @@ const ComponentDetail = () => {
           )}
     
           {component.createdAt && (
-            <Typography sx={{ fontSize: "1rem" }}>
+            <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)" }}>
               <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
             </Typography>
           )}
     
           {component.updatedAt && (
-            <Typography sx={{ fontSize: "1rem" }}>
+            <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)"  }}>
               <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
             </Typography>
           )}
@@ -601,7 +611,7 @@ const ComponentDetail = () => {
             <Box sx={{ mt: 3, display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
               <Button
                 variant="outlined"
-                sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)"}}
+                sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
                 onClick={resetChanges}
                 disabled={!changes || loadingButtons}
               >
@@ -610,7 +620,7 @@ const ComponentDetail = () => {
               <Button
                 variant="contained"
                 onClick={handleSaveChanges}
-                sx={{ bgcolor: "var(--color-bg-secondary)"}}
+                sx={{ bgcolor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
                 disabled={!changes || loadingButtons}
               >
                 Guardar Cambios
@@ -620,7 +630,7 @@ const ComponentDetail = () => {
         </Box>
 
         <Box sx={{ mt: 2, ml: 5, justifyItems: "flex-start", width: "50%" }}>
-          <Typography variant="h5" sx={{ mb: 1, mt: 5, color: "var(--color-title-primary)" }}>
+          <Typography variant="h5" sx={{ mb: 1, mt: 10, color: "var(--color-title-primary)", fontFamily: "var(--font-source)"  }}>
             <strong>Sub Componentes:</strong>
           </Typography>
           {component.components?.length > 0 ? (
@@ -632,6 +642,7 @@ const ComponentDetail = () => {
                     wordBreak: "break-word",   
                     whiteSpace: "normal",      
                     overflowWrap: "break-word",
+                    fontFamily: "var(--font-source)" 
                   }}>
                     {child.name}
                   </Typography>
@@ -655,7 +666,7 @@ const ComponentDetail = () => {
               ))}
             </Box>
           ) : (
-            <Typography variant="overline" sx={{ mt: 2 }}>
+            <Typography variant="overline" sx={{ mt: 2, fontFamily: "var(--font-source)"  }}>
               No hay sub componentes para este componente.
             </Typography>
           )}  
@@ -663,7 +674,7 @@ const ComponentDetail = () => {
             <Box sx={{ display: "flex", justifyContent: "end", width: "100%" }}>
               <Button 
                 size="large" 
-                sx={{ mt: 2, width: "50%", color: "var(--color-title-primary)" }} 
+                sx={{ mt: 2, width: "50%", color: "var(--color-title-primary)", fontFamily: "var(--font-source)"  }} 
                 onClick={handleOpenModalChild} 
               >
                 Agregar Sub Componente
@@ -683,12 +694,13 @@ const ComponentDetail = () => {
             transform: "translate(-50%, -50%)",
             width: 400,
             bgcolor: "white",
+            backdropFilter: "blur(4px)",
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)" }}>
+          <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
             Agregar Característica
           </Typography>
   
@@ -711,13 +723,13 @@ const ComponentDetail = () => {
           />
   
           <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-            <Button onClick={handleCloseModal} color="primary" sx={{ color: "var(--color-title-primary)"}}>
+            <Button onClick={handleCloseModal} color="primary" sx={{ color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
               Cancelar
             </Button>
             <Button
               onClick={handleAddDescripcion}
               variant="contained"
-              sx={{ backgroundColor: "var(--color-bg-secondary)"}}
+              sx={{ backgroundColor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
               disabled={!newNombre.trim() || !newDescripcion.trim() || loadingButtons}
             >
               Agregar
@@ -736,6 +748,7 @@ const ComponentDetail = () => {
           width: "70vw",
           height: "60vh",
           bgcolor: "white",
+          backdropFilter: "blur(4px)",
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
@@ -750,11 +763,11 @@ const ComponentDetail = () => {
             borderRight: "1px solid #e0e0e0", 
             gridTemplateRows: "auto 1fr auto"
           }}>
-            <Typography variant="h6" sx={{ mb: 2, fontSize: '2rem', color: "var(--color-title-primary)" }}>
+            <Typography variant="h6" sx={{ mb: 2, fontSize: '2rem', color: "var(--color-title-primary)", fontFamily: "var(--font-montserrat)"  }}>
               {component.name}
             </Typography>
             <Box>
-              <Typography variant="subtitle1" sx={{ mb: 1, color: "var(--color-title-primary)" }}>
+              <Typography variant="subtitle1" sx={{ mb: 1, color: "var(--color-title-primary)", fontFamily: "var(--font-source)", mb: 5  }}>
                 Subcomponentes actuales:
               </Typography>
               <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
@@ -763,15 +776,15 @@ const ComponentDetail = () => {
                       <Chip
                         key={sub._id}
                         label={sub.name}
-                        sx={{ bgcolor: "var(--color-bg-secondary)", color: "var(--color-title-secondary)" }}
+                        sx={{ bgcolor: "var(--color-bg-secondary)", color: "var(--color-title-secondary)", fontFamily: "var(--font-source)"  }}
                         size="small"
                       />
                     ))
-                  : <Typography color="text.secondary" fontSize="0.95rem">Sin subcomponentes.</Typography>
+                  : <Typography color="text.secondary" fontFamily={"var(--font-source)"} fontSize="0.95rem">Sin subcomponentes.</Typography>
                 }
               </Box>
             </Box>
-            <Button onClick={handleOpenModalNewChild} sx={{ color: "var(--color-title-primary)", bottom: 0}}>
+            <Button onClick={handleOpenModalNewChild} sx={{ color: "var(--color-title-primary)", bottom: 0, fontFamily: "var(--font-source)" }}>
               Crear subcomponente
             </Button>
           </Box>
@@ -824,7 +837,7 @@ const ComponentDetail = () => {
               size="small"
             />
             <Box sx={{ flex: 1.5, mx: 3, overflowY: "auto", maxHeight: "55vh", width: "100%", mt: 2 }}>
-              <Typography variant="subtitle1" sx={{ mb: 2, color: "#444" }}>
+              <Typography variant="subtitle1" sx={{ mb: 2, color: "#444", fontFamily: "var(--font-source)"  }}>
                 Componentes existentes:
               </Typography>
               {searchedComponents.length === 0 ? (
@@ -852,12 +865,13 @@ const ComponentDetail = () => {
                     }}
                   >
                     <Box>
-                      <Typography variant="body1"><strong>{c.name}</strong></Typography>
-                      <Typography variant="caption" color="text.secondary">{c.type}</Typography>
+                      <Typography variant="body1" fontFamily={"var(--font-source)"}><strong>{c.name}</strong></Typography>
+                      <Typography variant="caption" color="text.secondary" fontFamily={"var(--font-source)"}>{c.type}</Typography>
                     </Box>
                     <Button
                       variant="contained"
                       size="small"
+                      fontFamily={"var(--font-source)"}
                       sx={{ ml: 2, bgcolor: "var(--color-bg-secondary)" }}
                       onClick={() => handleAddExistingComponentAsChild(c._id)}
                     >
@@ -885,7 +899,9 @@ const ComponentDetail = () => {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: '100%',
-          margin: '0 auto'
+          margin: '0 auto',
+          bgcolor: "transparent",
+          backdropFilter: "blur(4px)",
         }}>
           <FormControl
             component={Paper}
@@ -900,7 +916,7 @@ const ComponentDetail = () => {
               maxWidth: '600px',
             }}
           >
-            <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center' }}>
+            <Typography variant="h4" sx={{ color: 'var(--color-title-secondary)', mb: 3, textAlign: 'center', fontFamily: "var(--font-montserrat)" }}>
               Agregar Componente
             </Typography>
     
@@ -933,8 +949,8 @@ const ComponentDetail = () => {
                 onChange={(e) => setEstado(e.target.value)}
                 sx={{ bgcolor: 'var(--bg-inputs)', textAlign: 'left' }}
               >
-                <MenuItem value="activo">Activo</MenuItem>
-                <MenuItem value="de baja">De baja</MenuItem>
+                <MenuItem value="activo" sx={{ fontFamily: "var(--font-source)" }}>Activo</MenuItem>
+                <MenuItem value="de baja" sx={{ fontFamily: "var(--font-source)" }}>De baja</MenuItem>
               </TextField>
     
               <Box sx={{ display: 'flex', flexDirection: 'row', gap: 2, alignItems: 'center' }}>
@@ -947,7 +963,7 @@ const ComponentDetail = () => {
                     width: '100%',
                   }}
                 >
-                  <Typography variant="subtitle2" sx={{ mb: 1, color: 'rgb(96, 96, 96)' }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, color: 'rgb(96, 96, 96)', fontFamily: "var(--font-source)" }}>
                     Características
                   </Typography>
                   <Box
@@ -996,7 +1012,8 @@ const ComponentDetail = () => {
                   sx={{ 
                     py: 1.5,
                     borderRadius: 50,
-                    color: '#fff' 
+                    color: '#fff',
+                    fontFamily: "var(--font-source)"
                   }}
                 >
                   Cancelar
@@ -1007,6 +1024,7 @@ const ComponentDetail = () => {
                     py: 1.5,
                     borderRadius: 50,
                     backgroundColor: 'var(--color-bg-gradient)',
+                    fontFamily: "var(--font-source)",
                     color: 'var(--color-title-primary)',
                     '&:hover': {
                       backgroundColor: 'var(--color-bg-secondary-hover)',
@@ -1036,12 +1054,13 @@ const ComponentDetail = () => {
             transform: 'translate(-50%, -50%)',
             width: 400,
             bgcolor: 'white',
+            backdropFilter: "blur(4px)",
             boxShadow: 24,
             p: 4,
             borderRadius: 2,
           }}
         >
-          <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)" }}>
+          <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)", fontFamily: "var(--font-montserrat)" }}>
             Agregar Característica
           </Typography>
   
@@ -1064,13 +1083,13 @@ const ComponentDetail = () => {
           />
   
           <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={handleCloseCharModal} color="secondary" sx={{ color: "var(--color-title-primary)"}}>
+            <Button onClick={handleCloseCharModal} color="secondary" sx={{ color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
               Cancelar
             </Button>
             <Button
               onClick={handleAddNewSubCharacteristics}
               variant="contained"
-              sx={{ backgroundColor: "var(--color-bg-secondary)"}}
+              sx={{ backgroundColor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
               disabled={!newSubName.trim() || !newSubDescription.trim() || loadingButtons}
             >
               Agregar

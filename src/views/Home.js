@@ -51,7 +51,7 @@ function Home() {
     };
     
     fetchData();
-  }, [token]);
+  }, [token, BACKEND_URL]);
 
   const handleSearch = (value) => {
     setSearchTerm(value);
@@ -83,11 +83,6 @@ function Home() {
     setComponents(searched);
     setCount(6);
   };
-  
-  if (loading)
-    return (
-      <LoadingCircle></LoadingCircle>
-    );
 
   return (
     <Box
@@ -96,7 +91,6 @@ function Home() {
         flexDirection: 'row',
         height: "100vh",
         width: '100%',
-        background: 'var(--color-bg-gradient)', 
         overflow: 'hidden',
         position: "fixed",
         top: 0,
@@ -114,7 +108,7 @@ function Home() {
           width: '85%',
           maxHeight: '100vh',
           backdropFilter: 'blur(10px)',
-          backgroundColor: 'var(--color-blur-bg)',
+          backgroundColor: 'var(--color-bg-gradient)',
           borderRadius: '15px',
           boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
           mx: 'auto',
@@ -182,6 +176,9 @@ function Home() {
           />
         </Box>
 
+        {loading && (
+          <LoadingCircle />
+        )}
         {/* Cartas de Componentes */}
         <Box
           sx={{
@@ -194,7 +191,7 @@ function Home() {
             overflowY: 'auto',
           }}
         >
-          {components.length === 0 ? (
+          {!loading && components.length === 0 ? (
             <Typography color="text.secondary">No hay componentes disponibles.</Typography>
           ) : (
             components.slice(0, count).map((c, idx) => (
@@ -208,39 +205,40 @@ function Home() {
                 boxShadow: 3, 
                 display: 'grid',
                 gridTemplateRows: 'auto 1fr auto', 
-                color: "var(--color-title-primary)"
+                color: "var(--color-title-primary)",
+                fontFamily:"var(--font-source)", 
               }}>
                 <Box sx={{ px: 2, pt: 2, gap: 1, display: 'flex', flexDirection: 'column' }}>
-                  <Typography variant="h4" sx={{ color: "var(--color-title-primary)" }}>
+                  <Typography variant="h4" sx={{ color: "var(--color-title-primary)", fontFamily:"var(--font-montserrat)" }}>
                     {c.name.length > 30? `${c.name.slice(0, 30)}...` : c.name}
                   </Typography>
-                  <Typography variant="h6" component="div" gutterBottom>
+                  <Typography variant="h6" component="div" gutterBottom fontFamily={"var(--font-source)"}>
                     {c.type}
                   </Typography>
                 </Box>
                 <CardContent sx={{ px: 2, maxHeight: '100%', overflowY: 'auto'  }}>
-                  <Typography variant="body1" color={c.status === 'de baja' ? 'textSecondary' : 'var(--color-title-primary)'} sx={{ mb: 1 }}>
+                  <Typography variant="body1" color={c.status === 'de baja' ? 'textSecondary' : 'var(--color-title-primary)'} fontFamily={'var(--font-source)'} sx={{ mb: 1 }}>
                     Estado: {c.status}
                   </Typography>
                   {c.descriptions.length > 0 && (
-                    <Typography>Características:</Typography>
+                    <Typography fontFamily={'var(--font-source)'}>Características:</Typography>
                   )}
                   {c.descriptions.length > 0 && c.descriptions.slice(0, 3).map((d, index) => (
                     <Chip
                       key={index}
                       label={`${d.name}: ${d.description}`}
                       size="small"
-                      sx={{ mt: 1, maxWidth: '90%' }}
+                      sx={{ mt: 1, maxWidth: '90%', fontFamily:'var(--font-source)', mx: 0.25 }}
                     />
                   ))}
                   {c.components.length > 0 && (
-                    <Typography sx={{ mt: 2, mb: 1 }}>Sub Componentes:</Typography>
+                    <Typography sx={{ mt: 2, mb: 1, fontFamily: 'var(--font-source)' }}>Sub Componentes:</Typography>
                   )}
                   {c.components.length > 0 && c.components.slice(0, 3).map((sub, index) => (
                     <ListItem
                       key={index}
                       size="small"
-                      sx={{ maxWidth: '90%', }}
+                      sx={{ maxWidth: '90%' }}
                     >
                       {`${sub.name}`}
                     </ListItem>
@@ -251,6 +249,7 @@ function Home() {
                     backgroundColor: 'var(--color-bg-secondary)',
                     color: 'var(--color-title-secondary)',
                     maxHeight: '30px',
+                    fontFamily:'var(--font-source)', 
                     '&:hover': {
                       backgroundColor: 'var(--color-bg-primary-hover)',
                     },
@@ -265,6 +264,10 @@ function Home() {
               <Button
                 variant="outlined"
                 onClick={() => setCount((prev) => prev + 6)}
+                sx={{
+                  fontFamily: 'var(--font-source)',
+                  color: 'var(--color-title-primary)',
+                }}
               >
                 Ver más
               </Button>

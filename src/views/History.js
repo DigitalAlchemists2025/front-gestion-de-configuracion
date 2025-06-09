@@ -3,6 +3,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import SideBar from "../components/SideBar";
 import CloseIcon from "@mui/icons-material/Close";
+import AddLinkIcon from '@mui/icons-material/AddLink';
+import LinkOffIcon from '@mui/icons-material/LinkOff';
 import { useNavigate } from "react-router-dom";
 
 const History = () => {
@@ -228,7 +230,7 @@ const History = () => {
                                     <strong>Acción:</strong> {selectedRecord.action}
                                 </Typography>
                                 <Typography variant="body1" fontSize={"1.1rem"} fontFamily={"var(--font-source)"}>
-                                    <strong>Componente:</strong> {selectedRecord.component_name || "Desconocido"}
+                                    <strong>Componente Principal:</strong> {selectedRecord.component_name || "Desconocido"}
                                 </Typography>
                                 <Typography variant="body1" fontSize={"1.1rem"} fontFamily={"var(--font-source)"}>
                                     <strong>Fecha:</strong>{" "}
@@ -267,33 +269,7 @@ const History = () => {
                                             </Typography>
                                         </Box>
                                         <Typography variant="body1" color="info" fontSize={"1.1rem"} fontFamily={"var(--font-source)"}>
-                                            {selectedRecord.action.toLowerCase() == ("asociar subcomponente") ? "A:" : "De:"}
-                                        </Typography>
-                                    </Box>
-                                )}
-                                {selectedRecord.details && (
-                                    <Box sx={{display: "flex", flexDirection: "column", alignItems: "center"}}>    
-                                        <Box 
-                                            sx={{ 
-                                                border: "1px solid", 
-                                                borderRadius: 5,
-                                                height: "auto", 
-                                                display: "flex",  
-                                                flexDirection: "column",
-                                                justifyContent: "flex-start",
-                                                p: 2,
-                                                my: 2,
-                                            }} 
-                                            onClick={() => {
-                                                navigate(`/components/${selectedRecord.component_id?._id}`);
-                                            }}
-                                        >
-                                            <Typography variant="body1" fontSize={"1.1rem"}>
-                                                <strong>Nombre:</strong> {selectedRecord.details.name.nombre_original || "Desconocido"}
-                                            </Typography>
-                                        </Box>
-                                        <Typography variant="body1" color="warning" fontSize={"1.1rem"}>
-                                            <strong>A:</strong>
+                                            {selectedRecord.action.toLowerCase() == ("asociar subcomponente")? <AddLinkIcon/>  : <LinkOffIcon/>}
                                         </Typography>
                                     </Box>
                                 )}

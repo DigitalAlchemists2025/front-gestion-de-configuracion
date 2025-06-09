@@ -372,7 +372,7 @@ const ComponentDetail = () => {
           variant= "outlined"
           color= "primary"
           onClick={() => navigate(-1)}
-          sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%", fontFamily: "var(--font-source)" }}
+          sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%", height: "40px", fontFamily: "var(--font-source)" }}
         >
             ← Volver
           </Button>        
@@ -400,250 +400,266 @@ const ComponentDetail = () => {
         sx={{
           backgroundColor: "var(--color-bg-gradient)",
           borderRadius: "16px",
-          padding: "2rem 3rem",
-          width: "80%",
-          height: "80vh",
+          padding: "4% 5% 1%",
+          width: "60vw",
+          height: "70vh",
           boxShadow: "0px 8px 20px rgba(0,0,0,0.1)",
           display: "flex",
-          flexDirection: "row",
+          flexDirection: "column",
         }}
       >
-       <Box sx={{ 
+        
+        {/* Boton para volver */}
+        <Button
+          variant= "outlined"
+          color= "primary"
+          onClick={() => navigate(-1)}
+          sx={{ mb: 10, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%", fontFamily: "var(--font-source)" }}
+        >
+          ← Volver
+        </Button>
+        
+        {/* Parte Arriba */}
+        <Box sx={{ 
           display: 'flex', 
-          flexDirection: 'column', 
-          justifyContent: 'space-between', 
-          width: '50%', 
-          height: '95%',
+          flexDirection: 'row',  
+          maxWidth: '100%', 
+          height: '40%',
+          pb: 5,
         }}>
-          <Button
-            variant= "outlined"
-            color= "primary"
-            onClick={() => navigate(-1)}
-            sx={{ mb: 2, color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", width: "20%", fontFamily: "var(--font-source)" }}
-          >
-            ← Volver
-          </Button>
-          
-          <TextareaAutosize
-            value={mainComponentName}
-            onChange={(e) => handleEditName(e)}
-            disabled={rol !== '0'}
-            style={{
-              fontSize: '2rem',
-              fontWeight: 500,
-              color: 'var(--color-title-primary)',
-              width: '100%',
-              resize: 'none',
-              border: 'none',
-              outline: 'none',
-              background: 'transparent',
-              overflow: 'hidden',
-              lineHeight: 1.2,
-              fontFamily: 'var(--font-montserrat)',
-            }}
-          />
-
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <Typography sx={{ mr: 1, fontSize: "1rem", color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}><strong>Tipo:</strong></Typography>
-            <TextField
-              variant="standard"
-              value={mainComponentType}
-              onChange={handleEditType}
+          {/* Datos */}
+          <Box sx={{ display: "flex", flexDirection: 'column', gap: 2, mt: 2, width: "50%"}}>
+            <TextareaAutosize
+              value={mainComponentName}
+              onChange={(e) => handleEditName(e)}
               disabled={rol !== '0'}
-              InputProps={{
-                disableUnderline: true,
-                style: {
-                  fontSize: '1rem',
-                  color: 'var(--color-title-primary)',
-                  fontFamily: 'var(--font-source)',
-                }
-              }}
-              sx={{
-                width: '200px',
-                "& .MuiInputBase-input.Mui-disabled": {
-                  WebkitTextFillColor: "inherit",
-                  color: "inherit",
-                },
+              style={{
+                fontSize: '2rem',
+                fontWeight: 500,
+                color: 'var(--color-title-primary)',
+                resize: 'none',
+                border: 'none',
+                outline: 'none',
+                background: 'transparent',
+                overflow: 'hidden',
+                lineHeight: 1.2,
+                fontFamily: 'var(--font-montserrat)',
               }}
             />
-          </Box>
 
-
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-            <Typography
-              sx={{
-                fontSize: "1rem",
-                fontFamily: "var(--font-source)",
-                width: "10rem",
-                color:
-                  component.status === "activo"
-                    ? "var(--color-text-active)"
-                    : "var(--color-text-baja)",
-              }}
-            >
-              <strong>Estado:</strong> <em>{component.status}</em>
-            </Typography>
-      
-            {rol === '0' && (
-              <Button
-                variant="outlined"
-                disabled={loadingButtons}
-                onClick={cambiarEstado}
-                size="medium"
+            {/* Tipo */}
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography sx={{ mr: 1, fontSize: "1rem", color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}><strong>Tipo:</strong></Typography>
+              <TextField
+                variant="standard"
+                value={mainComponentType}
+                onChange={handleEditType}
+                disabled={rol !== '0'}
+                InputProps={{
+                  disableUnderline: true,
+                  style: {
+                    fontSize: '1rem',
+                    color: 'var(--color-title-primary)',
+                    fontFamily: 'var(--font-source)',
+                  }
+                }}
                 sx={{
-                  fontSize: "0.7rem", 
+                  width: '200px',
+                  "& .MuiInputBase-input.Mui-disabled": {
+                    WebkitTextFillColor: "inherit",
+                    color: "inherit",
+                  },
+                }}
+              />
+            </Box>
+
+            {/* Estado */}
+            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
+              <Typography
+                color={component.status === "activo" ? "info" : "textSecondary"}
+                sx={{
+                  fontSize: "1rem",
                   fontFamily: "var(--font-source)",
-                  mr: 10,
-                  color: component.status === "activo"
-                    ? "var(--color-text-baja)"
-                    : "var(--color-text-active)", 
-                  borderColor: component.status === "activo"
-                    ? "var(--color-text-baja)"
-                    : "var(--color-text-active)", 
+                  width: "100%",
                 }}
               >
-                {component.status === "activo" ? "Retirar" : "Activar"}
-              </Button>
+                <strong>Estado:</strong> <em>{component.status}</em>
+              </Typography>
+        
+              {rol === '0' && (
+                <Button
+                  variant="outlined"
+                  disabled={loadingButtons}
+                  onClick={cambiarEstado}
+                  size="medium"
+                  color={component.status === "activo" ? "textSecondary" : "info"}
+                  borderColor={component.status === "activo" ? "textSecondary" : "info"}
+                  sx={{
+                    fontSize: "0.7rem", 
+                    fontFamily: "var(--font-source)",
+                    mr: 10,
+                  }}
+                >
+                  {component.status === "activo" ? "Retirar" : "Activar"}
+                </Button>
+              )}
+            </Box>
+      
+            {component.createdAt && (
+              <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)" }}>
+                <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
+              </Typography>
+            )}
+      
+            {component.updatedAt && (
+              <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)"  }}>
+                <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
+              </Typography>
             )}
           </Box>
-    
-          <Typography variant="h5" sx={{ fontFamily: "var(--font-source)", mb: 3, }}>
-            <strong>Características:</strong>
-          </Typography>
-          {component.descriptions?.length > 0 && (
-            <Box sx={{
-              maxHeight: '10rem',
-              overflowY: 'auto',
-              mr: 10
-            }}>
-              {mainDescriptions.map((desc, i) => (
-                <Box key={i} sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  mb: 1,
-                  gap: 1,
-                  mr: 2,
-                }}>
-                  <Typography
-                    size="small"
-                    sx={{
-                      width: '30%',
-                      wordWrap: "break-word",
-                      fontFamily: 'var(--font-source)',
-                      '& .MuiInputBase-input': { fontSize: '1rem' }
-                    }}
-                  >
-                    {desc.name}
-                  </Typography>
-                  <TextField
-                    fullWidth
-                    size="small"
+          
+          {/* Parte descripciones */}
+          <Box sx={{ mt: 2, ml: 5, width: "50%" }}>
+            <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: "center", mb: 5, mr: 1 }}>
+              <Typography variant="h5" sx={{ fontFamily: "var(--font-source)", }}>
+                <strong>Características</strong>
+              </Typography>
+              
+              {rol === '0' && (
+                <Box sx={{ display: "flex", justifyContent: "flex-end", }}>
+                  <Button
                     variant="outlined"
-                    value={desc.description}
-                    onChange={e => handleEditDescription(i, 'description', e.target.value)}
-                    disabled={rol !== '0'}
-                    InputProps={{
-                      style: {
-                        padding: '0.25rem 1rem',
-                        fontSize: '1rem',
-                        fontFamily: "var(--font-source)",
-                      }
-                    }}
-                    sx={{
-                      '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                      bgcolor: '#ffffff',
-                      borderRadius: 1,
-                      "& .MuiInputBase-input.Mui-disabled": {
-                        WebkitTextFillColor: "black",
-                        color: "black",
-                      },
-                    }}
-                  />
-                  {rol === '0' && (
-                    <Button
-                      onClick={() => handleDeleteDescription(i)}
+                    color="info"
+                    sx={{ color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", fontFamily: "var(--font-source)", width: "100%", minWidth: "60%" }}
+                    onClick={handleOpenModal}
+                    size="small"
+                  >
+                    + Agregar Característica
+                  </Button>
+                </Box>
+              )}
+            </Box>
+            {component.descriptions?.length > 0 && (
+              <Box sx={{
+                maxHeight: '10rem',
+                overflowY: 'auto',
+              }}>
+                {mainDescriptions.map((desc, i) => (
+                  <Box key={i} sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    mb: 1,
+                    gap: 1,
+                    mr: 2,
+                  }}>
+                    <Typography
                       size="small"
                       sx={{
-                        minWidth: '32px',
-                        color: 'error.main',
-                        borderColor: 'error.main'
+                        width: '30%',
+                        wordWrap: "break-word",
+                        fontFamily: 'var(--font-source)',
+                        '& .MuiInputBase-input': { fontSize: '1rem' }
                       }}
-                      variant="text"
                     >
-                      ✕
-                    </Button>
-                  )}
-                </Box>
-              ))}
-            </Box>
-          ) || (
-            <Typography variant="overline" fontFamily={"var(--font-source)"} mt={-5}>
-              No hay características disponibles para este componente.
-            </Typography>
-          )}
-          {rol === '0' && (
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mr: '5rem' }}>
-              <Button
-                variant="outlined"
-                color="info"
-                sx={{ color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", fontFamily: "var(--font-source)", width: "50%" }}
-                onClick={handleOpenModal}
-                size="small"
-              >
-                + Agregar Característica
-              </Button>
-            </Box>
-          )}
-    
-          {component.createdAt && (
-            <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)" }}>
-              <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
-            </Typography>
-          )}
-    
-          {component.updatedAt && (
-            <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)"  }}>
-              <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
-            </Typography>
-          )}
-
-          {rol === '0' && (
-            <Box sx={{ mt: 3, display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
-              <Button
-                variant="outlined"
-                sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-                onClick={resetChanges}
-                disabled={!changes || loadingButtons}
-              >
-                Descartar Cambios
-              </Button>
-              <Button
-                variant="contained"
-                onClick={handleSaveChanges}
-                sx={{ bgcolor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-                disabled={!changes || loadingButtons}
-              >
-                Guardar Cambios
-              </Button>
-            </Box>
-          )}
+                      {desc.name}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      variant="outlined"
+                      value={desc.description}
+                      onChange={e => handleEditDescription(i, 'description', e.target.value)}
+                      disabled={rol !== '0'}
+                      InputProps={{
+                        style: {
+                          padding: '0.25rem 1rem',
+                          fontSize: '1rem',
+                          fontFamily: "var(--font-source)",
+                        }
+                      }}
+                      sx={{
+                        '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+                        bgcolor: '#ffffff',
+                        borderRadius: 1,
+                        "& .MuiInputBase-input.Mui-disabled": {
+                          WebkitTextFillColor: "black",
+                          color: "black",
+                        },
+                      }}
+                    />
+                    {rol === '0' && (
+                      <Button
+                        onClick={() => handleDeleteDescription(i)}
+                        size="small"
+                        sx={{
+                          minWidth: '32px',
+                          color: 'error.main',
+                          borderColor: 'error.main'
+                        }}
+                        variant="text"
+                      >
+                        ✕
+                      </Button>
+                    )}
+                  </Box>
+                ))}
+              </Box>
+            ) || (
+              <Typography variant="overline" fontFamily={"var(--font-source)"} mt={-5}>
+                No hay características disponibles para este componente.
+              </Typography>
+            )}
+          </Box>
         </Box>
+          
+        {/* Parte de abajo */}
+        <Box sx={{ display: 'flex', flexDirection: "column", maxWidth: "100%", mr: 1,  }}>  
 
-        <Box sx={{ mt: 2, ml: 5, justifyItems: "flex-start", width: "50%" }}>
-          <Typography variant="h5" sx={{ mb: 1, mt: 10, color: "var(--color-title-primary)", fontFamily: "var(--font-source)"  }}>
-            <strong>Sub Componentes:</strong>
+          {/* BOX subcomponentes */}
+          <Typography variant="h5" sx={{
+            mb: 1,
+            color: "var(--color-title-primary)",
+            fontFamily: "var(--font-source)"
+          }}>
+            <strong>Sub Componentes</strong>
           </Typography>
           {component.components?.length > 0 ? (
-            <Box sx={{ mt: 2, overflowY: "auto", maxHeight: "70%", width: "40vw" }}>
+            <Box
+              sx={{
+                mt: 2,
+                display: "flex",
+                flexDirection: "row",
+                overflowX: "auto",
+                gap: 2,
+                pb: 1,
+                minWidth: "50%",
+                width: "100%",
+                alignSelf: "center"
+              }}
+            >
               {component.components.map((child, idx) => (
-                <Card key={idx} sx={{ padding: 1, mb: 1, flex: 1, display: "flex", justifyContent: "space-between", alignItems: "center" }} onClick={() => navigate(`/components/${child._id}`)}>
-                  <Typography variant="body1" sx={{
-                    ml: 2,
-                    wordBreak: "break-word",   
-                    whiteSpace: "normal",      
-                    overflowWrap: "break-word",
-                    fontFamily: "var(--font-source)" 
-                  }}>
+                <Card
+                  key={idx}
+                  sx={{
+                    minWidth: 200,
+                    maxWidth: 300,
+                    padding: 2,
+                    flex: "0 0 auto" ,
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                  }}
+                  onClick={() => navigate(`/components/${child._id}`)}
+                >
+                  <Typography
+                    variant="body1"
+                    sx={{
+                      ml: 2,
+                      wordBreak: "break-word",
+                      fontFamily: "var(--font-source)"
+                    }}
+                  >
                     {child.name}
                   </Typography>
                   {rol === '0' && (
@@ -666,22 +682,45 @@ const ComponentDetail = () => {
               ))}
             </Box>
           ) : (
-            <Typography variant="overline" sx={{ mt: 2, fontFamily: "var(--font-source)"  }}>
+            <Typography variant="overline" sx={{ mt: 2, fontFamily: "var(--font-source)" }}>
               No hay sub componentes para este componente.
             </Typography>
-          )}  
-          {rol === '0' && (
-            <Box sx={{ display: "flex", justifyContent: "end", width: "100%" }}>
-              <Button 
-                size="large" 
-                sx={{ mt: 2, width: "50%", color: "var(--color-title-primary)", fontFamily: "var(--font-source)"  }} 
-                onClick={handleOpenModalChild} 
-              >
-                Agregar Sub Componente
-              </Button>
-            </Box>
           )}
-        </Box>
+          
+            {rol === '0' && (
+              <Box sx={{ display: "flex", justifyContent: "end", width: "100%" }}>
+                <Button 
+                  size="large" 
+                  sx={{ mt: 2, width: "25em", color: "var(--color-title-primary)", fontFamily: "var(--font-source)"  }} 
+                  onClick={handleOpenModalChild} 
+                >
+                  Agregar Sub Componente
+                </Button>
+              </Box>
+            )}
+          </Box>  
+          <footer>
+            {rol === '0' && (
+              <Box sx={{ mt: 3, display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
+                <Button
+                  variant="outlined"
+                  sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
+                  onClick={resetChanges}
+                  disabled={!changes || loadingButtons}
+                >
+                  Descartar Cambios
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSaveChanges}
+                  sx={{ bgcolor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
+                  disabled={!changes || loadingButtons}
+                >
+                  Guardar Cambios
+                </Button>
+              </Box>
+            )}
+          </footer>
       </Paper>
 
       {/* Modal para añadir característica al padre */}
@@ -755,7 +794,6 @@ const ComponentDetail = () => {
           display: "flex",
         }}>
           <Box sx={{ 
-            flex: 1, 
             pr: 3, 
             display: "grid", 
             justifyContent: "flex-start",  
@@ -836,7 +874,7 @@ const ComponentDetail = () => {
               }}
               size="small"
             />
-            <Box sx={{ flex: 1.5, mx: 3, overflowY: "auto", maxHeight: "55vh", width: "100%", mt: 2 }}>
+            <Box sx={{ mx: 3, overflowY: "auto", maxHeight: "55vh", width: "100%", mt: 2 }}>
               <Typography variant="subtitle1" sx={{ mb: 2, color: "#444", fontFamily: "var(--font-source)"  }}>
                 Componentes existentes:
               </Typography>
@@ -873,7 +911,10 @@ const ComponentDetail = () => {
                       size="small"
                       fontFamily={"var(--font-source)"}
                       sx={{ ml: 2, bgcolor: "var(--color-bg-secondary)" }}
-                      onClick={() => handleAddExistingComponentAsChild(c._id)}
+                      onClick={(event) => {
+                        handleAddExistingComponentAsChild(c._id);
+                        event.stopPropagation();
+                      }}
                     >
                       +
                     </Button>

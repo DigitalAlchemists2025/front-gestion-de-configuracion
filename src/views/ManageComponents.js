@@ -346,7 +346,7 @@ const ManageComponents = () => {
                             rows={components}
                             columns={columns}
                             getRowId={(row) => row._id}
-                            isRowSelectable={() => false}
+                            isRowSelectable={() => {false}}
                             getRowClassName={(params) => {
                                 if (params.row.isSub) return 'fila-subcomponente';
                                 if (params.row.status === 'activo') return 'fila-activa';

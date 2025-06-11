@@ -200,7 +200,6 @@ function Login() {
         </Button>
 
         <Divider sx={{ borderColor: 'black', my: 5 }} />
-          {/* Quitar comentario (deploy) */}
         <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>O iniciar sesión con credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField

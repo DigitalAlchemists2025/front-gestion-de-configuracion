@@ -568,8 +568,7 @@ const ComponentDetail = () => {
               ...subRows,
               ...subComponents.slice(index + 1),
           ];
-
-          setComponents(newList);
+          setSubComponents(newList);
           setExpandedRows((prev) => ({ ...prev, [row._id]: true }));
         } catch (error) {
           console.error("Error cargando subcomponentes:", error);

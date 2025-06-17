@@ -44,11 +44,16 @@ function Home() {
           return 0;
         });
         setAllComponents(componentsSorted);
-        setSearchTerm(initialSearch);
 
         if (initialSearch) {
-          const filtered = showFilterComponents(initialSearch, componentsSorted);
-          setComponents(filtered);
+          const response = await axios.get(`${BACKEND_URL}/components/search`,
+            { 
+              params: { q: initialSearch }, 
+              headers: { 'Authorization': `Bearer ${token}` } 
+            }
+          );
+          setComponents(response.data);
+          setSearchTerm(initialSearch);
         } else {
           setComponents(componentsSorted);
         }
@@ -68,32 +73,21 @@ function Home() {
     fetchData();
   }, [token, BACKEND_URL]);
 
-  const showFilterComponents = (values, list = allComponents) => {
-    const terms = values
-      .toLowerCase()
-      .split(' ')
-      .filter(t => t.trim() !== '');
-
-    return list.filter(c => {
-      const splitedComponent = [
-        c.name,
-        c.type,
-        ...c.descriptions.flatMap(d => [d.name, d.description]),
-        ...c.components.map(sub => sub.name),
-      ];
-
-      const searchedComponent = splitedComponent
-        .filter(Boolean)
-        .join(' ')
-        .toLowerCase();
-
-      return terms.every(term => searchedComponent.includes(term));
-    });
-  };
-
-  const handleSearch = (value) => {
+  const handleSearch = async (value) => {
     setSearchTerm(value);
-    setComponents(showFilterComponents(value));
+    try {
+      const response = await axios.get(
+        `${BACKEND_URL}/components/search`,
+        {
+          params: { q: value },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      console.log(response.data)
+      setComponents(response.data);
+    } catch (error) {
+      console.error(error);
+    }
     setCount(6);
   };
 
@@ -204,7 +198,7 @@ function Home() {
             overflowY: 'auto',
           }}
         >
-          {!loading && components.length === 0 ? (
+          {!loading && components.length <= 0 ? (
             <Typography color="text.secondary">No hay componentes disponibles.</Typography>
           ) : (
             components.slice(0, count).map((c, idx) => (

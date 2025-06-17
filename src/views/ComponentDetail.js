@@ -1,15 +1,140 @@
-import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar } from "@mui/material";
+import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar, Tabs, Tab, CardContent, ListItem, IconButton } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
 import RemoveIcon from '@mui/icons-material/Remove';
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import WestIcon from '@mui/icons-material/West';
 import CloseIcon from '@mui/icons-material/Close';
 import EditIcon from '@mui/icons-material/Edit';
 import SideBar from "../components/SideBar";
+import TabPanel from "../components/TabPanel";
+import { DataGrid } from "@mui/x-data-grid";
+import DateTimeParser from "../utils/DateTimeParser";
 
 const ComponentDetail = () => {
+  const columns = [
+    { field: 'name', headerName: 'Nombre', flex: 1, },
+    { field: 'type', headerName: 'Tipo', flex: 1 },
+    {
+        field: 'status',
+        headerName: 'Estado',
+        flex: 1,
+        cellClassName: (params) => {
+            if (params.value === 'activo') return 'estado-activo';
+            if (params.value === 'de baja') return 'estado-baja';
+            return '';
+        },
+    },
+    {
+      field: 'components', 
+      headerName: '', 
+      width: 20,
+      sortable: false,
+      filterable: false, 
+      disableColumnMenu: true,
+      disableReorder: true,
+      stopPropagation: true,
+      renderCell: (params) => {
+        const isExpanded = expandedRows[params.row._id];
+        return (
+          params.row.components?.length > 0 && !params.row.isSub ? (
+            <IconButton onClick={(e) => {
+              e.stopPropagation();
+              showSubComponents(e, params.row);
+            }}>
+              {isExpanded ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
+            </IconButton>
+          ) : null
+        );
+      }
+    },
+  ];
+
+  const historyColumns = [
+    { field: 'component_name', headerName: 'Componente', flex: 1, },
+    {
+      field: 'user_id',
+      headerName: 'Usuario',
+      flex: 1,
+      renderCell: (params) => {
+        const user = params.row.user_id;
+        return (
+          <Typography variant="body1" sx={{ fontFamily: "var(--font-source)" }}>
+            {user?.username ?? 'Desconocido'}
+          </Typography>
+        );
+      }
+    },
+    { field: 'action', headerName: 'Acción', flex: 1,
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
+          {params.value.charAt(0).toUpperCase() + params.value.slice(1)}
+        </Typography> 
+      )
+    },
+    { field: 'date', headerName: 'Fecha', flex: 1,
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
+          {new Date(params.value).toLocaleString()}
+        </Typography>
+      )
+    },
+  ]
+
+  const descriptionColumns = [
+    { field: 'name', headerName: 'Característica', flex: 1 },
+    {
+      field: 'description',
+      headerName: 'Descripción',
+      flex: 2,
+      renderCell: (params) => (
+        <TextField
+          size="small"
+          variant="outlined"
+          value={params.value}
+          onChange={e => handleEditDescription(params.row._idx, 'description', e.target.value)}
+          disabled={rol !== '0'}
+          InputProps={{
+            style: {
+              padding: '0.25rem 1rem',
+              fontSize: '1.1rem',
+              fontFamily: "var(--font-source)",
+            }
+          }}
+          sx={{
+            width: '100%',
+            '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
+            bgcolor: '#ffffff',
+            borderRadius: 1,
+            "& .MuiInputBase-input.Mui-disabled": {
+              WebkitTextFillColor: "black",
+              color: "black",
+            },
+          }}
+        />
+      )
+    },
+    {
+      field: 'delete',
+      headerName: '',
+      width: 100,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+        rol === '0' ? (
+          <IconButton
+            size="small"
+            onClick={() => handleDeleteDescription(params.row._idx)}
+            sx={{ color: 'error.main' }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        ) : null
+    }
+  ]
   const { id } = useParams();
   const [component, setComponent] = useState(null);
   const [changes, setChanges] = useState(false);
@@ -42,10 +167,20 @@ const ComponentDetail = () => {
   const [newSubName, setNewSubName] = useState("");
   const [newSubDescription, setNewSubDescription] = useState("");
   const [newSubCharacteristics, setNewSubCharacteristics] = useState([]);
-
+  
   /* Búsqueda de subcomponentes */
   const [searchTerm, setSearchTerm] = useState('');
   const [searchedComponents, setSearchedComponents] = useState([]);
+
+  /* Tabs */
+  const [tabValue, setTabValue] = useState(0);
+
+  /* Tabla Subcomponentes */
+  const [expandedRows, setExpandedRows] = useState({});
+  const [subComponents, setSubComponents] = useState([]);
+
+  /* Historial */
+  const [history, setHistory] = useState([]);
 
   const token = localStorage.getItem("token").trim();
   const rol = localStorage.getItem("role");
@@ -91,6 +226,23 @@ const ComponentDetail = () => {
         localStorage.removeItem("selectedComponent");
       }
     }
+  }, [id]);
+
+  useEffect(() => {
+    const fetchHistory = async () => {
+      try {
+        const response = await axios.get(`${BACKEND_URL}/histories/components/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        console.log(response.data);
+        setHistory(response.data);
+      } catch (error) {
+        console.error("Error al obtener historial:", error);
+      }
+    };
+    fetchHistory();
   }, [id]);
 
   const handleAddDescripcion = async () => {
@@ -378,6 +530,53 @@ const ComponentDetail = () => {
     setSearchedComponents(searched);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setTabValue(newValue);
+  };
+
+  /* Tabla subcomponentes */
+  const showSubComponents = async (event, row) => {
+      const isExpanded = expandedRows[row._id];
+      
+      if (isExpanded) {
+        setSubComponents((prev) => prev.filter((c) => c.parentId !== row._id));
+        setExpandedRows((prev) => ({ ...prev, [row._id]: false }));
+      } else {
+        try {
+          const res = await axios.get(`${BACKEND_URL}/components/${row._id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+
+          /* Falta arreglar la linea subcomponente desfazada */
+          const populated = res.data.components.slice(0, 3);
+
+          const subRows = populated.map((sub, i) => ({
+            ...sub,
+            _id: `${sub._id}-sub-${i}`,
+            parentId: row._id,
+            name: `> ${sub.name}`,
+            status: sub.status,
+            type: sub.type,
+            createdAt: DateTimeParser(sub.createdAt),
+            updatedAt: DateTimeParser(sub.updatedAt),
+            isSub: true,
+          }));
+
+          const index = subComponents.findIndex((c) => c._id === row._id);
+          const newList = [
+              ...subComponents.slice(0, index + 1),
+              ...subRows,
+              ...subComponents.slice(index + 1),
+          ];
+
+          setComponents(newList);
+          setExpandedRows((prev) => ({ ...prev, [row._id]: true }));
+        } catch (error) {
+          console.error("Error cargando subcomponentes:", error);
+        }
+      }
+  };
+
   if (loading) {
     return (
       <Box sx={{ display:'flex', height:'100vh', width: '100vw', position: 'fixed', top: 0, left: 0, color: 'var(--color-text-base)' }}>
@@ -428,11 +627,12 @@ const ComponentDetail = () => {
             display: 'flex', 
             flexDirection: 'row',  
             width: '100%', 
-            height: '40%',
+            height: '30%',
+            mb: 2, 
           }}>
             {/* Datos */}
-            <Box sx={{ display: "flex", flexDirection: 'column', gap: 2, mt: 2, width: "100%"}}>  
-              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', }}>
+            <Box sx={{ display: "flex", flexDirection: 'column', width: "100%", }}>  
+              <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: 2}}>
                 <Button
                   variant= "outlined"
                   color= "primary"
@@ -460,247 +660,282 @@ const ComponentDetail = () => {
                   }}
                 >
                 </TextareaAutosize>  
-                 <EditIcon/>
+                {/* <EditIcon/> */}
               </Box> 
-
-              <Box sx={{ display: 'flex', alignItems: 'center',  }}>
-                <Typography sx={{ mr: 1, fontSize: "1rem", color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}><strong>Tipo:</strong></Typography>
-                <TextField
-                  variant="standard"
-                  value={mainComponentType}
-                  onChange={handleEditType}
-                  disabled={rol !== '0'}
-                  InputProps={{
-                    disableUnderline: true,
-                    style: {
-                      fontSize: '1rem',
-                      color: 'var(--color-title-primary)',
-                      fontFamily: 'var(--font-source)',
-                    }
-                  }}
-                  sx={{
-                    width: '200px',
-                    "& .MuiInputBase-input.Mui-disabled": {
-                      WebkitTextFillColor: "inherit",
-                      color: "inherit",
-                    },
-                  }}
-                />
-              </Box>
-
-              {/* Estado */}
-              <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%" }}>
-                <Typography
-                  color={component.status === "activo" ? "info" : "textSecondary"}
-                  sx={{
-                    fontSize: "1rem",
-                    fontFamily: "var(--font-source)",
-                    width: "100%",
-                  }}
-                >
-                  <strong>Estado:</strong> <em>{component.status}</em>
-                </Typography>
-          
-                {rol === '0' && (
-                  <Button
-                    variant="outlined"
-                    disabled={loadingButtons}
-                    onClick={cambiarEstado}
-                    size="medium"
-                    color={component.status === "activo" ? "textSecondary" : "info"}
-                    borderColor={component.status === "activo" ? "textSecondary" : "info"}
+              
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: "100%", height: "100%",  ml: 20, justifyContent: "center" }}>
+                <Box sx={{ display: 'flex', alignItems: 'center',  }}>
+                  <Typography sx={{ mr: 1, fontSize: "1.1rem", color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}><strong>Tipo:</strong></Typography>
+                  <TextField
+                    variant="standard"
+                    value={mainComponentType}
+                    onChange={handleEditType}
+                    disabled={rol !== '0'}
+                    InputProps={{
+                      disableUnderline: true,
+                      style: {
+                        fontSize: '1.1rem',
+                        color: 'var(--color-title-primary)',
+                        fontFamily: 'var(--font-source)',
+                      }
+                    }}
                     sx={{
-                      fontSize: "0.7rem", 
+                      width: '200px',
+                      "& .MuiInputBase-input.Mui-disabled": {
+                        WebkitTextFillColor: "inherit",
+                        color: "inherit",
+                      },
+                    }}
+                  />
+                </Box>
+
+                {/* Estado */}
+                <Box sx={{ display: "flex", alignItems: "center" }}>
+                  <Typography
+                    color={component.status === "activo" ? "info" : "textSecondary"}
+                    sx={{
+                      fontSize: "1.1rem",
                       fontFamily: "var(--font-source)",
-                      mr: 10,
+                      mr: 5,
                     }}
                   >
-                    {component.status === "activo" ? "Retirar" : "Activar"}
-                  </Button>
+                    <strong>Estado:</strong> <em>{component.status}</em>
+                  </Typography>
+            
+                  {rol === '0' && (
+                    <Button
+                      variant="outlined"
+                      disabled={loadingButtons}
+                      onClick={cambiarEstado}
+                      size="small"
+                      color={component.status === "activo" ? "textSecondary" : "info"}
+                      borderColor={component.status === "activo" ? "textSecondary" : "info"}
+                      sx={{
+                        fontSize: "0.7rem", 
+                        fontFamily: "var(--font-source)",
+                      }}
+                    >
+                      {component.status === "activo" ? "Retirar" : "Activar"}
+                    </Button>
+                  )}
+                </Box>
+          
+                {component.createdAt && (
+                  <Typography sx={{ fontSize: "1.1rem", fontFamily: "var(--font-source)" }}>
+                    <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
+                  </Typography>
+                )}
+          
+                {component.updatedAt && (
+                  <Typography sx={{ fontSize: "1.1rem", fontFamily: "var(--font-source)"  }}>
+                    <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
+                  </Typography>
                 )}
               </Box>
-        
-              {component.createdAt && (
-                <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)" }}>
-                  <strong>Creado:</strong> {new Date(component.createdAt).toLocaleString()}
-                </Typography>
-              )}
-        
-              {component.updatedAt && (
-                <Typography sx={{ fontSize: "1rem", fontFamily: "var(--font-source)"  }}>
-                  <strong>Actualizado:</strong> {new Date(component.updatedAt).toLocaleString()}
-                </Typography>
-              )}
             </Box>
           </Box>
             
           {/* Parte de abajo */}
-          <Box sx={{ display: 'flex', flexDirection: "column", maxWidth: "100%", mr: 1,  }}>  
+          <Box sx={{ display: 'flex', flexDirection: "column", maxWidth: "100%", mr: 1, flexGrow: 1, overflow: "hidden", }}>  
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              variant="fullWidth"
+              sx={{ position: "sticky", width: "70vw" }}
+            >
+              <Tab label="Características" sx={{ fontWeight: "bold" }} />
+              <Tab label="Sub Componentes" sx={{ fontWeight: "bold" }} />
+              {rol === '0' && (
+                <Tab label="Historial" sx={{ fontWeight: "bold" }} /> 
+              )}
+            </Tabs>
 
-            
-            {/* Parte descripciones */}
-            <Box sx={{ mt: 2, ml: 5, width: "50%" }}>
-              <Box sx={{ display: 'flex', flexDirection: 'row', justifyContent: "space-between", alignItems: "center", mb: 5, mr: 1 }}>
-                <Typography variant="h5" sx={{ fontFamily: "var(--font-source)", }}>
-                  <strong>Características</strong>
-                </Typography>
-                
-                {rol === '0' && (
-                  <Box sx={{ display: "flex", justifyContent: "flex-end", }}>
-                    <Button
-                      variant="outlined"
-                      color="info"
-                      sx={{ color: "var(--color-title-primary)", borderColor: "var(--color-title-primary)", fontFamily: "var(--font-source)", width: "100%", minWidth: "60%" }}
-                      onClick={handleOpenModal}
-                      size="small"
-                    >
-                      + Agregar Característica
-                    </Button>
-                  </Box>
-                )}
-              </Box>
-              {component.descriptions?.length > 0 && (
+           <TabPanel value={tabValue} index={0}>
+              {mainDescriptions.length > 0 ? (
                 <Box sx={{
-                  maxHeight: '10rem',
-                  overflowY: 'auto',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'stretch',
+                  height: '100%',
+                  width: '100%',
                 }}>
-                  {mainDescriptions.map((desc, i) => (
-                    <Box key={i} sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      mb: 1,
-                      gap: 1,
-                      mr: 2,
-                    }}>
-                      <Typography
-                        size="small"
-                        sx={{
-                          width: '30%',
-                          wordWrap: "break-word",
-                          fontFamily: 'var(--font-source)',
-                          '& .MuiInputBase-input': { fontSize: '1rem' }
-                        }}
-                      >
-                        {desc.name}
-                      </Typography>
-                      <TextField
-                        fullWidth
-                        size="small"
+                  <Paper sx={{
+                    flexGrow: 1,
+                    width: '100%',
+                    borderRadius: '16px',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    height: '38vh',
+                    backgroundColor: 'transparent'
+                  }}>
+                    <DataGrid
+                      rows={mainDescriptions.map((d, i) => ({ _idx: i, ...d }))}
+                      columns={descriptionColumns}
+                      getRowId={(row) => row._idx}
+                      pageSizeOptions={[5]}
+                      initialState={{
+                        pagination: { paginationModel: { page: 0, pageSize: 5 } }
+                      }}
+                      isRowSelectable={() => false}
+                      sx={{
+                        width: '100%',
+                        height: '100%',
+                        border: '1px solid #e0e0e0',
+                        borderRadius: '25px',
+                        fontSize: '1.1rem',
+                        background: 'transparent',
+                        color: 'var(--color-text-base)',
+                        fontFamily: "var(--font-source)",
+                        '.MuiDataGrid-columnHeader': {
+                          backgroundColor: 'var(--color-bg-secondary)',
+                          color: '#ffffff',
+                          borderBottom: 'none',
+                        },
+                        '.MuiDataGrid-cell': {
+                          borderBottom: 'none',
+                          backgroundColor: 'var(--color-dg-cell-bg)',
+                          color: 'var(--color-datagrid-cell-text)',
+                        },
+                        '.MuiDataGrid-row:hover': {
+                          backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                          cursor: 'pointer',
+                        },
+                        '.MuiDataGrid-footerContainer': {
+                          bgcolor: '#e3f2fd',
+                          borderTop: 'none',
+                        },
+                        '[class*="MuiTablePagination"]': {
+                          color: 'var(--color-pagination)',
+                        },
+                      }}
+                    />
+                  </Paper>
+
+                  {rol === '0' && (
+                    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                      <Button
                         variant="outlined"
-                        value={desc.description}
-                        onChange={e => handleEditDescription(i, 'description', e.target.value)}
-                        disabled={rol !== '0'}
-                        InputProps={{
-                          style: {
-                            padding: '0.25rem 1rem',
-                            fontSize: '1rem',
-                            fontFamily: "var(--font-source)",
-                          }
-                        }}
+                        color="info"
+                        size="small"
                         sx={{
-                          '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
-                          bgcolor: '#ffffff',
-                          borderRadius: 1,
-                          "& .MuiInputBase-input.Mui-disabled": {
-                            WebkitTextFillColor: "black",
-                            color: "black",
-                          },
+                          color: "var(--color-title-primary)",
+                          borderColor: "var(--color-title-primary)",
+                          fontFamily: "var(--font-source)",
                         }}
-                      />
-                      {rol === '0' && (
-                        <Button
-                          onClick={() => handleDeleteDescription(i)}
-                          size="small"
-                          sx={{
-                            minWidth: '32px',
-                            color: 'error.main',
-                            borderColor: 'error.main'
-                          }}
-                          variant="text"
-                        >
-                          <CloseIcon />
-                        </Button>
-                      )}
+                        onClick={handleOpenModal}
+                      >
+                        + Agregar Característica
+                      </Button>
                     </Box>
-                  ))}
+                  )}
                 </Box>
-              ) || (
-                <Typography variant="overline" fontFamily={"var(--font-source)"} mt={-5}>
+              ) : (
+                <Typography variant="overline" sx={{ fontFamily: "var(--font-source)", m: 2 }}>
                   No hay características disponibles para este componente.
                 </Typography>
               )}
-            </Box>
-            {/* BOX subcomponentes */}
-            <Typography variant="h5" sx={{
-              mb: 1,
-              color: "var(--color-title-primary)",
-              fontFamily: "var(--font-source)"
-            }}>
-              <strong>Sub Componentes</strong>
-            </Typography>
-            {component.components?.length > 0 ? (
-              <Box
-                sx={{
-                  mt: 2,
-                  display: "flex",
-                  flexDirection: "row",
-                  overflowX: "auto",
-                  gap: 2,
-                  pb: 1,
-                  minWidth: "50%",
-                  width: "100%",
-                  alignSelf: "center"
-                }}
-              >
-                {component.components.map((child, idx) => (
-                  <Card
-                    key={idx}
-                    sx={{
-                      minWidth: 200,
-                      maxWidth: 300,
-                      padding: 2,
-                      flex: "0 0 auto" ,
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                    }}
-                    onClick={() => navigate(`/components/${child._id}`)}
-                  >
-                    <Typography
-                      variant="body1"
-                      sx={{
-                        ml: 2,
-                        wordBreak: "break-word",
-                        fontFamily: "var(--font-source)"
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={1}>
+              {component.components?.length > 0 ? (
+                <Box sx={{
+                  flexGrow: 1,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: "center",
+                  height: "100%",
+                }}>
+                  <Paper sx={{
+                    flexGrow: 1,
+                    width: '100%',
+                    borderRadius: '16px',
+                    backgroundColor: 'transparent',
+                    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    height: "38vh",
+                  }}>
+                    <DataGrid
+                      rows={component.components}
+                      columns={columns}
+                      getRowId={(row) => row._id}
+                      isRowSelectable={() => false}
+                      getRowClassName={(params) => {
+                        if (params.row.isSub) return 'fila-subcomponente';
+                        if (params.row.status === 'activo') return 'fila-activa';
+                        if (params.row.status === 'de baja') return 'fila-baja';
+                        return '';
                       }}
-                    >
-                      {child.name}
-                    </Typography>
-                    {rol === '0' && (
-                      <Button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveSubComponent(child._id);
+                        initialState={{
+                          pagination: { paginationModel: { page: 0, pageSize: 5 } },
                         }}
-                        size="large"
-                        sx={{
-                          minWidth: '32px',
-                          borderColor: 'error.main'
+                        onRowClick={(params) => {
+                          if (!params.isSub){
+                            navigate(`/components/${params.row._id}`)
+                          } else {
+                            const newId = params.row._id.split('-sub-')[0];
+                            navigate(`/components/${newId}`);
+                          }
                         }}
-                        variant="text"
-                      >
-                        <RemoveIcon/>
-                      </Button>
-                    )}
-                  </Card>
-                ))}
+                          pageSizeOptions={[5]}
+                          sx={{
+                            height: '100%',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '25px',
+                            fontSize: '1.1rem',
+                            background: 'transparent',
+                            color: 'var(--color-text-base)',
+                            fontFamily: "var(--font-source)",
+                            '& .fila-activa': {
+                              color: 'var(--color-text-active)',
+                            },
+                            '& .fila-baja': {
+                              color: 'var(--color-text-baja)',
+                              fontStyle: 'italic',
+                            },
+                            '.MuiDataGrid-columnHeader': {
+                              backgroundColor: 'var(--color-bg-secondary)',
+                              color: '#ffffff',
+                              borderBottom: 'none',
+                            },
+                            '.MuiDataGrid-cell': {
+                              borderBottom: 'none',
+                              backgroundColor: 'var(--color-dg-cell-bg)',
+                              color: 'var(--color-datagrid-cell-text)',
+                            },
+                            '.MuiDataGrid-row:hover': {
+                              backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                              cursor: 'pointer',
+                            },
+                            '.MuiDataGrid-footerContainer': {
+                              bgcolor: '#e3f2fd',
+                              borderTop: 'none',
+                            },
+                            '[class*="MuiTablePagination"]': {
+                              color: 'var(--color-pagination)',
+                            },
+                            '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
+                              outline: 'none',
+                            },
+                            '& .MuiDataGrid-row:nth-of-type(even) .MuiDataGrid-cell': {
+                              backgroundColor: 'var(--color-dg-cell-bg-even)',
+                            },
+                            '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
+                                backgroundColor: 'var(--color-dg-cell-bg-odd)',
+                          },
+                            '& .MuiDataGrid-row.fila-subcomponente': {
+                              fontStyle: 'italic',
+                            },
+                            '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
+                              backgroundColor:"var(--color-dg-cell-child)" ,
+                              pl: 2,
+                          }
+                        }}
+                      />
+                  </Paper>
               </Box>
-            ) : (
-              <Typography variant="overline" sx={{ mt: 2, fontFamily: "var(--font-source)" }}>
-                No hay sub componentes para este componente.
-              </Typography>
-            )}
+              ) : (
+                <Typography variant="overline" sx={{ mt: 2, fontFamily: "var(--font-source)" }}>
+                  No hay sub componentes para este componente.
+                </Typography>
+              )}
             
               {rol === '0' && (
                 <Box sx={{ display: "flex", justifyContent: "end", width: "100%" }}>
@@ -713,29 +948,124 @@ const ComponentDetail = () => {
                   </Button>
                 </Box>
               )}
-            </Box>  
-            <footer>
-              {rol === '0' && (
-                <Box sx={{ mt: 3, display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
-                  <Button
-                    variant="outlined"
-                    sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-                    onClick={resetChanges}
-                    disabled={!changes || loadingButtons}
-                  >
-                    Descartar Cambios
-                  </Button>
-                  <Button
-                    variant="contained"
-                    onClick={handleSaveChanges}
-                    sx={{ bgcolor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-                    disabled={!changes || loadingButtons}
-                  >
-                    Guardar Cambios
-                  </Button>
-                </Box>
-              )}
-            </footer>
+            </TabPanel>
+
+            <TabPanel value={tabValue} index={2}>
+              <Box>
+                {history.length > 0 ? (
+                  <Box sx={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: "center",
+                    height: "100%",
+                  }}>
+                    <Paper sx={{
+                      flexGrow: 1,
+                      width: '100%',
+                      borderRadius: '16px',
+                      backgroundColor: 'transparent',
+                      boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                      height: "38vh",
+                    }}>
+                      <DataGrid
+                        rows={history}
+                        columns={historyColumns}
+                        getRowId={(row) => row._id}
+                        isRowSelectable={() => false}
+                        pageSizeOptions={[5]}
+                        initialState={{
+                          pagination: { paginationModel: { page: 0, pageSize: 5 } },
+                        }}
+                        onRowClick={(params) => {
+                          /* Abrir modal para ver datos completos del historico en cuestion */
+                          /* handleOpenModalHistory(params.row); */
+                        }}
+                          sx={{
+                            height: '100%',
+                            border: '1px solid #e0e0e0',
+                            borderRadius: '25px',
+                            fontSize: '1.1rem',
+                            background: 'transparent',
+                            color: 'var(--color-text-base)',
+                            fontFamily: "var(--font-source)",
+                            '& .fila-activa': {
+                              color: 'var(--color-text-active)',
+                            },
+                            '& .fila-baja': {
+                              color: 'var(--color-text-baja)',
+                              fontStyle: 'italic',
+                            },
+                            '.MuiDataGrid-columnHeader': {
+                              backgroundColor: 'var(--color-bg-secondary)',
+                              color: '#ffffff',
+                              borderBottom: 'none',
+                            },
+                            '.MuiDataGrid-cell': {
+                              borderBottom: 'none',
+                              backgroundColor: 'var(--color-dg-cell-bg)',
+                              color: 'var(--color-datagrid-cell-text)',
+                            },
+                            '.MuiDataGrid-row:hover': {
+                              backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                              cursor: 'pointer',
+                            },
+                            '.MuiDataGrid-footerContainer': {
+                              bgcolor: '#e3f2fd',
+                              borderTop: 'none',
+                            },
+                            '[class*="MuiTablePagination"]': {
+                              color: 'var(--color-pagination)',
+                            },
+                            '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
+                              outline: 'none',
+                            },
+                            '& .MuiDataGrid-row:nth-of-type(even) .MuiDataGrid-cell': {
+                              backgroundColor: 'var(--color-dg-cell-bg-even)',
+                            },
+                            '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
+                                backgroundColor: 'var(--color-dg-cell-bg-odd)',
+                            },
+                            '& .MuiDataGrid-row.fila-subcomponente': {
+                              fontStyle: 'italic',
+                            },
+                            '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
+                              backgroundColor:"var(--color-dg-cell-child)" ,
+                              pl: 2,
+                            }
+                        }}
+                      />
+                    </Paper>
+                  </Box>
+                ) : (
+                  <Typography variant="overline" sx={{ mt: 2, fontFamily: "var(--font-source)" }}>
+                    No hay historial para este componente.
+                  </Typography>
+                )}
+              </Box>
+            </TabPanel>
+          </Box>  
+          <footer>
+            {rol === '0' && (
+              <Box sx={{ display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
+                <Button
+                  variant="outlined"
+                  sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
+                  onClick={resetChanges}
+                  disabled={!changes || loadingButtons}
+                >
+                  Descartar Cambios
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSaveChanges}
+                  sx={{ bgcolor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
+                  disabled={!changes || loadingButtons}
+                >
+                  Guardar Cambios
+                </Button>
+              </Box>
+            )}
+          </footer>
         </Paper>
 
         {/* Modal para añadir característica al padre */}

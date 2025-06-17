@@ -2,13 +2,13 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: procces.env.FB_API_KEY,
-  authDomain: procces.env.FB_AUTH_DOMAIN,
-  projectId: procces.env.FB_PROJECT_ID,
-  storageBucket: procces.env.FB_STORAGE_BUCKET, 
-  messagingSenderId: procces.env.FB_MESSAGING,
-  appId: procces.env.FB_APP_ID,
-  measurementId: procces.env.FB_MEAS_ID,
+  apiKey: process.env.REACT_APP_FB_API_KEY,
+  authDomain: process.env.REACT_APP_FB_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FB_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FB_STORAGE_BUCKET, 
+  messagingSenderId: process.env.REACT_APP_FB_MESSAGING,
+  appId: process.env.REACT_APP_FB_APP_ID,
+  measurementId: process.env.REACT_APP_FB_MEAS_ID,
 };
 
 const app = initializeApp(firebaseConfig);

@@ -6,10 +6,16 @@ import axios from "axios";
 import LoadingCircle from "../components/LoadingCircle";
 
 function Home() {
+  let initialSearch = localStorage.getItem('searchedComponent');
+  if (initialSearch == "null" || initialSearch == "undefined") {
+    localStorage.removeItem('searchedComponent');
+    initialSearch = '';
+  }
+  localStorage.removeItem('selectedComponent');
+  
   const [allComponents, setAllComponents] = useState([]);
-
   const [components, setComponents] = useState([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(initialSearch || '');
   const [count, setCount] = useState(6);
 
   const [loading, setLoading] = useState(false);
@@ -38,7 +44,16 @@ function Home() {
           return 0;
         });
         setAllComponents(componentsSorted);
-        setComponents(componentsSorted); 
+        setSearchTerm(initialSearch);
+
+        if (initialSearch) {
+          const filtered = showFilterComponents(initialSearch, componentsSorted);
+          setComponents(filtered);
+        } else {
+          setComponents(componentsSorted);
+        }
+
+        setCount(6);
       } catch (error) {
         console.error('Error fetching data:', error);
         if (error.response.data.error.statusCode === 401) {
@@ -53,34 +68,32 @@ function Home() {
     fetchData();
   }, [token, BACKEND_URL]);
 
+  const showFilterComponents = (values, list = allComponents) => {
+    const terms = values
+      .toLowerCase()
+      .split(' ')
+      .filter(t => t.trim() !== '');
+
+    return list.filter(c => {
+      const splitedComponent = [
+        c.name,
+        c.type,
+        ...c.descriptions.flatMap(d => [d.name, d.description]),
+        ...c.components.map(sub => sub.name),
+      ];
+
+      const searchedComponent = splitedComponent
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+
+      return terms.every(term => searchedComponent.includes(term));
+    });
+  };
+
   const handleSearch = (value) => {
     setSearchTerm(value);
-
-    const lowerValue = value.toLowerCase();
-
-    const searched = allComponents.filter((c) => {
-      if (
-        c.name?.toLowerCase().includes(lowerValue) ||
-        c.type?.toLowerCase().includes(lowerValue)
-      ) return true;
-
-      if (
-        c.descriptions?.some(d =>
-          d.name?.toLowerCase().includes(lowerValue) ||
-          d.description?.toLowerCase().includes(lowerValue)
-        )
-      ) return true;
-
-      if (
-        c.components?.some(sub =>
-          sub.name?.toLowerCase().includes(lowerValue)
-        )
-      ) return true;
-
-      return false;
-    });
-
-    setComponents(searched);
+    setComponents(showFilterComponents(value));
     setCount(6);
   };
 
@@ -245,15 +258,21 @@ function Home() {
                   ))}
                 </CardContent>
                 <Box sx={{ px: 2, pb: 2, display: 'flex', justifyContent: 'flex-end', alignItems: 'center' }}>
-                  <Button variant="contained" size="small" onClick={() => navigate(`/components/${c._id}`)} sx={{
-                    backgroundColor: 'var(--color-bg-secondary)',
-                    color: 'var(--color-title-secondary)',
-                    maxHeight: '30px',
-                    fontFamily:'var(--font-source)', 
-                    '&:hover': {
-                      backgroundColor: 'var(--color-bg-primary-hover)',
-                    },
-                  }}>
+                  <Button variant="contained" size="small"
+                    onClick={() => {
+                      localStorage.setItem("searchedComponent", `${searchTerm}`);
+                      navigate(`/components/${c._id}`);
+                    }}
+                    sx={{
+                      backgroundColor: 'var(--color-bg-secondary)',
+                      color: 'var(--color-title-secondary)',
+                      maxHeight: '30px',
+                      fontFamily:'var(--font-source)', 
+                      '&:hover': {
+                        backgroundColor: 'var(--color-bg-primary-hover)',
+                      },
+                    }}
+                  >
                     Ver Detalles
                   </Button>
                 </Box>

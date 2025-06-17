@@ -8,7 +8,7 @@ import SideBar from "../components/SideBar";
 import { GridMoreVertIcon } from "@mui/x-data-grid";
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import DateTimeParser from "../components/DateTimeParser";
+import DateTimeParser from "../utils/DateTimeParser";
 
 const ManageComponents = () => {
     const navigate = useNavigate();
@@ -23,6 +23,7 @@ const ManageComponents = () => {
 
     const BACKEND_URL = process.env.REACT_APP_BACK_URL;
     const token = localStorage.getItem('token');
+    localStorage.removeItem('selectedComponent');
     if (!token) navigate('/login');
 
     const columns = [
@@ -250,12 +251,12 @@ const ManageComponents = () => {
             display: 'flex',
             height: "100vh",
             width: "100%",
-            background: "var(--color-blur-bg)",
             color: "var(--color-text-base)",
             position: "fixed",
             top: 0,
             left: 0,
         }}>
+            
             <SideBar />
             <Box sx={{
                 display: 'flex',

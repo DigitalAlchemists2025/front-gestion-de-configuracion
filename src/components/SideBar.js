@@ -1,5 +1,4 @@
 import { Box } from "@mui/material";
-import React from "react";
 import { useNavigate } from "react-router-dom";
 import ListButtonItem from "./ListButtonItem";
 import { getAuth, signOut } from "firebase/auth";

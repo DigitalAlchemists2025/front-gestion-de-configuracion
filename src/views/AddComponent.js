@@ -33,6 +33,8 @@ const AddComponent = () => {
     window.location.href = "/login";
   } 
 
+  localStorage.removeItem("selectedComponent");
+
   const handleSubmit = () => {
     setLoading(true);
     const validDescriptions = caracteristicas.filter(
@@ -127,6 +129,7 @@ const AddComponent = () => {
           backgroundColor: 'var(--bg-paper)',
           boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
           color: 'var(--color-text-base)',
+
           width: { xs: '100%', md: '80%' },
           maxWidth: 700,
           minWidth: 320,

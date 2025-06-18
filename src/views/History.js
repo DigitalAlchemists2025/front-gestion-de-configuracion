@@ -87,9 +87,7 @@ const History = () => {
         headerName: "Usuario",
         flex: 1,
         renderCell: (params) => (
-          <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
-            {params.row.user_id?.username ?? "Desconocido"}
-          </Typography>
+          params.row.user_id?.username ?? "Desconocido"
         ),
       },
       {
@@ -97,9 +95,7 @@ const History = () => {
         headerName: "Acción",
         flex: 1,
         renderCell: (params) => (
-          <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
-            {params.value.charAt(0).toUpperCase() + params.value.slice(1)}
-          </Typography>
+          params.value.charAt(0).toUpperCase() + params.value.slice(1)
         ),
       },
       {
@@ -112,9 +108,7 @@ const History = () => {
         headerName: "Subcomponente",
         flex: 1,
         renderCell: (params) => (
-          <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
-            {params.value || "—"}
-          </Typography>
+          params.value || "—"
         ),
       },
       {
@@ -122,9 +116,7 @@ const History = () => {
         headerName: "Fecha",
         flex: 1,
         renderCell: (params) => (
-          <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
-            {DateTimeParser(params.value)}
-          </Typography>
+          DateTimeParser(params.value)
         ),
       },
     ],
@@ -158,40 +150,16 @@ const History = () => {
         display: "flex",
         flexDirection: "column",
         alignItems: "stretch",
+        zIndex: 1,
       }}>
-        <Typography variant="h5" sx={{
+        <Typography variant="h4" sx={{
           fontFamily: "var(--font-montserrat)",
           color: "var(--color-title-primary)",
-          my: 3,
+          my: 5,
           textAlign: "center",
         }}>
           Historial de Cambios
         </Typography>
-
-        <TextField
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          placeholder="Buscar"
-          size="small"
-          sx={{
-            width: "60%",
-            maxWidth: 400,
-            mb: 2,
-            alignSelf: "center",
-            backgroundColor: "var(--bg-inputs)",
-            borderRadius: 1,
-          }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Avatar
-                  src="/search-icon.png"
-                  sx={{ width: 20, height: 20, filter: "invert(20%)" }}
-                />
-              </InputAdornment>
-            ),
-          }}
-        />
 
         {loading ? (
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -202,14 +170,14 @@ const History = () => {
             sx={{
               flex: 1,
               width: "90%",
-              maxHeight: "80vh",
+              maxHeight: "75vh",
               alignSelf: "center",
               borderRadius: "16px",
               boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
               overflow: "hidden",
               display: "flex",
               flexDirection: "column",
-              fontSize: "1.1rem",
+              fontSize: "1rem",
             }}
           >
             <DataGrid
@@ -226,7 +194,7 @@ const History = () => {
                 pagination: { paginationModel: { pageSize: 10, page: 0 } },
                 sorting: { sortModel: [{ field: "date", sort: "desc" }] },
               }}
-              onRowClick={handleRowClick}
+              /* onRowClick={handleRowClick} */
               sx={{
                 width: '100%',
                 height: '100%',
@@ -234,11 +202,11 @@ const History = () => {
                 borderRadius: '0 0 16px 16px',
                 fontFamily: 'var(--font-source)',
                 fontSize: '1rem',
-
                 '& .MuiDataGrid-columnHeader': {
                   backgroundColor: 'var(--color-bg-secondary)',
                   color: '#ffffff',
                   borderBottom: 'none',
+                  fontSize: '1.1rem',
                 },
                 '& .MuiDataGrid-columnSeparator': {
                   color: 'rgba(255,255,255,0.2)',

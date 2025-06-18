@@ -14,6 +14,7 @@ import {
 import axios from "axios";
 import LoadingCircle from "../components/LoadingCircle";
 import SideBar from "../components/SideBar";
+import AddCharasteristicModal from "../components/AddCharacteristModal";
 
 const AddComponent = () => {
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
@@ -250,57 +251,32 @@ const AddComponent = () => {
         </FormControl>
       </Box>
   
-      <Modal open={isModalOpen} onClose={handleCloseModal}>
-        <Box
-          sx={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: 400,
-            bgcolor: 'white',
-            boxShadow: 24,
-            p: 4,
-            borderRadius: 2,
-          }}
-        >
-          <Typography variant="h6" component="h2" sx={{ mb: 2, fontFamily: "var(--font-montserrat)" }}>
-            Agregar Característica
-          </Typography>
-  
-          <TextField
-            label="Nombre"
-            value={newNombre}
-            onChange={(e) => setNewNombre(e.target.value)}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-          />
-  
-          <TextField
-            label="Descripción"
-            value={newDescripcion}
-            onChange={(e) => setNewDescripcion(e.target.value)}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-          />
-  
-          <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button onClick={handleCloseModal} color="secondary" sx={{ color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
-              Cancelar
-            </Button>
-            <Button
-              onClick={handleAddCaracteristica}
-              variant="contained"
-              sx={{ backgroundColor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-              disabled={!newNombre.trim() || !newDescripcion.trim()}
-            >
-              Agregar
-            </Button>
-          </Box>
-        </Box>
-      </Modal>
+      <AddCharasteristicModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        title="Agregar Característica"
+        onConfirm={handleAddCaracteristica}
+        confirmText="Agregar"
+        confirmDisabled={!newNombre.trim() || !newDescripcion.trim()}
+        sxBox={{ transform: 'translate(-12.5%, -75%)' }}
+      >
+        <TextField
+          label="Nombre"
+          value={newNombre}
+          onChange={(e) => setNewNombre(e.target.value)}
+          fullWidth
+          margin="normal"
+          variant="outlined"
+        />
+        <TextField
+          label="Descripción"
+          value={newDescripcion}
+          onChange={(e) => setNewDescripcion(e.target.value)}
+          fullWidth
+          margin="normal"
+          variant="outlined"
+        />
+      </AddCharasteristicModal>
     </Box>
   );    
 };

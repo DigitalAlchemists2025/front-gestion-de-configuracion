@@ -1,7 +1,7 @@
 import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar, Tabs, Tab, CardContent, ListItem, IconButton } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
 import RemoveIcon from '@mui/icons-material/Remove';
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
@@ -13,6 +13,7 @@ import SideBar from "../components/SideBar";
 import TabPanel from "../components/TabPanel";
 import { DataGrid } from "@mui/x-data-grid";
 import DateTimeParser from "../utils/DateTimeParser";
+import AddCharacteristicModal from "../components/AddCharacteristModal";
 
 const ComponentDetail = () => {
   const columns = [
@@ -62,24 +63,18 @@ const ComponentDetail = () => {
       renderCell: (params) => {
         const user = params.row.user_id;
         return (
-          <Typography variant="body1" sx={{ fontFamily: "var(--font-source)" }}>
-            {user?.username ?? 'Desconocido'}
-          </Typography>
+            user?.username ?? 'Desconocido'
         );
       }
     },
     { field: 'action', headerName: 'Acción', flex: 1,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
-          {params.value.charAt(0).toUpperCase() + params.value.slice(1)}
-        </Typography> 
+        params.value.charAt(0).toUpperCase() + params.value.slice(1)
       )
     },
     { field: 'date', headerName: 'Fecha', flex: 1,
       renderCell: (params) => (
-        <Typography variant="body2" sx={{ fontFamily: "var(--font-source)" }}>
-          {new Date(params.value).toLocaleString()}
-        </Typography>
+        new Date(params.value).toLocaleString()
       )
     },
   ]
@@ -136,6 +131,8 @@ const ComponentDetail = () => {
     }
   ]
   const { id } = useParams();
+  const { state } = useLocation();
+
   const [component, setComponent] = useState(null);
   const [changes, setChanges] = useState(false);
 
@@ -217,16 +214,12 @@ const ComponentDetail = () => {
   }, [id]);
   
   useEffect(() => {
-    if (localStorage.getItem("selectedComponent")) {
-      const idStoraged = localStorage.getItem("selectedComponent").split("-")[0];
-      if (idStoraged === component?._id) {
-        const selectedComponent = localStorage.getItem("selectedComponent").split("-")[1];
-        setSearchTerm(selectedComponent);
-        handleOpenModalChild();
-        localStorage.removeItem("selectedComponent");
-      }
+    if (!component) return;
+    if (state?.openChildModalFor === component._id) {
+      setSearchTerm(state.search || '');
+      handleOpenModalChild();
     }
-  }, [id]);
+  }, [component, state]);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -343,7 +336,7 @@ const ComponentDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const components = response.data.filter((c) => c.parent === null && c.name !== component.name);
+      const components = response.data.filter((c) => c.parent === null && String(c._id) !== String(component._id));
       setAllComponents(components);
       setSearchedComponents(components);
       setIsModalChildOpen(true);
@@ -519,15 +512,20 @@ const ComponentDetail = () => {
     }
   };
 
-  const handleSearch = (value) => {
+  const handleSearch = async (value) => {
     setSearchTerm(value);
-  
-    const searched = allComponents.filter((c) =>
-      c.name.toLowerCase().includes(value.toLowerCase()) ||
-      c.type.toLowerCase().includes(value.toLowerCase()) 
-    );
-  
-    setSearchedComponents(searched);
+    try {
+      const response = await axios.get(
+        `${BACKEND_URL}/components/search`,
+        {
+          params: { q: value },
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setSearchedComponents(response.data.filter(c => c.parent !== null && String(c._id !== component._id)));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const handleTabChange = (event, newValue) => {
@@ -1068,58 +1066,35 @@ const ComponentDetail = () => {
         </Paper>
 
         {/* Modal para añadir característica al padre */}
-        <Modal open={isModalOpen} onClose={handleCloseModal}>
-          <Box
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 400,
-              bgcolor: "white",
-              backdropFilter: "blur(4px)",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
-              Agregar Característica
-            </Typography>
-    
-            <TextField
-              label="Nombre"
-              value={newNombre}
-              onChange={(e) => setNewNombre(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-    
-            <TextField
-              label="Descripción"
-              value={newDescripcion}
-              onChange={(e) => setNewDescripcion(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-    
-            <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
-              <Button onClick={handleCloseModal} color="primary" sx={{ color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleAddDescripcion}
-                variant="contained"
-                sx={{ backgroundColor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-                disabled={!newNombre.trim() || !newDescripcion.trim() || loadingButtons}
-              >
-                Agregar
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
+        <AddCharacteristicModal
+          open={isModalOpen}
+          onClose={handleCloseModal}
+          title="Agregar Característica"
+          onConfirm={handleAddDescripcion}
+          confirmText="Agregar"
+          cancelText="Cancelar"
+          confirmDisabled={
+            !newNombre.trim() || !newDescripcion.trim() || loadingButtons
+          }
+          sxConfirmBtn={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
+          <TextField
+            label="Nombre"
+            value={newNombre}
+            onChange={(e) => setNewNombre(e.target.value)}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            label="Descripción"
+            value={newDescripcion}
+            onChange={(e) => setNewDescripcion(e.target.value)}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+          />
+        </AddCharacteristicModal>
 
         {/* Modal para agregar sub componentes */}
         <Modal open={isModalChildOpen} onClose={handleCloseModal}>
@@ -1230,8 +1205,9 @@ const ComponentDetail = () => {
                       key={c._id}
                       variant="outlined"
                       onClick={() =>{ 
-                        navigate(`/components/${c._id}`);
-                        localStorage.setItem("selectedComponent", `${c._id}-${searchTerm}`);
+                        navigate(`/components/${c._id}`,
+                          { state: { openChildModalFor: component._id, search: searchTerm } }
+                        );
                         setSearchTerm("");
                         handleCloseModal();
                       }}
@@ -1432,58 +1408,37 @@ const ComponentDetail = () => {
         </Modal>
 
         {/* Modal para características en Hijo */}
-        <Modal open={isCharModalOpen} onClose={handleCloseCharModal}>
-          <Box
-            sx={{
-              position: 'absolute',
-              top: '50%',
-              left: '50%',
-              transform: 'translate(-50%, -50%)',
-              width: 400,
-              bgcolor: 'white',
-              backdropFilter: "blur(4px)",
-              boxShadow: 24,
-              p: 4,
-              borderRadius: 2,
-            }}
-          >
-            <Typography variant="h6" component="h2" sx={{ mb: 2, color: "var(--color-title-primary)", fontFamily: "var(--font-montserrat)" }}>
-              Agregar Característica
-            </Typography>
-    
-            <TextField
-              label="Nombre"
-              value={newSubName}
-              onChange={(e) => setNewSubName(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-    
-            <TextField
-              label="Descripción"
-              value={newSubDescription}
-              onChange={(e) => setNewSubDescription(e.target.value)}
-              fullWidth
-              margin="normal"
-              variant="outlined"
-            />
-    
-            <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-              <Button onClick={handleCloseCharModal} color="secondary" sx={{ color: "var(--color-title-primary)", fontFamily: "var(--font-source)" }}>
-                Cancelar
-              </Button>
-              <Button
-                onClick={handleAddNewSubCharacteristics}
-                variant="contained"
-                sx={{ backgroundColor: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
-                disabled={!newSubName.trim() || !newSubDescription.trim() || loadingButtons}
-              >
-                Agregar
-              </Button>
-            </Box>
-          </Box>
-        </Modal>
+        <AddCharacteristicModal
+          open={isCharModalOpen}
+          onClose={handleCloseCharModal}
+          title="Agregar Característica"
+          onConfirm={handleAddNewSubCharacteristics}
+          confirmText="Agregar"
+          cancelText="Cancelar"
+          confirmDisabled={
+            !newSubName.trim() || !newSubDescription.trim() || loadingButtons
+          }
+          sxBox={{ transform: 'translate(-50%, -50%)' }}
+          sxCancelBtn={{ color: 'var(--color-title-primary)' }}
+          sxConfirmBtn={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
+          <TextField
+            label="Nombre"
+            value={newSubName}
+            onChange={(e) => setNewSubName(e.target.value)}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+          />
+          <TextField
+            label="Descripción"
+            value={newSubDescription}
+            onChange={(e) => setNewSubDescription(e.target.value)}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+          />
+        </AddCharacteristicModal>
       </Box>   
     </Box>
   );

@@ -11,6 +11,12 @@ import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import DateTimeParser from "../utils/DateTimeParser";
 
 const ManageComponents = () => {
+    let initialSearch = localStorage.getItem('searchedComponentManagment');
+    if (initialSearch == "null" || initialSearch == "undefined") {
+        localStorage.removeItem('searchedComponentManagment');
+        initialSearch = '';
+    }
+    
     const navigate = useNavigate();
     const [allComponents, setAllComponents] = useState([]);
     const [components, setComponents] = useState([]);
@@ -116,9 +122,18 @@ const ManageComponents = () => {
                     updatedAt: parsedUpdatedAt,
                     };
                 }).sort((a, b) => a.name.localeCompare(b.name)); 
-
                 setAllComponents(componentesMappedAndSorted);
-                setComponents(componentesMappedAndSorted);
+
+                if (initialSearch) {
+                    const response = await axios.get(`${BACKEND_URL}/components/search`, { 
+                        params: { q: initialSearch }, 
+                        headers: { 'Authorization': `Bearer ${token}` } 
+                    });
+                    setComponents(response.data);
+                    setSearchTerm(initialSearch);
+                } else {
+                    setComponents(componentesMappedAndSorted);
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
             } finally {
@@ -129,20 +144,21 @@ const ManageComponents = () => {
         fetchData();
     }, [token]);
 
-    const handleSearch = (value) => {
+    const handleSearch = async (value) => {
         setSearchTerm(value);
-      
-        const searched = allComponents.filter((c) =>
-            c.name.toLowerCase().includes(value.toLowerCase()) ||
-            c.type.toLowerCase().includes(value.toLowerCase()) ||
-            (Array.isArray(c.descriptions) && c.descriptions.some((desc) =>
-                desc.description?.toLowerCase().includes(value.toLowerCase())
-            ))
-            /* || c.hijos.name || c.hijos.type */
-        );
-      
-        setComponents(searched);
-    };  
+        try {
+          const response = await axios.get(
+            `${BACKEND_URL}/components/search`,
+            {
+              params: { q: value },
+              headers: { Authorization: `Bearer ${token}` },
+            }
+          );
+          setComponents(response.data);
+        } catch (error) {
+          console.error(error);
+        }
+    };
 
     const handleMenuOpen = (event, row) => {
         setAnchorEl(event.currentTarget);
@@ -216,7 +232,6 @@ const ManageComponents = () => {
                     headers: { Authorization: `Bearer ${token}` },
                 });
 
-                /* Falta arreglar la linea subcomponente desfazada */
                 const populated = res.data.components.slice(0, 3);
 
                 const subRows = populated.map((sub, i) => ({
@@ -228,7 +243,7 @@ const ManageComponents = () => {
                     type: sub.type,
                     createdAt: DateTimeParser(sub.createdAt),
                     updatedAt: DateTimeParser(sub.updatedAt),
-                    isSub: true,
+                    isSub: true
                 }));
 
                 const index = components.findIndex((c) => c._id === row._id);
@@ -358,10 +373,11 @@ const ManageComponents = () => {
                                 pagination: { paginationModel: { page: 0, pageSize: 10 } },
                             }}
                             onRowClick={(params) => {
+                                localStorage.setItem("searchedComponentManagment", `${searchTerm}`);
                                 if (!params.isSub){
                                     navigate(`/components/${params.row._id}`)
                                 } else {
-                                    const newId = params.row._id.split('-sub-')[0];
+                                    const newId = params.row._id.split('-')[0];
                                     navigate(`/components/${newId}`);
                                 }
                             }}

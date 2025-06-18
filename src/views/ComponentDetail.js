@@ -29,29 +29,6 @@ const ComponentDetail = () => {
             return '';
         },
     },
-    {
-      field: 'components', 
-      headerName: '', 
-      width: 20,
-      sortable: false,
-      filterable: false, 
-      disableColumnMenu: true,
-      disableReorder: true,
-      stopPropagation: true,
-      renderCell: (params) => {
-        const isExpanded = expandedRows[params.row._id];
-        return (
-          params.row.components?.length > 0 && !params.row.isSub ? (
-            <IconButton onClick={(e) => {
-              e.stopPropagation();
-              showSubComponents(e, params.row);
-            }}>
-              {isExpanded ? <ArrowDropUpIcon /> : <ArrowDropDownIcon />}
-            </IconButton>
-          ) : null
-        );
-      }
-    },
   ];
 
   const historyColumns = [
@@ -171,10 +148,6 @@ const ComponentDetail = () => {
   /* Tabs */
   const [tabValue, setTabValue] = useState(0);
 
-  /* Tabla Subcomponentes */
-  const [expandedRows, setExpandedRows] = useState({});
-  const [subComponents, setSubComponents] = useState([]);
-
   /* Historial */
   const [history, setHistory] = useState([]);
 
@@ -223,6 +196,7 @@ const ComponentDetail = () => {
         setHistory(response.data);
       } catch (error) {
         console.error("Error al obtener historial:", error);
+        setHistory([]);
       }
     };
     fetchHistory();
@@ -528,48 +502,6 @@ const ComponentDetail = () => {
     setTabValue(newValue);
   };
 
-  /* Tabla subcomponentes */
-  const showSubComponents = async (event, row) => {
-      const isExpanded = expandedRows[row._id];
-      
-      if (isExpanded) {
-        setSubComponents((prev) => prev.filter((c) => c.parentId !== row._id));
-        setExpandedRows((prev) => ({ ...prev, [row._id]: false }));
-      } else {
-        try {
-          const res = await axios.get(`${BACKEND_URL}/components/${row._id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-
-          /* Falta arreglar la linea subcomponente desfazada */
-          const populated = res.data.components.slice(0, 3);
-
-          const subRows = populated.map((sub, i) => ({
-            ...sub,
-            _id: `${sub._id}-sub-${i}`,
-            parentId: row._id,
-            name: `> ${sub.name}`,
-            status: sub.status,
-            type: sub.type,
-            createdAt: DateTimeParser(sub.createdAt),
-            updatedAt: DateTimeParser(sub.updatedAt),
-            isSub: true,
-          }));
-
-          const index = subComponents.findIndex((c) => c._id === row._id);
-          const newList = [
-              ...subComponents.slice(0, index + 1),
-              ...subRows,
-              ...subComponents.slice(index + 1),
-          ];
-          setSubComponents(newList);
-          setExpandedRows((prev) => ({ ...prev, [row._id]: true }));
-        } catch (error) {
-          console.error("Error cargando subcomponentes:", error);
-        }
-      }
-  };
-
   if (loading) {
     return (
       <Box sx={{ display:'flex', height:'100vh', width: '100vw', position: 'fixed', top: 0, left: 0, color: 'var(--color-text-base)' }}>
@@ -615,7 +547,7 @@ const ComponentDetail = () => {
           }}
         >
 
-          {/* Parte Arriba */}
+          {/* Box información del component */}
           <Box sx={{ 
             display: 'flex', 
             flexDirection: 'row',  
@@ -728,7 +660,7 @@ const ComponentDetail = () => {
             </Box>
           </Box>
             
-          {/* Parte de abajo */}
+          {/* Box de tabs para características, subcomponentes e historial */}
           <Box sx={{ display: 'flex', flexDirection: "column", maxWidth: "100%", mr: 1, flexGrow: 1, overflow: "hidden", }}>  
             <Tabs
               value={tabValue}
@@ -1347,15 +1279,8 @@ const ComponentDetail = () => {
                     <Button
                       variant="outlined"
                       onClick={handleOpenCharModal}
-                      sx={{
-                        borderColor: 'var(--color-bg-secondary)',
-                        backgroundColor: 'var(--color-bg-gradient)',
-                        color: 'var(--color-title-primary)',
-                        height: 'fit-content',
-                        '&:hover': {
-                          borderColor: 'var(--color-bg-secondary-hover)',
-                          backgroundColor: 'var(--color-bg-secondary-hover)',
-                        },
+                      sx={{ borderColor: 'var(--color-bg-secondary)', backgroundColor: 'var(--color-bg-gradient)', color: 'var(--color-title-primary)', height: 'fit-content',
+                        '&:hover': { borderColor: 'var(--color-bg-secondary-hover)', backgroundColor: 'var(--color-bg-secondary-hover)' },
                       }}
                     >
                       +
@@ -1366,30 +1291,14 @@ const ComponentDetail = () => {
                 <Box sx={{ display: "flex", mt: 5, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center"}}>
                   <Button 
                     onClick={handleCloseNewChildModal} 
-                    sx={{ 
-                      py: 1.5,
-                      borderRadius: 50,
-                      color: '#fff',
-                      fontFamily: "var(--font-source)"
-                    }}
+                    sx={{ py: 1.5, borderRadius: 50, color: '#fff', fontFamily: "var(--font-source)" }}
                   >
                     Cancelar
                   </Button>
                   <Button 
                     variant="contained" 
-                    sx={{
-                      py: 1.5,
-                      borderRadius: 50,
-                      backgroundColor: 'var(--color-bg-gradient)',
-                      fontFamily: "var(--font-source)",
-                      color: 'var(--color-title-primary)',
-                      '&:hover': {
-                        backgroundColor: 'var(--color-bg-secondary-hover)',
-                      },
-                      '&:disabled': {
-                        backgroundColor: '#fff',
-                        color: "rgb(65, 92, 117)",
-                      },
+                    sx={{ py: 1.5, borderRadius: 50, backgroundColor: 'var(--color-bg-gradient)', fontFamily: "var(--font-source)", color: 'var(--color-title-primary)',
+                      '&:hover': { backgroundColor: 'var(--color-bg-secondary-hover)' }, '&:disabled': { backgroundColor: '#fff', color: "rgb(65, 92, 117)" },
                     }}
                     onClick={handleAddChildComponent}
                     disabled={!nombre || !tipo || !estado || loadingButtons}

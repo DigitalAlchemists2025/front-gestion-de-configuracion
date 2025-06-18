@@ -131,7 +131,6 @@ const ComponentDetail = () => {
     }
   ]
   const { id } = useParams();
-  const { state } = useLocation();
 
   const [component, setComponent] = useState(null);
   const [changes, setChanges] = useState(false);
@@ -212,14 +211,6 @@ const ComponentDetail = () => {
     };
     fetchComponent();
   }, [id]);
-  
-  useEffect(() => {
-    if (!component) return;
-    if (state?.openChildModalFor === component._id) {
-      setSearchTerm(state.search || '');
-      handleOpenModalChild();
-    }
-  }, [component, state]);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -229,7 +220,6 @@ const ComponentDetail = () => {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(response.data);
         setHistory(response.data);
       } catch (error) {
         console.error("Error al obtener historial:", error);
@@ -345,10 +335,16 @@ const ComponentDetail = () => {
     }
   };
 
+  const handleCloseChildModal = () => {
+    setIsModalChildOpen(false);
+  };
+
+  const handleCloseNewChildModal = () => {
+    setIsModalNewChildOpen(false);
+  };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setIsModalNewChildOpen(false);
-    setIsModalChildOpen(false);
   };
 
   /* Características para SubComponente */
@@ -485,7 +481,7 @@ const ComponentDetail = () => {
         ...prev,
         components: nuevosComponentes,
       }));
-      handleCloseModal();
+      handleCloseChildModal();
     } catch (error) {
       console.error("Error al agregar componente hijo:", error);
     } finally {
@@ -1043,7 +1039,7 @@ const ComponentDetail = () => {
           </Box>  
           <footer>
             {rol === '0' && (
-              <Box sx={{ display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly" }}>
+              <Box sx={{ display: 'flex', gap: 2, width: "100%", justifyContent: "space-evenly", mb: 10 }}>
                 <Button
                   variant="outlined"
                   sx={{ borderColor: "var(--color-bg-secondary)", color: "var(--color-bg-secondary)", fontFamily: "var(--font-source)" }}
@@ -1097,7 +1093,7 @@ const ComponentDetail = () => {
         </AddCharacteristicModal>
 
         {/* Modal para agregar sub componentes */}
-        <Modal open={isModalChildOpen} onClose={handleCloseModal}>
+        <Modal open={isModalChildOpen} onClose={handleCloseChildModal}>
           <Box sx={{
             position: "absolute",
             top: "50%",
@@ -1205,11 +1201,9 @@ const ComponentDetail = () => {
                       key={c._id}
                       variant="outlined"
                       onClick={() =>{ 
-                        navigate(`/components/${c._id}`,
-                          { state: { openChildModalFor: component._id, search: searchTerm } }
-                        );
+                        navigate(`/components/${c._id}`)
                         setSearchTerm("");
-                        handleCloseModal();
+                        handleCloseChildModal();
                       }}
                       sx={{
                         m: "1em auto",
@@ -1249,7 +1243,7 @@ const ComponentDetail = () => {
         </Modal>
 
         {/* Modal para crear nuevo componente hijo */}
-        <Modal open={isModalNewChildOpen} onClose={handleCloseModal}>
+        <Modal open={isModalNewChildOpen} onClose={handleCloseNewChildModal}>
           <Box sx={{
             flexGrow: 1,
             display: 'flex',
@@ -1371,7 +1365,7 @@ const ComponentDetail = () => {
                   
                 <Box sx={{ display: "flex", mt: 5, flexDirection: "row", justifyContent: "space-evenly", alignItems: "center"}}>
                   <Button 
-                    onClick={handleCloseModal} 
+                    onClick={handleCloseNewChildModal} 
                     sx={{ 
                       py: 1.5,
                       borderRadius: 50,

@@ -51,6 +51,7 @@ function SideBar() {
                     <ListButtonItem nombre="Gestionar Componentes" onClick={() => navigate('/gestionar-componentes')} />
                     <ListButtonItem nombre="Agregar Componentes" onClick={() => navigate('/agregar-componentes')} />
                     <ListButtonItem nombre="Ver Historial" onClick={() => navigate('/ver-historial')} />
+                    <ListButtonItem nombre="Gestionar Usuarios" onClick={() => navigate('/users')} />
                 </>
             )}
             <ListButtonItem nombre="Cerrar Sesión" onClick={HandleCerrarSesion} />

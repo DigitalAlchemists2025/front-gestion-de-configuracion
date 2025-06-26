@@ -7,8 +7,8 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 
 
-function Login() {
-  const [login, setLogin] = useState({ email: '', password: '' });
+function Register() {
+  const [register, setRegister] = useState({ username: '', email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
   const [id, setId] = useState(null);
 
@@ -18,66 +18,21 @@ function Login() {
     e.preventDefault();
     setLoading(true);
     try {
-      const resp = await axios.post(`${BACKEND_URL}/api/v1/auth/signin`, {
-        email: login.email.trim(),
-        password: login.password,
+      await axios.post(`${BACKEND_URL}/api/v1/auth/signup`, {
+        username: register.username.trim(),
+        email: register.email.trim(),
+        password: register.password,
+        role: 'usuario',
       });
-      const { access_token } = resp.data;
-      localStorage.setItem('token', access_token);
-      setId(resp.data.id);
-      if (access_token) {
-        alert('Ha iniciado sesión correctamente');
-      } else {
-        console.log("Usuario no existe");
-      }
+      alert('Te has registrado correctamente');
+      window.location.replace("/login");
     } catch (error) {
-      if (error.response && error.response.status === 401) {
-        alert('Usuario o contraseña incorrectos');
-      } else {
-        console.error('Error en el login:', error);
-        alert('Ocurrió un error. Por favor, inténtalo de nuevo más tarde.');
-      }
+      console.error('Error al registrar:', error);
+      alert('Ocurrió un error. Por favor, inténtalo de nuevo más tarde.');
     } finally {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (!id) return;
-  
-    const fetchUser = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        console.warn("No se encontró token");
-        return;
-      }
-  
-      try {
-        const response = await axios.get(`${BACKEND_URL}/users/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-  
-        const role = response.data.role;
-  
-        if (role === 'usuario') {
-          localStorage.setItem('role', '1');
-        } else if (role === 'administrador') {
-          localStorage.setItem('role', '0');
-        } else {
-          console.warn("Rol desconocido:", role);
-        }
-  
-        window.location.replace('/home');
-  
-      } catch (error) {
-        console.error("Error al obtener el usuario:", error);
-      }
-    };
-  
-    fetchUser();
-  }, [id]);
   
   // Login Google con Popup
   const handleGoogleLogin = () => {
@@ -105,8 +60,8 @@ function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLogin({
-      ...login,
+    setRegister({
+      ...register,
       [name]: value,
     });
   };
@@ -171,7 +126,7 @@ function Login() {
             color: 'var(--login-paper-header)',
           }}
         >
-          Iniciar Sesión
+          Registrarse
         </Typography>
 
 
@@ -196,17 +151,27 @@ function Login() {
           }}
         >
           <FontAwesomeIcon icon={faGoogle} style={{ color: "var(--color-title-primary)"}} />
-            Iniciar sesión con Google
+            Continuar con Google
         </Button>
 
         <Divider sx={{ borderColor: 'black', my: 5 }} />
 
-        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>O iniciar sesión con credenciales:</Typography>
+        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>Ingresa tus credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <TextField
+            type="string"
+            name="username"
+            value={register.username}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            label="Nombre de usuario"
+            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+          />
           <TextField
             type="email"
             name="email"
-            value={login.email}
+            value={register.email}
             onChange={handleChange}
             fullWidth
             size="small"
@@ -216,7 +181,7 @@ function Login() {
           <TextField
             type="password"
             name="password"
-            value={login.password}
+            value={register.password}
             onChange={handleChange}
             fullWidth
             size="small"
@@ -230,7 +195,7 @@ function Login() {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={isLoading || login.password === "" || login.email === ""}
+          disabled={isLoading || register.username === "" || register.password === "" || register.email === ""}
           sx={{
             mt: 4,
             py: 1.5,
@@ -247,10 +212,10 @@ function Login() {
         </Button>
         
         <Divider sx={{ borderColor: 'black', my: 5 }} />
-        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>No tiene cuenta? <Link href="/register">Registrese aquí</Link></Typography>
+        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>Ya tiene cuenta? <Link href="/register">Inicie sesión aquí</Link></Typography>
       </Paper>
     </Box>
   );
 }
 
-export default Login;
+export default Register;

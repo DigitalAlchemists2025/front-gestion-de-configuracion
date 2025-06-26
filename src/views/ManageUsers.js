@@ -55,8 +55,8 @@ const ManageUsers = () => {
             setUsers(allUsers);
         } else {
             const terms = searchTerm.toLowerCase().split(" ").filter(Boolean);
-            setRecords(
-                records.filter((u) => {
+            setUsers(
+                users.filter((u) => {
                     const haystack = [u.username, u.email]
                         .filter(Boolean)
                         .join(" ")

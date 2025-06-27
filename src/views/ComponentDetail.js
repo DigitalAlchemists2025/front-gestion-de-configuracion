@@ -99,6 +99,7 @@ const ComponentDetail = () => {
         rol === '0' ? (
           <IconButton
             size="small"
+            disabled={loadingButtons}
             onClick={() => handleDeleteDescription(params.row._idx)}
             sx={{ color: 'error.main' }}
           >
@@ -372,10 +373,21 @@ const ComponentDetail = () => {
     setChanges(true);
   };
 
-  const handleDeleteDescription = (index) => {
+  const handleDeleteDescription = async (index) => {
+    setLoadingButtons(true);
     const updatedDescriptions = mainDescriptions.filter((_, i) => i !== index);
+    try {
+      await axios.delete(`${BACKEND_URL}/components/${id}/descriptions/${mainDescriptions[index]._id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+    } catch(err) {
+      console.error(err);
+    } finally {
+      setLoadingButtons(false);
+    }
     setMainDescriptions(updatedDescriptions);
-    setChanges(true);
   };
 
   const handleSaveChanges = async () => {
@@ -734,29 +746,28 @@ const ComponentDetail = () => {
                       }}
                     />
                   </Paper>
-
-                  {rol === '0' && (
-                    <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-                      <Button
-                        variant="outlined"
-                        color="info"
-                        size="small"
-                        sx={{
-                          color: "var(--color-title-primary)",
-                          borderColor: "var(--color-title-primary)",
-                          fontFamily: "var(--font-source)",
-                        }}
-                        onClick={handleOpenModal}
-                      >
-                        + Agregar Característica
-                      </Button>
-                    </Box>
-                  )}
                 </Box>
               ) : (
                 <Typography variant="overline" sx={{ fontFamily: "var(--font-source)", m: 2 }}>
                   No hay características disponibles para este componente.
                 </Typography>
+              )}
+              {rol === '0' && (
+                <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+                  <Button
+                    variant="outlined"
+                    color="info"
+                    size="small"
+                    sx={{
+                      color: "var(--color-title-primary)",
+                      borderColor: "var(--color-title-primary)",
+                      fontFamily: "var(--font-source)",
+                    }}
+                    onClick={handleOpenModal}
+                  >
+                    + Agregar Característica
+                  </Button>
+                </Box>
               )}
             </TabPanel>
 

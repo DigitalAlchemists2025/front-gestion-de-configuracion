@@ -9,14 +9,28 @@ import {
   InputAdornment,
   Avatar,
   CircularProgress,
+  Divider,
+  List,
+  ListItem,
+  Chip,
+  Button,
 } from "@mui/material";
 import { DataGrid } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
+import { getChangeDetails } from "../utils/HistoryParser";  
 import DateTimeParser from "../utils/DateTimeParser";
 import LoadingCircle from "../components/LoadingCircle";
+
+const COLOR_MAP = {
+  added:   { bg: "#e8f5e9", color: "#43a047" },
+  edited:  { bg: "#fffde7", color: "#fbc02d" },
+  deleted: { bg: "#ffebee", color: "#e53935" },
+  associated: { bg: "#e3f2fd", color: "#1976d2" },
+  disassociated: { bg: "#f3e5f5", color: "#8e24aa" },
+};
 
 const History = () => {
   const navigate = useNavigate();
@@ -29,6 +43,10 @@ const History = () => {
   const [loading, setLoading] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
+
+  const [componentExists, setComponentExists] = useState(null);
+  const [checkingComponent, setCheckingComponent] = useState(false);
+  const [changeDetails, setChangeDetails] = useState([]);
 
   useEffect(() => {
     if (!token || role !== "0") navigate("/login");
@@ -80,7 +98,13 @@ const History = () => {
     }
   }, [searchTerm, records]);
 
-   const columns = useMemo(
+  useEffect(() => {
+    if (selectedRecord) {
+      setChangeDetails(getChangeDetails(selectedRecord));
+    }
+}, [selectedRecord]);
+
+  const columns = useMemo(
     () => [
       {
         field: "user_id",
@@ -123,15 +147,48 @@ const History = () => {
     []
   );
 
-  const handleRowClick = (params) => {
+  const handleRowClick = async (params) => {
     setSelectedRecord(params.row);
     setDetailModalOpen(true);
+    setCheckingComponent(true);
+    setComponentExists(null);
+    getChangeDetails(params.row);
+    try {
+      const checkId = params.row.component_id?._id;
+      if (!checkId) {
+        setComponentExists(false);
+        setCheckingComponent(false);
+        return;
+      }
+      const response = await axios.get(`${BACKEND_URL}/components/${checkId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setComponentExists(response.status === 200);
+    } catch (error) {
+      setComponentExists(false);
+    }
+    setCheckingComponent(false);
   };
 
   const handleCloseDetail = () => {
     setDetailModalOpen(false);
     setSelectedRecord(null);
   };
+
+  async function checkComponent() {
+    const checkId = selectedRecord.component_id._id;
+    const checked = false;
+    try {
+      const response = await axios.get(`${BACKEND_URL}/components/${checkId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        }
+      }) 
+      if (response.status === 200) {checked = true;}
+    } catch(error) {
+    }
+    return checked
+  }
 
    return (
     <Box sx={{
@@ -190,6 +247,7 @@ const History = () => {
               columns={columns}
               getRowId={(row) => row._id}
               pageSizeOptions={[10, 25, 50, 1000]}
+              onRowClick={handleRowClick}
               initialState={{
                 pagination: { paginationModel: { pageSize: 10, page: 0 } },
                 sorting: { sortModel: [{ field: "date", sort: "desc" }] },
@@ -247,35 +305,113 @@ const History = () => {
         <Modal
           open={detailModalOpen}
           onClose={handleCloseDetail}
-          sx={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+          aria-labelledby="modal-history-detail-title"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 2000,
+            px: 2,
+          }}
         >
-          <Paper sx={{ width: "40vw", height: "50vh", p: 3, position: "relative", borderRadius: 2 }}>
-            <IconButton
-              onClick={handleCloseDetail}
-              sx={{ position: "absolute", top: 8, right: 8, color: "var(--color-text-base)" }}
-            >
-              <CloseIcon />
-            </IconButton>
+          <Paper
+            elevation={4}
+            sx={{
+              width: "100%",
+              maxWidth: "25vw",
+              maxHeight: "90vh",
+              overflow: "auto",
+              borderRadius: 4,
+              transform: "translate(25%, 0%)",
+              position: "relative",
+              p: 0,
+            }}
+          >
+            {/* Encabezado */}
+            <Box sx={{ p: 3, borderBottom: "1px solid #ececec", bgcolor: "var(--color-bg-secondary)", borderRadius: "16px 16px 0 0", position: "relative" }}>
+              <Typography id="modal-history-detail-title" variant="h5" sx={{ fontWeight: 700, color: "var(--color-title-secondary)", pr: 5 }}>
+                {selectedRecord?.action || "Detalle"}
+              </Typography>
+              <IconButton
+                onClick={handleCloseDetail}
+                sx={{ position: "absolute", top: 18, right: 18, color: "var(--color-text-base)" }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            {/* Datos generales */}
             {selectedRecord && (
-              <Box sx={{ display: "flex", flexDirection: "column", gap: 1, mt: 2 }}>
-                <Typography variant="body1">
-                  <strong>Usuario:</strong> {selectedRecord.user_id?.username}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Acción:</strong>{" "}
-                  {selectedRecord.action.charAt(0).toUpperCase() + selectedRecord.action.slice(1)}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Componente:</strong> {selectedRecord.component_name}
+              <Box sx={{ p: 3, pt: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    <strong>Autor: </strong>{selectedRecord.user_id?.username}
+                  </Typography>
+                </Box>
+                <Typography variant="body2">
+                  <b>Componente:</b> {selectedRecord.component_name}
                 </Typography>
                 {selectedRecord.subcomponent_name && (
-                  <Typography variant="body1">
-                    <strong>Subcomponente:</strong> {selectedRecord.subcomponent_name}
-                  </Typography>
+                  <Typography variant="body2"><b>Subcomponente:</b> {selectedRecord.subcomponent_name}</Typography>
                 )}
-                <Typography variant="body1">
-                  <strong>Fecha:</strong> {DateTimeParser(selectedRecord.date)}
+                <Typography variant="body2">
+                  <b>Tipo:</b> {selectedRecord.component_type}
                 </Typography>
+                <Typography variant="body2">
+                  <b>Fecha:</b> {DateTimeParser(selectedRecord.date)}
+                </Typography>
+                {/* Botón ir a componente */}
+                {selectedRecord.component_id?._id && (
+                  <Box sx={{ mt: 1, mb: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={checkingComponent || !componentExists}
+                      onClick={() => navigate(`/components/${selectedRecord.component_id._id}`)}
+                      sx={{ minWidth: 160 }}
+                    >
+                      {checkingComponent
+                        ? <CircularProgress size={18} />
+                        : componentExists
+                          ? "Ir al componente"
+                          : "No disponible"}
+                    </Button>
+                  </Box>
+                )}
+                <Divider sx={{ my: 2 }} />
+                {/* Detalles de cambios */}
+                <Box>
+                  <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+                    Detalles del cambio:
+                  </Typography>
+                  {changeDetails.length === 0 && (
+                    <Typography variant="body2" color="text.secondary">
+                      No se registraron cambios detallados.
+                    </Typography>
+                  )}
+                  {changeDetails.map((change, idx) => (
+                    <Box key={idx} sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: COLOR_MAP[change.type]?.color || "#555" }}>
+                        {change.label}
+                      </Typography>
+                      <List dense sx={{ pl: 2 }}>
+                        {change.items.map((item, i) => (
+                          <ListItem key={i} disablePadding>
+                            <Chip
+                              label={item}
+                              size="small"
+                              sx={{
+                                mr: 1,
+                                mb: 0.5,
+                                bgcolor: COLOR_MAP[change.type]?.bg || "#f5f5f5",
+                                color: COLOR_MAP[change.type]?.color || "#555",
+                              }}
+                            />
+                          </ListItem>
+                        ))}
+                      </List>
+                    </Box>
+                  ))}
+                </Box>
               </Box>
             )}
           </Paper>

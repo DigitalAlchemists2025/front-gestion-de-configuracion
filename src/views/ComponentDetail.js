@@ -29,6 +29,27 @@ const ComponentDetail = () => {
             return '';
         },
     },
+    {
+      field: 'delete',
+      headerName: '',
+      width: 100,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) =>
+        rol === '0' ? (
+          <IconButton
+            size="small"
+            disabled={loadingButtons}
+            onClick={(event) => {
+              event.stopPropagation();
+              handleRemoveSubComponent(params.row._id);
+            }}
+            sx={{ color: 'error.main' }}
+          >
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        ) : null
+    }
   ];
 
   const historyColumns = [
@@ -208,31 +229,11 @@ const ComponentDetail = () => {
       name: newNombre,
       description: newDescripcion,
     };
-    setLoadingButtons(true);
-
-    try {
-      await axios.post(`${BACKEND_URL}/components/${id}/descriptions`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      setComponent((prev) => ({
-        ...prev,
-        descriptions: [...prev.descriptions, payload],
-      }));
-
-        setMainDescriptions((prev) => [...prev, payload]);
-
-      setNewNombre("");
-      setNewDescripcion("");
-      handleCloseModal();
-    }
-    catch (error) {
-      console.error("Error al agregar descripción:", error);
-    } finally {
-      setLoadingButtons(false);
-    }
+    
+    mainDescriptions.push(payload);
+    console.log(`Main:`, mainDescriptions)
+    setChanges(true);
+    setIsModalOpen(false);
   }
 
   const cambiarEstado = async () => {
@@ -373,21 +374,10 @@ const ComponentDetail = () => {
     setChanges(true);
   };
 
-  const handleDeleteDescription = async (index) => {
-    setLoadingButtons(true);
+  const handleDeleteDescription = (index) => {
     const updatedDescriptions = mainDescriptions.filter((_, i) => i !== index);
-    try {
-      await axios.delete(`${BACKEND_URL}/components/${id}/descriptions/${mainDescriptions[index]._id}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-    } catch(err) {
-      console.error(err);
-    } finally {
-      setLoadingButtons(false);
-    }
     setMainDescriptions(updatedDescriptions);
+    setChanges(true);
   };
 
   const handleSaveChanges = async () => {
@@ -401,7 +391,7 @@ const ComponentDetail = () => {
         alert("Error: Debe ingresar un Tipo")
         return;
       }
-      const filteredDescriptions = mainDescriptions.map(({ _id, ...cdr }) => cdr);
+      const filteredDescriptions = mainDescriptions.map(({ _id, ...des }) => des);
   
       const payload = {
         name: mainComponentName,
@@ -468,6 +458,7 @@ const ComponentDetail = () => {
         components: nuevosComponentes,
       }));
       handleCloseChildModal();
+      handleCloseNewChildModal();
     } catch (error) {
       console.error("Error al agregar componente hijo:", error);
     } finally {
@@ -477,6 +468,7 @@ const ComponentDetail = () => {
 
   const handleRemoveSubComponent = async (childId) => {
     try {
+      console.log(childId)
       setLoadingButtons(true);
       await axios.post(`${BACKEND_URL}/components/${id}/disassociate/${childId}`, {}, {
         headers: {

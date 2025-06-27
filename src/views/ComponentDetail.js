@@ -302,7 +302,11 @@ const ComponentDetail = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-      const components = response.data.filter((c) => c.parent === null && String(c._id) !== String(component._id));
+      const components = response.data.filter((c) => 
+        c.parent === null && 
+        String(c._id) !== String(component._id) &&
+        c._id !== component.parent
+      );
       setAllComponents(components);
       setSearchedComponents(components);
       setIsModalChildOpen(true);
@@ -496,7 +500,11 @@ const ComponentDetail = () => {
           headers: { Authorization: `Bearer ${token}` },
         }
       );
-      setSearchedComponents(response.data.filter(c => c.parent !== null && String(c._id !== component._id)));
+      setSearchedComponents(response.data.filter(c => 
+        c.parent !== null && 
+        String(c._id !== component._id &&
+        c._id !== component.parent
+      )));
     } catch (error) {
       console.error(error);
     }

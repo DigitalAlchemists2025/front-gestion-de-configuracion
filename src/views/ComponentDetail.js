@@ -1,18 +1,13 @@
 import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar, Tabs, Tab, CardContent, ListItem, IconButton } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import LoadingCircle from "../components/LoadingCircle";
-import RemoveIcon from '@mui/icons-material/Remove';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import WestIcon from '@mui/icons-material/West';
 import CloseIcon from '@mui/icons-material/Close';
-import EditIcon from '@mui/icons-material/Edit';
 import SideBar from "../components/SideBar";
 import TabPanel from "../components/TabPanel";
 import { DataGrid } from "@mui/x-data-grid";
-import DateTimeParser from "../utils/DateTimeParser";
 import AddCharacteristicModal from "../components/AddCharacteristModal";
 
 const ComponentDetail = () => {
@@ -97,6 +92,7 @@ const ComponentDetail = () => {
               fontFamily: "var(--font-source)",
             }
           }}
+          onKeyDown={e => e.stopPropagation()}
           sx={{
             width: '100%',
             '& .MuiOutlinedInput-notchedOutline': { border: 'none' },
@@ -231,7 +227,6 @@ const ComponentDetail = () => {
     };
     
     mainDescriptions.push(payload);
-    console.log(`Main:`, mainDescriptions)
     setChanges(true);
     setIsModalOpen(false);
   }
@@ -395,7 +390,7 @@ const ComponentDetail = () => {
         alert("Error: Debe ingresar un Tipo")
         return;
       }
-      const filteredDescriptions = mainDescriptions.map(({ _id, ...des }) => des);
+      const filteredDescriptions = mainDescriptions;
   
       const payload = {
         name: mainComponentName,
@@ -472,7 +467,6 @@ const ComponentDetail = () => {
 
   const handleRemoveSubComponent = async (childId) => {
     try {
-      console.log(childId)
       setLoadingButtons(true);
       await axios.post(`${BACKEND_URL}/components/${id}/disassociate/${childId}`, {}, {
         headers: {

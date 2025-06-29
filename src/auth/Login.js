@@ -22,13 +22,15 @@ function Login() {
         email: login.email.trim(),
         password: login.password,
       });
+
       const { access_token } = resp.data;
       localStorage.setItem('token', access_token);
       setId(resp.data.id);
+
       if (access_token) {
         alert('Ha iniciado sesión correctamente');
       } else {
-        console.log("Usuario no existe");
+        console.error("EL usuario no está registrado");
       }
     } catch (error) {
       if (error.response && error.response.status === 401) {

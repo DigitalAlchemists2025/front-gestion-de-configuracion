@@ -17,7 +17,9 @@ const ManageUsers = () => {
     const [selectedUser, setSelectedUser] = useState(null);
     const [userModalOpen, setUserModalOpen] = useState(false);
 
-    const [editUser, setEditUser] = useState({ username: "", email: "", role: "usuario" });
+    const [onChangePassword, setOnChangePassword] = useState(false)
+
+    const [editUser, setEditUser] = useState({ username: "", email: "", password: "", role: "usuario" });
     const [saving, setSaving] = useState(false);
     const [isEditMode, setIsEditMode] = useState(false); // Cuando no edita, crea
 
@@ -95,7 +97,7 @@ const ManageUsers = () => {
     );
 
     const handleAddUser = () => {
-      setEditUser({ username: "", email: "", role: "usuario" });
+      setEditUser({ username: "", email: "", password: "", role: "usuario" });
       setIsEditMode(false);
       setUserModalOpen(true);
     };
@@ -106,6 +108,7 @@ const ManageUsers = () => {
       setEditUser({ 
           username: params.row.username || "",
           email: params.row.email || "",
+          password: params.row.password || "",
           role: params.row.role || "usuario"
       });
       setIsEditMode(true);
@@ -115,7 +118,7 @@ const ManageUsers = () => {
       const handleCloseUser = () => {
         setUserModalOpen(false);
         setSelectedUser(null);
-        setEditUser({ username: "", email: "", role: "usuario" });
+        setEditUser({ username: "", email: "", password: "", role: "usuario" });
         setSaving(false);
       };
 
@@ -144,6 +147,7 @@ const ManageUsers = () => {
           });
           setUsers(response.data);
           setAllUsers(response.data);
+          setOnChangePassword(false);
           setUserModalOpen(false);
           setSelectedUser(null);
         } catch (err) {
@@ -363,6 +367,33 @@ const ManageUsers = () => {
                     </Box>
                     <Box>
                       <Typography variant="body2" sx={{ color: "var(--color-title-primary)", fontWeight: 600, mb: 0.5, fontFamily: "var(--font-montserrat)" }}>
+                        Contraseña
+                      </Typography>
+                      <Box sx={{ display: "flex", justifyContent: "space-between"}}>
+                        <input
+                          type="password"
+                          value={editUser.password}
+                          onChange={e => handleEditChange("password", e.target.value)}
+                          disabled={!onChangePassword}
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            border: "1px solid #e0e0e0",
+                            background: "var(--bg-inputs)",
+                            fontFamily: "var(--font-source)",
+                            fontSize: "1rem"
+                          }}
+                          autoComplete="off"
+                        />
+                        <Button sx={{fontSize: "0.5em"}} onClick={() => {
+                          setEditUser((prev) => ({ ...prev, password: "" }));
+                          setOnChangePassword(true);
+                        }}>Cambiar Contraseña</Button>
+                      </Box>
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" sx={{ color: "var(--color-title-primary)", fontWeight: 600, mb: 0.5, fontFamily: "var(--font-montserrat)" }}>
                         Rol
                       </Typography>
                       <select
@@ -378,8 +409,9 @@ const ManageUsers = () => {
                           fontSize: "1rem"
                         }}
                       >
-                        <option value="usuario">Usuario</option>
-                        <option value="admin">Administrador</option>
+                        <option value = {selectedUser?.role} disabled>{editUser?.role}</option>
+                        <option value="usuario">usuario</option>
+                        <option value="admin">administrador</option>
                       </select>
                     </Box>
                   </Box>

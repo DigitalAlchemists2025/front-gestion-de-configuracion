@@ -100,7 +100,8 @@ const History = () => {
 
   useEffect(() => {
     if (selectedRecord) {
-      setChangeDetails(getChangeDetails(selectedRecord));
+      const detail = getChangeDetails(selectedRecord);
+      setChangeDetails(detail);
     }
 }, [selectedRecord]);
 
@@ -175,21 +176,6 @@ const History = () => {
     setSelectedRecord(null);
   };
 
-  async function checkComponent() {
-    const checkId = selectedRecord.component_id._id;
-    const checked = false;
-    try {
-      const response = await axios.get(`${BACKEND_URL}/components/${checkId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        }
-      }) 
-      if (response.status === 200) {checked = true;}
-    } catch(error) {
-    }
-    return checked
-  }
-
    return (
     <Box sx={{
       display: "flex",
@@ -252,7 +238,6 @@ const History = () => {
                 pagination: { paginationModel: { pageSize: 10, page: 0 } },
                 sorting: { sortModel: [{ field: "date", sort: "desc" }] },
               }}
-              /* onRowClick={handleRowClick} */
               sx={{
                 width: '100%',
                 height: '100%',
@@ -390,24 +375,33 @@ const History = () => {
                   )}
                   {changeDetails.map((change, idx) => (
                     <Box key={idx} sx={{ mb: 1.5 }}>
-                      <Typography variant="body2" sx={{ fontWeight: 500, color: COLOR_MAP[change.type]?.color || "#555" }}>
+                      <Typography variant="body2" sx={{ fontWeight: 500, color: COLOR_MAP[change.type]?.color || "#555", mb: 1 }}>
                         {change.label}
                       </Typography>
-                      <List dense sx={{ pl: 2 }}>
-                        {change.items.map((item, i) => (
-                          <ListItem key={i} disablePadding>
-                            <Chip
-                              label={item}
-                              size="small"
-                              sx={{
-                                mr: 1,
-                                mb: 0.5,
-                                bgcolor: COLOR_MAP[change.type]?.bg || "#f5f5f5",
-                                color: COLOR_MAP[change.type]?.color || "#555",
-                              }}
-                            />
-                          </ListItem>
-                        ))}
+                      <List dense>
+                          <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start", gap: 1 }}>
+                            {change.items.map((item, i) => (
+                              <ListItem disablePadding>
+                                <Paper
+                                  elevation={1}
+                                  sx={{
+                                    display: 'inline-block',
+                                    mb: 1,
+                                    px: 2,
+                                    py: 0.5,
+                                    bgcolor: COLOR_MAP[change.type]?.bg || "#f5f5f5",
+                                    color: COLOR_MAP[change.type]?.color || "#555",
+                                    borderRadius: 2,
+                                    fontFamily: "var(--font-source)",
+                                    maxWidth: 260,
+                                    wordBreak: 'break-word',
+                                  }}
+                                >
+                                  {item}
+                                </Paper>
+                              </ListItem>
+                            ))}
+                          </Box>
                       </List>
                     </Box>
                   ))}

@@ -17,7 +17,19 @@ export function getChangeDetails(selectedRecord) {
             changes.push({
                 type: "edited",
                 label: "Características editadas",
-                items: details.descriptions.edited.map(d => `${d.name}: ${d.description}`),
+                items: details.descriptions.edited.map(d => {
+                    const nameChanged = d.before.name !== d.after.name;
+                    const descriptionChanged = d.before.description !== d.after.description;
+                    if (nameChanged && descriptionChanged) {
+                        return `De ${d.before.name}: ${d.before.description} a ${d.after.name}: ${d.after.description}`;
+                    } else if (nameChanged) {
+                        return `Nombre: De ${d.before.name} a ${d.after.name}`;
+                    } else if (descriptionChanged) {
+                        return `Descripción: De ${d.before.description} a ${d.after.description}`;
+                    } else {
+                        return `Sin cambios visibles`;
+                    }
+                }),
             });
         }
 
@@ -54,33 +66,23 @@ export function getChangeDetails(selectedRecord) {
         });
     }
 
-    if (selectedRecord.action?.toLowerCase().includes("asociar subcomponente")) {
+    if (selectedRecord.action?.toLowerCase() === "asociar subcomponente") {
         changes.push({
             type: "associated",
             label: "Subcomponente asociado",
             items: [
-                `Nombre: ${selectedRecord.subcomponent_name}`,
-                `Tipo: ${selectedRecord.subcomponent_type}`,
+                `${selectedRecord.subcomponent_type}: ${selectedRecord.subcomponent_name}`,
             ],
         });
-    }
-
-    if (selectedRecord.action?.toLowerCase().includes("desasociar subcomponente")) {
+    } 
+    
+    if (selectedRecord.action?.toLowerCase() === "desasociar subcomponente") {
         changes.push({
-        type: "disassociated",
-        label: "Subcomponente desasociado",
-        items: [
-            `Nombre: ${selectedRecord.subcomponent_name}`,
-            `Tipo: ${selectedRecord.subcomponent_type}`,
-        ],
-        });
-    }
-
-    if (details.descripcion_agregada) {
-        changes.push({
-            type: "added",
-            label: "Descripción agregada",
-            items: [`ID: ${details.descripcion_agregada.$oid || details.descripcion_agregada}`],
+            type: "disassociated",
+            label: "Subcomponente desasociado",
+            items: [
+                `${selectedRecord.subcomponent_type}: ${selectedRecord.subcomponent_name}`,
+            ],
         });
     }
 

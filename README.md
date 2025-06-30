@@ -1,70 +1,63 @@
-# Getting Started with Create React App
+# Gestión de Configuración
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Descripción
 
-## Available Scripts
+Este proyecto contiene el código fuente de la aplicación web Gestión de Configuración.
+La aplicación está diseñada para gestionar entornos que requieren organización, principalmente en procesos de orden y actualización de recursos.
 
-In the project directory, you can run:
+Permite visualizar y administrar "Componentes" registrados en la base de datos. Los usuarios con privilegios pueden crear, actualizar y eliminar componentes.
 
-### `npm start`
+## Funcionalidades clave
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+* Gestión completa de componentes, incluyendo sus configuraciones y especificaciones.
+* Creación y administración de atributos genéricos para cualquier componente.
+* Registro y control jerárquico de dependencias entre componentes.
+* Registro detallado de cambios mediante historial.
+* Control de acceso mediante autenticación meadiante credenciales y Google (Google Firebase)
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Requisitos para su correcto funcionamiento
 
-### `npm test`
+La aplicación funciona con google firebase como autenticación secundaria.
+Es necesario configurar una cuenta Firebase para administrar dominios y restricciones de dominios de correo electónicos. 
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+A continuación, se describen los pasos de configuración.
 
-### `npm run build`
+1. Dirigirse al [sitio web oficial de Google Firebase](https://firebase.google.com/).
+2. Acceder con una cuenta de Google.
+3. Entrar a consola pulsando el botón "Go to console".
+4. Crear el proyecto o seleccionar uno existente.
+5. Añadir una aplicación web y registrar el proyecto.
+   Esto generará un archivo que debe copiar y agregar al .env del proyecto.
+   
+  ![Registrar App en Firebase](https://github.com/user-attachments/assets/8ef50250-b208-4419-8ce1-ccc83628d65e)
+  
+7. Configurar la autenticación desde la sección "Authentication".
+8. En la pestaña "Usuarios" puede visualizar los usuarios registrados.
+9. En la pestaña "Métodos de acceso" puede administrar los métodos de autenticación de la app (En versiones iniciales solo soporta Google)
+10. En la pestaña "Configuración" - "Dominios autorizados" agergar la URL de producción de la app.
+11. Al completar estos pasos, la autenticación con Google funcionará correctamente.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+También es necesario crear un archivo .env con las variables de configuración de Firebase, URL del backend y el puerto de despliegue
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Para mayor información consulte la [documentación oficia de Firebasel](https://firebase.google.com/docs/web/setup)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Estructura del Proyecto
 
-### `npm run eject`
+Esta sección describe la estructura de carpetas y su propósito en este proyecto.
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- **src/**: Código fuente de la aplicación
+- **public/**: Archivos estáticos y recursos públicos
+- **src/auth/**: Componentes para vista de inicio de sesión/registro
+- **src/components/**: Componentes reutilizables de UI
+- **src/firebase/**: Configuración de firebase
+- **src/test/**: Testing unitario de componentes personalizados
+- **src/utils/**: Funciones y utilidades generales
+- **src/views/**: Vistas principales de la aplicación
+- **src/AppRouter.js: Administración de rutas y permisos para acceder a estas
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Inicialización del proyecto
+* Instalar dependencias
+  ```bash npm install```
+* Iniciar la aplicación en modo desarrollo
+```bash npm run start```
+### Por defecto, la aplicación estará disponible en `http://localhost:3000`

@@ -60,7 +60,7 @@ Esta sección describe la estructura de carpetas y su propósito en este proyect
   ```bash npm install```
 * Iniciar la aplicación en modo desarrollo
 ```bash npm run start```
-### Por defecto, la aplicación estará disponible en `http://localhost:3000`
+### Por defecto, la aplicación estará disponible en `http://localhost:3001`
 
 ## Contacto
 Para cualquier duda o consulta, contactar al equipo DigitalAlchemists a través del correo `digitalAlchemists2025@gmail.com`

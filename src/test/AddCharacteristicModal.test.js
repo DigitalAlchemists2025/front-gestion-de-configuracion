@@ -1,8 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
-import GenericModal from './GenericModal';
+import AddCharacteristicModal from '../components/AddCharacteristModal';
 
-describe('GenericModal', () => {
+describe('AddCharacteristicModal', () => {
   const defaultProps = {
     open: true,
     onClose: jest.fn(),
@@ -15,9 +15,9 @@ describe('GenericModal', () => {
 
   const renderModal = (props = {}) =>
     render(
-      <GenericModal {...defaultProps} {...props}>
+      <AddCharacteristicModal {...defaultProps} {...props}>
         <div data-testid="child-content">Contenido interno</div>
-      </GenericModal>
+      </AddCharacteristicModal>
     );
 
   beforeEach(() => {

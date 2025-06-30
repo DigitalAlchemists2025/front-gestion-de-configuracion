@@ -1,4 +1,4 @@
-import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar, Tabs, Tab, CardContent, ListItem, IconButton } from "@mui/material";
+import { Box, Typography, Paper, Button, Modal, TextField, Card, FormControl, FormGroup, MenuItem, Chip, TextareaAutosize, Alert, Input, InputAdornment, Avatar, Tabs, Tab, IconButton } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -7,10 +7,12 @@ import WestIcon from '@mui/icons-material/West';
 import CloseIcon from '@mui/icons-material/Close';
 import SideBar from "../components/SideBar";
 import TabPanel from "../components/TabPanel";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridCloseIcon } from "@mui/x-data-grid";
 import AddCharacteristicModal from "../components/AddCharacteristModal";
 
 const ComponentDetail = () => {
+
+  // Sección de columnas personalizadas para las diferentes tablas
   const columns = [
     { field: 'name', headerName: 'Nombre', flex: 1, },
     { field: 'type', headerName: 'Tipo', flex: 1 },
@@ -125,6 +127,7 @@ const ComponentDetail = () => {
         ) : null
     }
   ]
+
   const { id } = useParams();
 
   const [component, setComponent] = useState(null);
@@ -181,19 +184,30 @@ const ComponentDetail = () => {
   }
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
 
+  /* 
+    Al montar la página con un componente existente, se
+    hace fetch a sus datos incluyendo su historial de cambios
+  */
   useEffect(() => {
     const fetchComponent = async () => {
       try {
-        const response = await axios.get(`${BACKEND_URL}/components/${id}`, {
+        const componentResponse = await axios.get(`${BACKEND_URL}/components/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        const data = response.data;
+        const data = componentResponse.data;
         setComponent(data);
         setMainComponentName(data.name);
         setMainComponentType(data.type);
         setMainDescriptions(data.descriptions.map(d => ({ ...d })));
+
+        const historyResponse = await axios.get(`${BACKEND_URL}/histories/components/${id}/`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setHistory(historyResponse.data);
       } catch (error) {
         console.error("Error al obtener componente:", error);
       } finally {
@@ -203,33 +217,16 @@ const ComponentDetail = () => {
     fetchComponent();
   }, [id]);
 
-  useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const response = await axios.get(`${BACKEND_URL}/histories/components/${id}/`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-        setHistory(response.data);
-      } catch (error) {
-        console.error("Error al obtener historial:", error);
-        setHistory([]);
-      }
-    };
-    fetchHistory();
-  }, [id]);
-
-  const handleAddDescripcion = async () => {
-    const payload = {
-      name: newNombre,
-      description: newDescripcion,
-    };
-    
-    mainDescriptions.push(payload);
+  /* Editar características del componente principal */
+  const handleEditName = (e) => {
+    setMainComponentName(e.target.value);
     setChanges(true);
-    setIsModalOpen(false);
-  }
+  };
+
+  const handleEditType = (e) => {
+    setMainComponentType(e.target.value);
+    setChanges(true);
+  };
 
   const cambiarEstado = async () => {
     const payload = {
@@ -254,42 +251,46 @@ const ComponentDetail = () => {
     }
   };
 
+  const handleAddDescripcion = async () => {
+    const payload = {
+      name: newNombre,
+      description: newDescripcion,
+    };
+    
+    mainDescriptions.push(payload);
+    setChanges(true);
+    setIsModalOpen(false);
+  };
+
+  const handleEditDescription = (index, field, value) => {
+    setMainDescriptions(descs =>
+      descs.map((d, i) =>
+        i === index
+          ? { ...d, [field]: value }
+          : d
+      )
+    );
+    setChanges(true);
+  };
+
+  const handleDeleteDescription = (index) => {
+    const updatedDescriptions = mainDescriptions.filter((_, i) => i !== index);
+    setMainDescriptions(updatedDescriptions);
+    setChanges(true);
+  };
+
+  /* Modal para características genéricas del componente principal */
   const handleOpenModal = () => {
     setIsModalOpen(true);
     setNewNombre("");
     setNewDescripcion("");
   };
-
-  const handleOpenModalNewChild = () => {
-    setIsModalNewChildOpen(true);
-    setNombre("");
-    setTipo("");
-    setEstado("activo");
-    setCaracteristicas([]);
+  
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
   };
 
-  const handleAddExistingComponentAsChild = async (childId) => {
-    try {
-      setLoadingButtons(true)
-      const res = await axios.post(`${BACKEND_URL}/components/${component._id}/associate/${childId}`,{},
-        { 
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      setComponent(res.data);
-      alert('¡Componente añadido correctamente!');
-      setSearchTerm("");
-      setSearchedComponents([]);
-      setIsModalChildOpen(false);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoadingButtons(false)
-    }
-  };
-
+  /* Modal para añadir un subcomponente */
   const handleOpenModalChild = async () => {
     try {
       const response = await axios.get(`${BACKEND_URL}/components`, {
@@ -314,15 +315,42 @@ const ComponentDetail = () => {
     setIsModalChildOpen(false);
   };
 
+  const handleAddExistingComponentAsChild = async (childId) => {
+    try {
+      setLoadingButtons(true)
+      const res = await axios.post(`${BACKEND_URL}/components/${component._id}/associate/${childId}`,{},
+        { 
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      setComponent(res.data);
+      alert('¡Componente añadido correctamente!');
+      setSearchTerm("");
+      setSearchedComponents([]);
+      setIsModalChildOpen(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLoadingButtons(false)
+    }
+  };
+  
+  /* Modal para crear subcomponente */
+  const handleOpenModalNewChild = () => {
+    setIsModalNewChildOpen(true);
+    setNombre("");
+    setTipo("");
+    setEstado("activo");
+    setCaracteristicas([]);
+  };
+  
   const handleCloseNewChildModal = () => {
     setIsModalNewChildOpen(false);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
-
-  /* Características para SubComponente */
+  /* Crear descripciones en nuevo subcomponente */
   const handleOpenCharModal = () => {
     setIsCharModalOpen(true);
     setNewNombre("");
@@ -352,33 +380,7 @@ const ComponentDetail = () => {
     setNewSubCharacteristics(news);
   };
 
-  const handleEditName = (e) => {
-    setMainComponentName(e.target.value);
-    setChanges(true);
-  };
-
-  const handleEditType = (e) => {
-    setMainComponentType(e.target.value);
-    setChanges(true);
-  };
-
-  const handleEditDescription = (index, field, value) => {
-    setMainDescriptions(descs =>
-      descs.map((d, i) =>
-        i === index
-          ? { ...d, [field]: value }
-          : d
-      )
-    );
-    setChanges(true);
-  };
-
-  const handleDeleteDescription = (index) => {
-    const updatedDescriptions = mainDescriptions.filter((_, i) => i !== index);
-    setMainDescriptions(updatedDescriptions);
-    setChanges(true);
-  };
-
+  /* Logica de guardado de cambios (incluyendo características genéricas y datos de componente) */
   const handleSaveChanges = async () => {
     if (window.confirm("¿Esta segur@ de realizar estos cambios?")) {
       if (!changes) return;
@@ -432,7 +434,6 @@ const ComponentDetail = () => {
   };
 
   /* Lógica para agregar o quitar subcomponente */
-
   const handleAddChildComponent = async () => {
     const validDescriptions = caracteristicas.filter(
       (c) => c.name.trim() && c.description.trim()
@@ -552,7 +553,6 @@ const ComponentDetail = () => {
             flexDirection: "column",
           }}
         >
-
           {/* Box información del component */}
           <Box sx={{ 
             display: 'flex', 
@@ -561,7 +561,7 @@ const ComponentDetail = () => {
             height: '30%',
             mb: 2, 
           }}>
-            {/* Datos */}
+            {/* Datos generales*/}
             <Box sx={{ display: "flex", flexDirection: 'column', width: "100%", }}>  
               <Box sx={{ width: '100%', display: 'flex', alignItems: 'center', mb: 2}}>
                 <Button
@@ -591,7 +591,6 @@ const ComponentDetail = () => {
                   }}
                 >
                 </TextareaAutosize>  
-                {/* <EditIcon/> */}
               </Box> 
               
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, width: "100%", height: "100%",  ml: 20, justifyContent: "center" }}>
@@ -619,8 +618,6 @@ const ComponentDetail = () => {
                     }}
                   />
                 </Box>
-
-                {/* Estado */}
                 <Box sx={{ display: "flex", alignItems: "center" }}>
                   <Typography
                     color={component.status === "activo" ? "info" : "textSecondary"}
@@ -641,10 +638,7 @@ const ComponentDetail = () => {
                       size="small"
                       color={component.status === "activo" ? "textSecondary" : "info"}
                       borderColor={component.status === "activo" ? "textSecondary" : "info"}
-                      sx={{
-                        fontSize: "0.7rem", 
-                        fontFamily: "var(--font-source)",
-                      }}
+                      sx={{ fontSize: "0.7rem", fontFamily: "var(--font-source)", }}
                     >
                       {component.status === "activo" ? "Retirar" : "Activar"}
                     </Button>
@@ -736,6 +730,13 @@ const ComponentDetail = () => {
                         },
                         '[class*="MuiTablePagination"]': {
                           color: 'var(--color-pagination)',
+                        },
+                        '& .MuiDataGrid-columnHeaderMenuIconButton-root, & .MuiDataGrid-columnHeaderMenuIconButton-root svg, & .css-1ckov0h-MuiSvgIcon-root': {
+                          color: 'white !important',
+                          fill: 'white !important',
+                        },
+                        '& .MuiDataGrid-iconButtonContainer button': {
+                          color: '#fff !important',
                         },
                       }}
                     />
@@ -849,14 +850,21 @@ const ComponentDetail = () => {
                             },
                             '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
                                 backgroundColor: 'var(--color-dg-cell-bg-odd)',
-                          },
+                            },
                             '& .MuiDataGrid-row.fila-subcomponente': {
                               fontStyle: 'italic',
                             },
                             '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
                               backgroundColor:"var(--color-dg-cell-child)" ,
                               pl: 2,
-                          }
+                            },
+                            '& .MuiDataGrid-columnHeaderMenuIconButton-root, & .MuiDataGrid-columnHeaderMenuIconButton-root svg, & .css-1ckov0h-MuiSvgIcon-root': {
+                                color: 'white !important',
+                                fill: 'white !important',
+                              },
+                              '& .MuiDataGrid-iconButtonContainer button': {
+                                color: '#fff !important',
+                              },
                         }}
                       />
                   </Paper>
@@ -906,62 +914,65 @@ const ComponentDetail = () => {
                         initialState={{
                           pagination: { paginationModel: { page: 0, pageSize: 5 } },
                         }}
-                        onRowClick={(params) => {
-                          /* Abrir modal para ver datos completos del historico en cuestion */
-                          /* handleOpenModalHistory(params.row); */
-                        }}
-                          sx={{
-                            height: '100%',
-                            border: '1px solid #e0e0e0',
-                            borderRadius: '25px',
-                            fontSize: '1.1rem',
-                            background: 'transparent',
-                            color: 'var(--color-text-base)',
-                            fontFamily: "var(--font-source)",
-                            '& .fila-activa': {
-                              color: 'var(--color-text-active)',
-                            },
-                            '& .fila-baja': {
-                              color: 'var(--color-text-baja)',
-                              fontStyle: 'italic',
-                            },
-                            '.MuiDataGrid-columnHeader': {
-                              backgroundColor: 'var(--color-bg-secondary)',
-                              color: '#ffffff',
-                              borderBottom: 'none',
-                            },
-                            '.MuiDataGrid-cell': {
-                              borderBottom: 'none',
-                              backgroundColor: 'var(--color-dg-cell-bg)',
-                              color: 'var(--color-datagrid-cell-text)',
-                            },
-                            '.MuiDataGrid-row:hover': {
-                              backgroundColor: 'rgba(25, 118, 210, 0.05)',
-                              cursor: 'pointer',
-                            },
-                            '.MuiDataGrid-footerContainer': {
-                              bgcolor: '#e3f2fd',
-                              borderTop: 'none',
-                            },
-                            '[class*="MuiTablePagination"]': {
-                              color: 'var(--color-pagination)',
-                            },
-                            '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
-                              outline: 'none',
-                            },
-                            '& .MuiDataGrid-row:nth-of-type(even) .MuiDataGrid-cell': {
-                              backgroundColor: 'var(--color-dg-cell-bg-even)',
-                            },
-                            '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
-                                backgroundColor: 'var(--color-dg-cell-bg-odd)',
-                            },
-                            '& .MuiDataGrid-row.fila-subcomponente': {
-                              fontStyle: 'italic',
-                            },
-                            '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
-                              backgroundColor:"var(--color-dg-cell-child)" ,
-                              pl: 2,
-                            }
+                        sx={{
+                          height: '100%',
+                          border: '1px solid #e0e0e0',
+                          borderRadius: '25px',
+                          fontSize: '1.1rem',
+                          background: 'transparent',
+                          color: 'var(--color-text-base)',
+                          fontFamily: "var(--font-source)",
+                          '& .fila-activa': {
+                            color: 'var(--color-text-active)',
+                          },
+                          '& .fila-baja': {
+                            color: 'var(--color-text-baja)',
+                            fontStyle: 'italic',
+                          },
+                          '.MuiDataGrid-columnHeader': {
+                            backgroundColor: 'var(--color-bg-secondary)',
+                            color: '#ffffff',
+                            borderBottom: 'none',
+                          },
+                          '.MuiDataGrid-cell': {
+                            borderBottom: 'none',
+                            backgroundColor: 'var(--color-dg-cell-bg)',
+                            color: 'var(--color-datagrid-cell-text)',
+                          },
+                          '.MuiDataGrid-row:hover': {
+                            backgroundColor: 'rgba(25, 118, 210, 0.05)',
+                            cursor: 'pointer',
+                          },
+                          '.MuiDataGrid-footerContainer': {
+                            bgcolor: '#e3f2fd',
+                            borderTop: 'none',
+                          },
+                          '[class*="MuiTablePagination"]': {
+                            color: 'var(--color-pagination)',
+                          },
+                          '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
+                            outline: 'none',
+                          },
+                          '& .MuiDataGrid-row:nth-of-type(even) .MuiDataGrid-cell': {
+                            backgroundColor: 'var(--color-dg-cell-bg-even)',
+                          },
+                          '& .MuiDataGrid-row:nth-of-type(odd) .MuiDataGrid-cell': {
+                              backgroundColor: 'var(--color-dg-cell-bg-odd)',
+                          },
+                          '& .MuiDataGrid-row.fila-subcomponente': {
+                            fontStyle: 'italic',
+                          },
+                          '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
+                            backgroundColor:"var(--color-dg-cell-child)" ,
+                            pl: 2,
+                          },
+                          '& .MuiDataGrid-columnHeaderMenuIconButton-root, & .MuiDataGrid-columnHeaderMenuIconButton-root svg, & .css-1ckov0h-MuiSvgIcon-root': {
+                            color: 'white !important',
+                            fill: 'white !important',
+                          },
+                          '& .MuiDataGrid-iconButtonContainer button': {
+                            color: '#fff !important',
+                          },
                         }}
                       />
                     </Paper>
@@ -1095,6 +1106,13 @@ const ComponentDetail = () => {
                       }}
                       className="search-icon"
                     />
+                  </InputAdornment>
+                }
+                endAdornment={
+                  <InputAdornment position="end">
+                    <Button onClick={() => {handleSearch("");}}>
+                      <GridCloseIcon/>
+                    </Button>
                   </InputAdornment>
                 }
                 value={searchTerm}

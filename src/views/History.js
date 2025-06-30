@@ -1,21 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  Modal,
-  IconButton,
-  TextField,
-  InputAdornment,
-  Avatar,
-  CircularProgress,
-  Divider,
-  List,
-  ListItem,
-  Chip,
-  Button,
-} from "@mui/material";
-import { DataGrid } from "@mui/x-data-grid";
+import { Box, Paper, Typography, Modal, IconButton, CircularProgress, Divider, List, ListItem, Button, Input, InputAdornment, Avatar } from "@mui/material";
+import { DataGrid, GridCloseIcon } from "@mui/x-data-grid";
 import CloseIcon from "@mui/icons-material/Close";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -24,6 +9,7 @@ import { getChangeDetails } from "../utils/HistoryParser";
 import DateTimeParser from "../utils/DateTimeParser";
 import LoadingCircle from "../components/LoadingCircle";
 
+/* Coloreado de los distintos cambios al abrir el detalle de historial */
 const COLOR_MAP = {
   added:   { bg: "#e8f5e9", color: "#43a047" },
   edited:  { bg: "#fffde7", color: "#fbc02d" },
@@ -36,9 +22,9 @@ const History = () => {
   const navigate = useNavigate();
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
   const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
 
   const [records, setRecords] = useState([]);
+  const [allRecords, setAllRecords] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [detailModalOpen, setDetailModalOpen] = useState(false);
@@ -48,9 +34,7 @@ const History = () => {
   const [checkingComponent, setCheckingComponent] = useState(false);
   const [changeDetails, setChangeDetails] = useState([]);
 
-  useEffect(() => {
-    if (!token || role !== "0") navigate("/login");
-  }, [token, role, navigate]);
+  if (!token) navigate("/login");
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -66,6 +50,7 @@ const History = () => {
           return 0;
         });
         setRecords(sortedHistory);
+        setAllRecords(sortedHistory);
       } catch (error) {
         console.error(error);
       } finally {
@@ -76,34 +61,11 @@ const History = () => {
   }, [BACKEND_URL, token]);
 
   useEffect(() => {
-    if (!searchTerm) {
-      setRecords(records);
-    } else {
-      const terms = searchTerm.toLowerCase().split(" ").filter(Boolean);
-      setRecords(
-        records.filter((r) => {
-          const haystack = [
-            r.username,
-            r.action,
-            r.component_name,
-            r.subcomponent_name || "",
-            r.date,
-          ]
-            .filter(Boolean)
-            .join(" ")
-            .toLowerCase();
-          return terms.every((t) => haystack.includes(t));
-        })
-      );
-    }
-  }, [searchTerm, records]);
-
-  useEffect(() => {
     if (selectedRecord) {
       const detail = getChangeDetails(selectedRecord);
       setChangeDetails(detail);
     }
-}, [selectedRecord]);
+  }, [selectedRecord]);
 
   const columns = useMemo(
     () => [
@@ -171,6 +133,45 @@ const History = () => {
     setCheckingComponent(false);
   };
 
+  const normalize = str =>
+    (str || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+
+  const filterHistoryRecords = (value, list = []) => {
+    const terms = value
+      .toLowerCase()
+      .split(" ")
+      .filter(t => t.trim() !== "")
+      .map(normalize);
+
+    return list.filter(r => {
+      const haystack = [
+        r.user_id?.username,
+        r.action,
+        r.component_name,
+        r.component_type,
+        r.subcomponent_name,
+        r.subcomponent_type
+      ]
+        .filter(Boolean)
+        .map(normalize)
+        .join(" ");
+
+      return terms.every(term => haystack.includes(term));
+    });
+  };
+
+  const handleSearch = (value) => {
+    setSearchTerm(value);
+    if (value.trim() === "") {
+      setRecords(allRecords);
+    } else {
+      setRecords(filterHistoryRecords(value, allRecords));
+    }
+  };
+
   const handleCloseDetail = () => {
     setDetailModalOpen(false);
     setSelectedRecord(null);
@@ -204,6 +205,71 @@ const History = () => {
           Historial de Cambios
         </Typography>
 
+        {/* Barra de Búsqueda */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'row',
+            justifyContent: 'center',
+            gap: 5,
+            mb: 4,
+          }}
+        >
+          <Input
+            startAdornment={
+              <InputAdornment position="start">
+                <Avatar
+                  variant="square"
+                  src="/search-icon.png"
+                  sx={{
+                    p: 1,
+                    mr: 1,
+                    height: '20px',
+                    width: '20px',
+                    backgroundColor: 'transparent',
+                    filter: 'invert(20%)',
+                  }}
+                  className="search-icon"
+                />
+              </InputAdornment>
+            }
+            endAdornment={
+              <InputAdornment position="end">
+                <Button onClick={() => {handleSearch("");}}>
+                  <GridCloseIcon/>
+                </Button>
+              </InputAdornment>
+            }
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            placeholder="Buscar"
+            sx={{
+              borderRadius: '8px',
+              backgroundColor: 'var(--bg-inputs)',
+              padding: '0.5rem 1rem',
+              width: '100%',
+              maxWidth: '30rem',
+              color: 'var(--color-text-base)',
+              boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)',
+              '& input': {
+                color: 'var(--color-text-base)',
+              },
+              '&:focus-within': {
+                backgroundColor: 'var(--color-celeste-focus)',
+                boxShadow: '0 0 5px var(--color-celeste-focus)',
+              },
+            }}
+            onFocus={() => {
+              const icon = document.querySelector('.search-icon');
+              icon?.classList.add('focus-icon');
+            }}
+            onBlur={() => {
+              const icon = document.querySelector('.search-icon');
+              icon?.classList.remove('focus-icon');
+            }}
+            size="small"
+          />
+        </Box>
         {loading ? (
           <Box sx={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center" }}>
             <LoadingCircle />
@@ -224,12 +290,7 @@ const History = () => {
             }}
           >
             <DataGrid
-              rows={records.filter((r) =>
-                [r.user_id?.username, r.action, r.component_name, r.subcomponent_name]
-                  .join(" ")
-                  .toLowerCase()
-                  .includes(searchTerm.toLowerCase())
-              )}
+              rows={records}
               columns={columns}
               getRowId={(row) => row._id}
               pageSizeOptions={[10, 25, 50, 1000]}
@@ -278,9 +339,16 @@ const History = () => {
                 '[class*="MuiTablePagination"]': {
                   color: 'var(--color-pagination)',
                 },
-              '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
-                  outline: 'none',
-              },
+                '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
+                    outline: 'none',
+                },
+                '& .MuiDataGrid-columnHeaderMenuIconButton-root, & .MuiDataGrid-columnHeaderMenuIconButton-root svg, & .css-1ckov0h-MuiSvgIcon-root': {
+                  color: 'white !important',
+                  fill: 'white !important',
+                },
+                '& .MuiDataGrid-iconButtonContainer button': {
+                  color: '#fff !important',
+                },
               }}
             />
           </Paper>
@@ -312,9 +380,8 @@ const History = () => {
               p: 0,
             }}
           >
-            {/* Encabezado */}
             <Box sx={{ p: 3, borderBottom: "1px solid #ececec", bgcolor: "var(--color-bg-secondary)", borderRadius: "16px 16px 0 0", position: "relative" }}>
-              <Typography id="modal-history-detail-title" variant="h5" sx={{ fontWeight: 700, color: "var(--color-title-secondary)", pr: 5 }}>
+              <Typography variant="h5" sx={{ fontWeight: 700, color: "var(--color-title-secondary)", pr: 5 }}>
                 {selectedRecord?.action || "Detalle"}
               </Typography>
               <IconButton
@@ -324,7 +391,7 @@ const History = () => {
                 <CloseIcon />
               </IconButton>
             </Box>
-            {/* Datos generales */}
+            {/* Datos del histórico */}
             {selectedRecord && (
               <Box sx={{ p: 3, pt: 2, display: "flex", flexDirection: "column", gap: 1.5 }}>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -344,7 +411,6 @@ const History = () => {
                 <Typography variant="body2">
                   <b>Fecha:</b> {DateTimeParser(selectedRecord.date)}
                 </Typography>
-                {/* Botón ir a componente */}
                 {selectedRecord.component_id?._id && (
                   <Box sx={{ mt: 1, mb: 1 }}>
                     <Button
@@ -363,7 +429,7 @@ const History = () => {
                   </Box>
                 )}
                 <Divider sx={{ my: 2 }} />
-                {/* Detalles de cambios */}
+                {/* Detalles de cambios con ayuda de parser */}
                 <Box>
                   <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
                     Detalles del cambio:

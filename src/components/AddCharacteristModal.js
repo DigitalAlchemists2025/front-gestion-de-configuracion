@@ -1,8 +1,11 @@
-// components/GenericModal.jsx
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Modal, Box, Typography, Button } from '@mui/material';
 
+/* 
+  Este modal se ocupan en 3 vistas distintas, requiere distintas 
+  propiedades dependiendo de cada una 
+*/
 const AddCharacteristicModal = ({
   open,
   onClose,

@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import SideBar from "../components/SideBar";
 import axios from "axios";
 import LoadingCircle from "../components/LoadingCircle";
+import { GridCloseIcon } from "@mui/x-data-grid";
 
 function Home() {
   let initialSearch = localStorage.getItem('searchedComponent');
@@ -149,6 +150,13 @@ function Home() {
                   }}
                   className="search-icon"
                 />
+              </InputAdornment>
+            }
+            endAdornment={
+              <InputAdornment position="end">
+                <Button onClick={() => {handleSearch("");}}>
+                  <GridCloseIcon/>
+                </Button>
               </InputAdornment>
             }
             value={searchTerm}

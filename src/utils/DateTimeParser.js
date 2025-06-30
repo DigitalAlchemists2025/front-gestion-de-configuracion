@@ -1,3 +1,7 @@
+/* 
+  Función para convertir fechas a formato chileno
+*/
+
 const DateTimeParser = (fechaISO) => {
     if (!fechaISO) return "N/A";
   

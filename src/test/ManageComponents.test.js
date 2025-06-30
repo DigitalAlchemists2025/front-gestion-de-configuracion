@@ -1,35 +1,35 @@
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom';
-import ManageComponents from './ManageComponents';
-import axios from 'axios';
-import { DataGrid } from '@mui/x-data-grid';
+const mockNavigate = jest.fn();
+import "react-router-dom";
 
-// Mock de las dependencias
-jest.mock('axios');
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: () => jest.fn(),
+  useNavigate: () => mockNavigate,
 }));
 
-// Mock de localStorage
-const mockLocalStorage = (() => {
-  let store = {};
-  return {
-    getItem: jest.fn((key) => store[key] || null),
-    setItem: jest.fn((key, value) => { store[key] = value; }),
-    clear: jest.fn(() => { store = {}; })
-  };
-})();
+jest.mock('axios');
 
-// Mock de DataGrid para simplificar pruebas
 jest.mock('@mui/x-data-grid', () => ({
   ...jest.requireActual('@mui/x-data-grid'),
   DataGrid: jest.fn(() => <div>MockedDataGrid</div>),
 }));
 
-beforeAll(() => {
-  Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
-});
+const mockLocalStorage = (() => {
+  let store = {};
+  return {
+    getItem: jest.fn((key) => store[key] || null),
+    setItem: jest.fn((key, value) => { store[key] = value; }),
+    clear: jest.fn(() => { store = {}; }),
+  };
+})();
+
+Object.defineProperty(window, 'localStorage', { value: mockLocalStorage });
+
+import React from 'react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
+import ManageComponents from './ManageComponents';
+import axios from 'axios';
+import { DataGrid } from '@mui/x-data-grid';
 
 describe('ManageComponents', () => {
   const mockComponents = [
@@ -54,6 +54,10 @@ describe('ManageComponents', () => {
   ];
 
   beforeEach(() => {
+    window.localStorage.getItem.mockClear();
+    axios.get.mockClear();
+    mockNavigate.mockClear();
+
     window.localStorage.getItem.mockReturnValue('mock-token');
     axios.get.mockResolvedValue({ data: mockComponents });
   });
@@ -62,26 +66,22 @@ describe('ManageComponents', () => {
     jest.clearAllMocks();
   });
 
-  test('renderiza el componente correctamente', async () => {
+  test('Renderiza el componente correctamente', async () => {
     render(
       <MemoryRouter>
         <ManageComponents />
       </MemoryRouter>
     );
 
-    // Verifica que el título se renderice
     expect(screen.getByText('Gestión de componentes')).toBeInTheDocument();
-    
-    // Verifica que el campo de búsqueda esté presente
     expect(screen.getByPlaceholderText('Buscar')).toBeInTheDocument();
-    
-    // Verifica que se renderice el DataGrid (mock)
+
     await waitFor(() => {
       expect(screen.getByText('MockedDataGrid')).toBeInTheDocument();
     });
   });
 
-  test('hace fetch de los componentes al montar', async () => {
+  test('Fetch a los componentes al montar', async () => {
     render(
       <MemoryRouter>
         <ManageComponents />
@@ -101,7 +101,7 @@ describe('ManageComponents', () => {
     });
   });
 
-  test('filtra componentes al buscar', async () => {
+  test('Filtra componentes al buscar', async () => {
     render(
       <MemoryRouter>
         <ManageComponents />
@@ -112,7 +112,6 @@ describe('ManageComponents', () => {
     fireEvent.change(searchInput, { target: { value: 'Componente 1' } });
 
     await waitFor(() => {
-      // Verificar que se llamó a la función de filtrado con el valor correcto
       expect(DataGrid).toHaveBeenCalledWith(
         expect.objectContaining({
           rows: expect.arrayContaining([
@@ -124,14 +123,8 @@ describe('ManageComponents', () => {
     });
   });
 
-  test('redirige a login si no hay token', async () => {
+  test('Redirige a login si no hay token', () => {
     window.localStorage.getItem.mockReturnValue(null);
-    const mockNavigate = jest.fn();
-    
-    jest.mock('react-router-dom', () => ({
-      ...jest.requireActual('react-router-dom'),
-      useNavigate: () => mockNavigate,
-    }));
 
     render(
       <MemoryRouter>
@@ -140,46 +133,5 @@ describe('ManageComponents', () => {
     );
 
     expect(mockNavigate).toHaveBeenCalledWith('/login');
-  });
-});
-
-// Tests para funciones específicas
-describe('Funciones de ManageComponents', () => {
-  let originalConfirm;
-  
-  beforeAll(() => {
-    originalConfirm = window.confirm;
-    window.confirm = jest.fn(() => true);
-  });
-
-  afterAll(() => {
-    window.confirm = originalConfirm;
-  });
-
-  test('changeStatus cambia el estado del componente', async () => {
-    axios.put.mockResolvedValue({});
-    
-    // Necesitarías extraer la función para probarla directamente
-    // o renderizar el componente y simular las interacciones
-    // Esta es una versión simplificada
-    const { rerender } = render(
-      <MemoryRouter>
-        <ManageComponents />
-      </MemoryRouter>
-    );
-
-    await waitFor(() => {
-      expect(axios.get).toHaveBeenCalled();
-    });
-
-    // Aquí normalmente simularías la interacción con el menú
-    // y la selección de cambiar estado
-  });
-
-  test('handleDeleteComponent elimina un componente', async () => {
-    axios.delete.mockResolvedValue({});
-    
-    // Similar a changeStatus, necesitarías simular las interacciones
-    // o extraer la función para probarla directamente
   });
 });

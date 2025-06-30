@@ -45,6 +45,7 @@ function SideBar() {
                 <img src="/logoUCN.png"></img>
                 <img src="/logoEIC.png"></img>
             </Box>
+            {/* Solo un usuario con rol administrador tiene acceso a las diferentes vistas */}
             {rol === '0' && (
                 <>
                     <ListButtonItem nombre="Ver Componentes" onClick={() => navigate('/home')} />

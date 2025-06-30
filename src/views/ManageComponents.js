@@ -32,6 +32,7 @@ const ManageComponents = () => {
     localStorage.removeItem('selectedComponent');
     if (!token) navigate('/login');
 
+    /* Columnas visibles en la tabla */
     const columns = [
         { field: 'name', headerName: 'Nombre', flex: 1, },
         { field: 'type', headerName: 'Tipo', flex: 1 },
@@ -108,7 +109,8 @@ const ManageComponents = () => {
                         'Authorization': `Bearer ${token}`,
                     },
                 });
-
+                
+                /* Se transforma el formato de las características genéricas y las horas a hora chile */
                 const componentesMappedAndSorted = response.data.map((component) => {
                     const parsedCreatedAt = DateTimeParser(component.createdAt);
                     const parsedUpdatedAt = DateTimeParser(component.updatedAt);
@@ -433,7 +435,14 @@ const ManageComponents = () => {
                                 '& .MuiDataGrid-row.fila-subcomponente .MuiDataGrid-cell': {
                                     backgroundColor:"var(--color-dg-cell-child)" ,
                                     pl: 2,
-                                }
+                                },
+                                '& .MuiDataGrid-columnHeaderMenuIconButton-root, & .MuiDataGrid-columnHeaderMenuIconButton-root svg, & .css-1ckov0h-MuiSvgIcon-root': {
+                                    color: 'white !important',
+                                    fill: 'white !important',
+                                },
+                                '& .MuiDataGrid-iconButtonContainer button': {
+                                    color: '#fff !important',
+                                },
                             }}
                         />
                     </Paper>

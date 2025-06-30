@@ -8,7 +8,6 @@ import {
   Typography,
   MenuItem,
   Paper,
-  Modal,
   Chip
 } from "@mui/material";
 import axios from "axios";
@@ -55,8 +54,7 @@ const AddComponent = () => {
         "Content-Type": "application/json"
       }
     })
-    .then((response) => {
-      console.log("Componente guardado:", response.data);
+    .then(() => {
       alert("Componente guardado correctamente");
       window.location.href = "/home";
     })
@@ -76,7 +74,7 @@ const AddComponent = () => {
     setIsModalOpen(false);
   };
 
-  const handleAddCaracteristica = () => {
+  const handleAddDescription = () => {
     const nueva = {
       name: newNombre.trim(),
       description: newDescripcion.trim()
@@ -88,7 +86,7 @@ const AddComponent = () => {
     setNewDescripcion("");
   };
 
-  const handleDeleteCaracteristica = (index) => {
+  const handleEditDescription = (index) => {
     const nuevas = [...caracteristicas];
     nuevas.splice(index, 1);
     setCaracteristicas(nuevas);
@@ -199,7 +197,7 @@ const AddComponent = () => {
                     <Chip
                       key={index}
                       label={`${c.name}: ${c.description}`}
-                      onDelete={() => handleDeleteCaracteristica(index)}
+                      onDelete={() => handleEditDescription(index)}
                       size="medium"
                       sx={{ m: 1, maxWidth: '100%', fontFamily: 'var(--font-source)' }}
                     />
@@ -255,7 +253,7 @@ const AddComponent = () => {
         open={isModalOpen}
         onClose={handleCloseModal}
         title="Agregar Característica"
-        onConfirm={handleAddCaracteristica}
+        onConfirm={handleAddDescription}
         confirmText="Agregar"
         confirmDisabled={!newNombre.trim() || !newDescripcion.trim()}
         sxBox={{ transform: 'translate(-12.5%, -75%)' }}

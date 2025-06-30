@@ -1,9 +1,14 @@
+/* 
+    Función para transformar datos en el modal de la vista Historial
+*/
+
 export function getChangeDetails(selectedRecord) {
     if (!selectedRecord) return [];
 
     const details = selectedRecord.details || {};
     const changes = [];
 
+    // Procesa descripciones agregadas, editadas o eliminadas
     if (details.descriptions) {
         if (details.descriptions.added?.length) {
             changes.push({
@@ -42,6 +47,7 @@ export function getChangeDetails(selectedRecord) {
         }
     }
 
+    // Cambios de nombre, tipo o estado del componente principal
     if (details.nombre_anterior && details.nombre_nuevo) {
         changes.push({
             type: "edited",
@@ -66,6 +72,7 @@ export function getChangeDetails(selectedRecord) {
         });
     }
 
+    // Asociar/desasociar subcomponentes
     if (selectedRecord.action?.toLowerCase() === "asociar subcomponente") {
         changes.push({
             type: "associated",
@@ -74,8 +81,8 @@ export function getChangeDetails(selectedRecord) {
                 `${selectedRecord.subcomponent_type}: ${selectedRecord.subcomponent_name}`,
             ],
         });
-    } 
-    
+    }
+
     if (selectedRecord.action?.toLowerCase() === "desasociar subcomponente") {
         changes.push({
             type: "disassociated",

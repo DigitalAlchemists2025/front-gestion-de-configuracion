@@ -8,66 +8,47 @@ import CloseIcon from "@mui/icons-material/Close";
 import LoadingCircle from "../components/LoadingCircle";
 
 const ManageUsers = () => {
-    const [loading, setLoading] = useState(false);
-    const [loadingButtons, setLoadingButtons] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [loadingButtons, setLoadingButtons] = useState(false);
 
-    const [users, setUsers] = useState([]);
-    const [allUsers, setAllUsers] = useState([]);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [userModalOpen, setUserModalOpen] = useState(false);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [userModalOpen, setUserModalOpen] = useState(false);
 
-    const [onChangePassword, setOnChangePassword] = useState(false)
+  const [onChangePassword, setOnChangePassword] = useState(false)
 
-    const [editUser, setEditUser] = useState({ username: "", email: "", password: "", role: "usuario" });
-    const [saving, setSaving] = useState(false);
-    const [isEditMode, setIsEditMode] = useState(false); // Cuando no edita, crea
+  const [editUser, setEditUser] = useState({ username: "", email: "", password: "", role: "usuario" });
+  const [saving, setSaving] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false); // Cuando no edita, crea
+  const allRoles = ["usuario", "administrador"];
+  const roleOptions = useMemo(() => {
+    if (!editUser.role) return allRoles;
+    return [editUser.role, ...allRoles.filter(r => r !== editUser.role)];
+  }, [editUser.role]);
 
-    const navigate = useNavigate();
-    const BACKEND_URL = process.env.REACT_APP_BACK_URL;
-    const token = localStorage.getItem("token");
-    const role = localStorage.getItem("role");
+  const navigate = useNavigate();
+  const BACKEND_URL = process.env.REACT_APP_BACK_URL;
+  const token = localStorage.getItem("token");
+  
+  if (!token) navigate("/login");
 
-    useEffect(() => {
-        if (!token || role !== "0") navigate("/login");
-    }, [token, role, navigate]);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get(`${BACKEND_URL}/users`, {
+          headers: { Authorization: `Bearer ${token}` },       
+        })
+        setUsers(response.data);
+      } catch(err) {
+        console.error(err)
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    useEffect(() => {
-        const fetchUsers = async () => {
-            try {
-                setLoading(true);
-                const response = await axios.get(`${BACKEND_URL}/users`, {
-                    headers: { Authorization: `Bearer ${token}` },       
-                })
-                console.log(response.data);
-                setUsers(response.data);
-                setAllUsers(response.data);
-            } catch(err) {
-                console.log(err)
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchUsers();
-    }, [token])
-    
-    useEffect(() => {
-        if (!searchTerm || searchTerm.trim() === "") {
-            setUsers(allUsers);
-        } else {
-            const terms = searchTerm.toLowerCase().split(" ").filter(Boolean);
-            setUsers(
-                users.filter((u) => {
-                    const haystack = [u.username, u.email]
-                        .filter(Boolean)
-                        .join(" ")
-                        .toLowerCase();
-                    return terms.every((t) => haystack.includes(t));
-              })
-            );
-        }
-    }, [searchTerm, users]);
+    fetchUsers();
+  }, [token])
     
     const columns = useMemo(
       () => [
@@ -102,61 +83,119 @@ const ManageUsers = () => {
       setUserModalOpen(true);
     };
 
-    
     const handleRowClick = (params) => {
       setSelectedUser(params.row);
       setEditUser({ 
           username: params.row.username || "",
           email: params.row.email || "",
           password: params.row.password || "",
-          role: params.row.role || "usuario"
+          role: params.row.role || "",
       });
       setIsEditMode(true);
       setUserModalOpen(true);
     };
     
-      const handleCloseUser = () => {
-        setUserModalOpen(false);
-        setSelectedUser(null);
-        setEditUser({ username: "", email: "", password: "", role: "usuario" });
-        setSaving(false);
-      };
+    const handleCloseUser = () => {
+      setUserModalOpen(false);
+      setSelectedUser(null);
+      setEditUser({ username: "", email: "", password: "", role: "usuario" });
+      setSaving(false);
+    };
 
       const handleEditChange = (field, value) => {
           setEditUser((prev) => ({ ...prev, [field]: value }));
       };
+
+      const hasUserChanged = () => {
+        if (!selectedUser) return true; // En modo creación, sí hay cambios
+
+        if (editUser.username.trim() !== (selectedUser.username || '').trim()) return true;
+        if (editUser.email.trim() !== (selectedUser.email || '').trim()) return true;
+        if (editUser.role !== (selectedUser.role || '')) return true;
+        if (onChangePassword && editUser.password.trim() !== '') return true;
+
+        return false;
+      };
     
       const handleSaveUser = async () => {
         setSaving(true);
+        setLoadingButtons(true);
+
+        if (!hasUserChanged()) {
+          alert("No hay cambios para guardar.");
+          setSaving(false);
+          setLoadingButtons(false);
+          return;
+        }
+
+        // Validación de campos obligatorios
+        if (!editUser.username.trim()) {
+          alert("El nombre de usuario es obligatorio.");
+          setSaving(false);
+          setLoadingButtons(false);
+          return;
+        }
+        if (!editUser.email.trim()) {
+          alert("El correo es obligatorio.");
+          setSaving(false);
+          setLoadingButtons(false);
+          return;
+        }
+        if (!["usuario", "administrador"].includes(editUser.role)) {
+          alert("Rol inválido.");
+          setSaving(false);
+          setLoadingButtons(false);
+          return;
+        }
+
         try {
+          const userPayload = {
+            username: editUser.username.trim(),
+            email: editUser.email.trim(),
+            role: editUser.role,
+          };
+
+          if (onChangePassword && editUser.password.trim() !== "") {
+            userPayload.password = editUser.password.trim();
+          }
+
           if (isEditMode && selectedUser) {
             await axios.put(
               `${BACKEND_URL}/users/${selectedUser._id}`,
-              editUser,
+              userPayload,
               { headers: { Authorization: `Bearer ${token}` } }
-            );
+            ).catch((err) => console.error("Error actualizando: ", err));
+            alert(`Usuario ${userPayload.username} editado correctamente`);
           } else {
+            if (!userPayload.password) {
+              alert("Debe ingresar una contraseña para crear un usuario.");
+              setSaving(false);
+              setLoadingButtons(false);
+              return;
+            }
             await axios.post(
               `${BACKEND_URL}/users`,
-              editUser,
+              userPayload,
               { headers: { Authorization: `Bearer ${token}` } }
             );
+            alert(`Usuario ${userPayload.username} creado correctamente`);
           }
           const response = await axios.get(`${BACKEND_URL}/users`, {
-            headers: { Authorization: `Bearer ${token}` }
+            headers: { Authorization: `Bearer ${token}` },
           });
           setUsers(response.data);
-          setAllUsers(response.data);
           setOnChangePassword(false);
           setUserModalOpen(false);
           setSelectedUser(null);
+          setEditUser({ username: "", email: "", password: "", role: "usuario" });
         } catch (err) {
-          alert("Error guardando usuario");
+          alert("Error guardando usuario:", err);
+          console.error(err);
         } finally {
+          setLoadingButtons(false);
           setSaving(false);
         }
       };
-
 
       return (
         <Box sx={{
@@ -186,7 +225,7 @@ const ManageUsers = () => {
               }}>
                 Usuarios encontrados:
               </Typography>
-              <Button variant="outlined" sx={{ height: "2rem" }} onClick={handleAddUser}>
+              <Button variant="outlined" sx={{ height: "2rem" }} onClick={handleAddUser} disabled={loadingButtons}>
                 Agregar usuario
               </Button>
             </Box>
@@ -211,12 +250,7 @@ const ManageUsers = () => {
                 }}
               >
                 <DataGrid
-                  rows={users.filter((u) =>
-                    [u.username, u.email]
-                      .join(" ")
-                      .toLowerCase()
-                      .includes(searchTerm.toLowerCase())
-                  )}
+                  rows={users}
                   columns={columns}
                   getRowId={(row) => row._id}
                   pageSizeOptions={[5, 10, 20]}
@@ -265,9 +299,16 @@ const ManageUsers = () => {
                     '[class*="MuiTablePagination"]': {
                       color: 'var(--color-pagination)',
                     },
-                  '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
-                      outline: 'none',
-                  },
+                    '.MuiDataGrid-cell:focus, .MuiDataGrid-columnHeader:focus, .MuiDataGrid-columnHeader:focus-within': {
+                        outline: 'none',
+                    },
+                    '& .MuiDataGrid-columnHeaderMenuIconButton-root, & .MuiDataGrid-columnHeaderMenuIconButton-root svg, & .css-1ckov0h-MuiSvgIcon-root': {
+                      color: 'white !important',
+                      fill: 'white !important',
+                    },
+                    '& .MuiDataGrid-iconButtonContainer button': {
+                      color: '#fff !important',
+                    },
                   }}
                 />
               </Paper>
@@ -386,10 +427,16 @@ const ManageUsers = () => {
                           }}
                           autoComplete="off"
                         />
+                        {/* 
+                          La contraseña solo se cambiará si se selecciona este botón.
+                          Al intentar cambiarla se borrará la actual contraseña para crear una nueva.
+                        */}
                         <Button sx={{fontSize: "0.5em"}} onClick={() => {
                           setEditUser((prev) => ({ ...prev, password: "" }));
                           setOnChangePassword(true);
-                        }}>Cambiar Contraseña</Button>
+                        }}>
+                          Cambiar Contraseña
+                        </Button>
                       </Box>
                     </Box>
                     <Box>
@@ -409,9 +456,11 @@ const ManageUsers = () => {
                           fontSize: "1rem"
                         }}
                       >
-                        <option value = {selectedUser?.role} disabled>{editUser?.role}</option>
-                        <option value="usuario">usuario</option>
-                        <option value="admin">administrador</option>
+                        {roleOptions.map(role => (
+                          <option key={role} value={role}>
+                            {role}
+                          </option>
+                        ))}
                       </select>
                     </Box>
                   </Box>
@@ -438,7 +487,8 @@ const ManageUsers = () => {
                         bgcolor: "var(--login-button-bg)",
                         ":hover": { bgcolor: "var(--login-button-hover)" }
                       }}
-                      disabled={saving || !editUser.username || !editUser.email}
+                      /* El botón estará deshabilitado para cualquier itento de actualización inválido */
+                      disabled={saving || !editUser.username || !editUser.email || loadingButtons || (isEditMode && !hasUserChanged())}
                     >
                       {saving ? (isEditMode ? "Guardando..." : "Agregando...") : (isEditMode ? "Guardar" : "Agregar")}
                     </Button>

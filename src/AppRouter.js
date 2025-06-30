@@ -10,7 +10,10 @@ import History from './views/History';
 import ManageUsers from './views/ManageUsers';
 
 function AppRouter() {
+    // constante para gestionar el acceso a las vistas según sesión iniciada
     const token = localStorage.getItem('token');
+
+    // constante para gestionar el acceso a las vistas según rol del usuario
     const isOne = localStorage.getItem('role') === '1';
   
     return (
@@ -22,9 +25,10 @@ function AppRouter() {
           <Route path="/home" element={token? <Home/> : <Login/>} />
           <Route path="/agregar-componentes" element={token? (!isOne? <AddComponent/> : <Home/>) : <Login/>} />
           <Route path="/components/:id" element={token? <ComponentDetail/> : <Login/>} />
-          <Route path="/gestionar-componentes" element={token? <ManageComponents/> : <Login/>} />
-          <Route path="/ver-historial" element={token? <History/> : <Login/>} />
-          <Route path="/users" element={token? <ManageUsers/> : <Login/>} />
+          <Route path="/gestionar-componentes" element={token? (!isOne? <ManageComponents/> : <Home/>) : <Login/>} />
+          <Route path="/ver-historial" element={token? (!isOne? <History/> : <Home/>) : <Login/>} />
+          <Route path="/users" element={token? (!isOne? <ManageUsers/> : <Home/>) : <Login/>} />
+          <Route path="*" element={<Home/>} /> 
         </Routes>
       </Router>
     );

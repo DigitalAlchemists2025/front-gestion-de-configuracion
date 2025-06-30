@@ -44,13 +44,14 @@ function Login() {
     }
   };
 
+  // Al cargar el id por inicio de sesión exitoso, 
+  // se obtiene el rol del usuario desde backend
   useEffect(() => {
-    if (!id) return;
-  
+    if (!id) return;  
     const fetchUser = async () => {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.warn("No se encontró token");
+        console.error("No se encontró token");
         return;
       }
   
@@ -68,22 +69,28 @@ function Login() {
         } else if (role === 'administrador') {
           localStorage.setItem('role', '0');
         } else {
-          console.warn("Rol desconocido:", role);
+          throw new Error("Rol desconocido");
         }
   
         window.location.replace('/home');
   
       } catch (error) {
-        console.error("Error al obtener el usuario:", error);
+        console.error("Error al obtener el rol del usuario:", error);
       }
     };
   
     fetchUser();
   }, [id]);
   
-  // Login Google con Popup
+  // Popup de auth de google
   const handleGoogleLogin = () => {
     setLoading(true);
+    /* 
+      Google Firebase tiene su propio metodo de autenticación, 
+      por lo que se verifica el correo por backend y se asignan 
+      las propiedades de usuario necesarias para el correcto
+      funcionamiento de la applicación
+    */
     signInWithPopup(auth, provider).then(async (result) => {
       const _user = result.user;
       try {
@@ -91,7 +98,7 @@ function Login() {
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('role', response.data.role === 'administrador' ? '0' : '1');
       } catch(error) {
-        console.log("Email no encontrado");
+        console.error("Email no encontrado", error);
       }
       alert(`¡Bienvenido/a ${_user.displayName.split(' ')[0] || _user.email}!`);
       window.location.replace("/home");
@@ -120,7 +127,7 @@ function Login() {
       alignItems: 'center', 
       justifyContent: 'center',
       background: 'var(--color-bg-secondary)',
-      minHeight: '100vh',
+      height: '100vh',
       width: "100vw",
       position: "fixed",
       top: 0,
@@ -128,23 +135,21 @@ function Login() {
     }}>
       <Box sx={{
         maxWidth: "50%",
-        maxHeight: "15%",
         display: "flex",
         gap: 5,
         justifyContent: "center",
         alignItems: "center",
-        top: "1rem",
-        mb: 5,
+        my: 2,
       }}>
-        <img style={{ width: "5rem", height: "15%" }} src="/logoUCN.png"></img>
-        <img style={{ width: "10rem", height: "15%" }} src="/logoEIC.png"></img>
+        <img style={{ width: "5rem", objectFit: "contain", }} src="/logoUCN.png"></img>
+        <img style={{ width: "10rem", objectFit: "contain", }} src="/logoEIC.png"></img>
       </Box>
       <Typography
         variant="h1"
         sx={{
           fontSize: '2.5rem',
           fontFamily: 'var(--font-source)',
-          mb: 6,
+          mb: 3,
           color: 'var(--color-title-secondary)',
           textAlign: 'center',
         }}
@@ -155,9 +160,14 @@ function Login() {
       <Paper
         elevation={3}
         sx={{
-          p: 4,
+          px: 4,
+          py: 3,
           borderRadius: 3,
-          width: '30%',
+          width: '30rvw',
+          minWidth: '20vw',
+          minHeight: "30vh",
+          height: "50rvh",
+          objectFit: "contain",
           maxWidth: 400,
           boxShadow: 'var(--login-paper-shadow)',
         }}
@@ -167,8 +177,7 @@ function Login() {
           sx={{
             fontSize: '1.8rem',
             fontFamily: 'var(--font-source)',
-            mb: 5,
-            gap: 5,
+            my: 1,
             textAlign: 'center',
             color: 'var(--login-paper-header)',
           }}
@@ -185,11 +194,12 @@ function Login() {
           fullWidth
           sx={{ 
             flex: 1, 
+            my: 1,
             flexDirection: 'row', 
             justifyContent: 'center', 
             color: 'var(--login-button-hover)',
             border: '1px solid var(--login-button-hover)',
-            gap: 1, 
+            gap: 1,
             borderRadius: 50,
             fontFamily: 'var(--font-source)',
             '&:hover': { 
@@ -201,7 +211,7 @@ function Login() {
             Iniciar sesión con Google
         </Button>
 
-        <Divider sx={{ borderColor: 'black', my: 5 }} />
+        <Divider sx={{ borderColor: 'black', my: '2rem' }} />
 
         <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>O iniciar sesión con credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -213,7 +223,7 @@ function Login() {
             fullWidth
             size="small"
             label="Correo"
-            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+            sx={{ '& .MuiInputBase-input': { height: '1.5rem' } }}
           />
           <TextField
             type="password"
@@ -223,7 +233,7 @@ function Login() {
             fullWidth
             size="small"
             label="Contraseña"
-            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+            sx={{ '& .MuiInputBase-input': { height: '1.5rem' } }}
           />
         </Box>
 
@@ -247,9 +257,7 @@ function Login() {
         >
           {isLoading ? 'Cargando...' : 'Ingresar'}
         </Button>
-        
-        <Divider sx={{ borderColor: 'black', my: 5 }} />
-        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>No tiene cuenta? <Link href="/register">Registrese aquí</Link></Typography>
+        <Typography sx={{ ml: 1, my: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>No tiene cuenta? <Link href="/register">Registrese aquí</Link></Typography>
       </Paper>
     </Box>
   );

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Box, Button, Divider, Link, Paper, TextField, Typography } from '@mui/material';
 import axios from 'axios';
 import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
@@ -10,7 +10,6 @@ import { faGoogle } from '@fortawesome/free-brands-svg-icons';
 function Register() {
   const [register, setRegister] = useState({ username: '', email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
-  const [id, setId] = useState(null);
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
 
@@ -24,7 +23,7 @@ function Register() {
         password: register.password,
         role: 'usuario',
       });
-      alert('Te has registrado correctamente');
+      alert('Te has registrado correctamente, inicia sesión para continuar');
       window.location.replace("/login");
     } catch (error) {
       console.error('Error al registrar:', error);
@@ -34,7 +33,7 @@ function Register() {
     }
   };
   
-  // Login Google con Popup
+  // Popup de auth de google - no registra una cuenta
   const handleGoogleLogin = () => {
     setLoading(true);
     signInWithPopup(auth, provider).then(async (result) => {
@@ -73,7 +72,7 @@ function Register() {
       alignItems: 'center', 
       justifyContent: 'center',
       background: 'var(--color-bg-secondary)',
-      minHeight: '100vh',
+      height: '100vh',
       width: "100vw",
       position: "fixed",
       top: 0,
@@ -81,23 +80,21 @@ function Register() {
     }}>
       <Box sx={{
         maxWidth: "50%",
-        maxHeight: "15%",
         display: "flex",
         gap: 5,
         justifyContent: "center",
         alignItems: "center",
-        top: "1rem",
-        mb: 5,
+        my: 2,
       }}>
-        <img style={{ width: "5rem", height: "15%" }} src="/logoUCN.png"></img>
-        <img style={{ width: "10rem", height: "15%" }} src="/logoEIC.png"></img>
+        <img style={{ width: "5rem", objectFit: "contain", }} src="/logoUCN.png"></img>
+        <img style={{ width: "10rem", objectFit: "contain", }} src="/logoEIC.png"></img>
       </Box>
       <Typography
         variant="h1"
         sx={{
           fontSize: '2.5rem',
           fontFamily: 'var(--font-source)',
-          mb: 6,
+          mb: 3,
           color: 'var(--color-title-secondary)',
           textAlign: 'center',
         }}
@@ -108,10 +105,13 @@ function Register() {
       <Paper
         elevation={3}
         sx={{
-          p: 4,
+          px: 4,
+          py: 3,
           borderRadius: 3,
-          width: '30%',
-          maxWidth: 400,
+          width: '30rvw',
+          minWidth: '20vw',
+          minHeight: "35rvh",
+          height: "50rvh",
           boxShadow: 'var(--login-paper-shadow)',
         }}
       >
@@ -120,8 +120,7 @@ function Register() {
           sx={{
             fontSize: '1.8rem',
             fontFamily: 'var(--font-source)',
-            mb: 5,
-            gap: 5,
+            my: 1,
             textAlign: 'center',
             color: 'var(--login-paper-header)',
           }}
@@ -129,7 +128,7 @@ function Register() {
           Registrarse
         </Typography>
 
-
+        {/* Es un inicio de sesión igual que el login, no se registra la cuenta asociada a google */}
         <Button
           onClick={handleGoogleLogin}
           variant="outlined"
@@ -138,6 +137,7 @@ function Register() {
           fullWidth
           sx={{ 
             flex: 1, 
+            my: 1,
             flexDirection: 'row', 
             justifyContent: 'center', 
             color: 'var(--login-button-hover)',
@@ -151,10 +151,10 @@ function Register() {
           }}
         >
           <FontAwesomeIcon icon={faGoogle} style={{ color: "var(--color-title-primary)"}} />
-            Continuar con Google
+            Inicia sesión con Google
         </Button>
 
-        <Divider sx={{ borderColor: 'black', my: 5 }} />
+        <Divider sx={{ borderColor: 'black', my: '2rem' }} />
 
         <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>Ingresa tus credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -166,7 +166,7 @@ function Register() {
             fullWidth
             size="small"
             label="Nombre de usuario"
-            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+            sx={{ '& .MuiInputBase-input': { height: '1.5rem' } }}
           />
           <TextField
             type="email"
@@ -176,7 +176,7 @@ function Register() {
             fullWidth
             size="small"
             label="Correo"
-            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+            sx={{ '& .MuiInputBase-input': { height: '1.5rem' }, textJustify: "center" }}
           />
           <TextField
             type="password"
@@ -210,9 +210,7 @@ function Register() {
         >
           {isLoading ? 'Cargando...' : 'Ingresar'}
         </Button>
-        
-        <Divider sx={{ borderColor: 'black', my: 5 }} />
-        <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>Ya tiene cuenta? <Link href="/register">Inicie sesión aquí</Link></Typography>
+        <Typography sx={{ ml: 1, my: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>Ya tiene cuenta? <Link href="/login">Inicie sesión aquí</Link></Typography>
       </Paper>
     </Box>
   );

@@ -1,5 +1,9 @@
 import { Box, Typography } from "@mui/material";
 
+/* 
+  Componente personalizado para las tabs de la 
+  vista de detalle de componente 
+*/
 export default function TabPanel(props) {
   const { children, value, index, } = props;
 

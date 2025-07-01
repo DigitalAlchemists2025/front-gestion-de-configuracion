@@ -8,7 +8,7 @@ import { GridCloseIcon } from "@mui/x-data-grid";
 
 function Home() {
   let initialSearch = localStorage.getItem('searchedComponent');
-  if (initialSearch == "null" || initialSearch == "undefined") {
+  if (initialSearch === (null || undefined)) {
     localStorage.removeItem('searchedComponent');
     initialSearch = '';
   }

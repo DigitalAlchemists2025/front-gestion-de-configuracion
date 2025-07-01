@@ -12,7 +12,7 @@ import DateTimeParser from "../utils/DateTimeParser";
 
 const ManageComponents = () => {
     let initialSearch = localStorage.getItem('searchedComponentManagment');
-    if (initialSearch == "null" || initialSearch == "undefined") {
+    if (initialSearch === (null || undefined)) {
         localStorage.removeItem('searchedComponentManagment');
         initialSearch = '';
     }
@@ -172,34 +172,52 @@ const ManageComponents = () => {
         setSelectedRow(null);
     };
 
-    const changeStatus = async () => {
-        let idComponent = selectedRow._id || null;
-        const payload = {
-          status: selectedRow.status === "activo" ? "de baja" : "activo",
-        };
-
-        if (selectedRow.isSub) {
-            const newId = selectedRow._id.split('-sub-')[0];
-            idComponent = newId;
-        }
+    /* Función recursiva para cambiar el estado de subcomponentes junto a su padre */
+    const changeStatusRecursive = async (component, updateSubcomponents) => {
+        const idComponent = component._id;
+        const newStatus = component.status === "activo" ? "de baja" : "activo";
+        const payload = { status: newStatus };
 
         try {
             await axios.put(`${BACKEND_URL}/components/${idComponent}`, payload, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
             });
-            setComponents((prev) =>
-                prev.map((comp) =>
-                    comp._id === selectedRow._id
-                    ? { ...comp, status: payload.status }
+
+            if (updateSubcomponents && component.components && component.components.length > 0) {
+                for (const childId of component.components) {
+                    const child = components.find(c => c._id === (childId._id || childId));
+                    if (child && child.status !== newStatus) {
+                        await changeStatusRecursive(child, true);
+                    }
+                }
+            }
+
+            setComponents(prev =>
+                prev.map(comp =>
+                    comp._id === component._id
+                    ? { ...comp, status: newStatus }
                     : comp
                 )
             );
         } catch (error) {
-          console.error("Error al cambiar estado:", error);
-        } finally {
-          setLoading(false);
+            console.error("Error al cambiar estado:", error);
+        }
+    };
+
+    const handleChangeStatus = async (component) => {
+        const newStatus = component?.status === "activo" ? "de baja" : "activo";
+
+        if (newStatus === "de baja") {
+            const updateSubcomponents = window.confirm("¿Desea también dar de baja todos los subcomponentes y sub-subcomponentes?");
+            if (updateSubcomponents) {
+                await changeStatusRecursive(component, true);
+            } else {
+                await changeStatusRecursive(component, false);
+            }
+        } else {
+            await changeStatusRecursive(component, false);
         }
     };
 
@@ -207,6 +225,12 @@ const ManageComponents = () => {
         if (window.confirm("¿Estás seguro de que deseas eliminar este componente?")) {
             try {
                 setLoading(true);
+                if(selectedRow.components?.length > 0) {
+                    alert("No puede eliminar a un componente con subcomponentes");
+                    setLoading(false);
+                    return;
+                }
+
                 await axios.delete(`${BACKEND_URL}/components/${id}`, {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -214,6 +238,7 @@ const ManageComponents = () => {
                 });
                 setComponents((prev) => prev.filter((comp) => comp._id !== id));
                 setAllComponents((prev) => prev.filter((comp) => comp._id !== id));
+                window.location.reload();
             } catch (error) {
                 console.error("Error al eliminar componente:", error);
             } finally {
@@ -467,7 +492,7 @@ const ManageComponents = () => {
                         Ver / Editar
                     </MenuItem>
                     <MenuItem onClick={() => {
-                            changeStatus();
+                            handleChangeStatus(selectedRow);
                             handleMenuClose();
                         }}
                         sx={{ fontFamily: 'var(--font-source)', color: 'var(--color-text-primary)' }}

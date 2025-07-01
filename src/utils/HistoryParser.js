@@ -48,30 +48,22 @@ export function getChangeDetails(selectedRecord) {
     }
 
     // Cambios de nombre, tipo o estado del componente principal
-    if (details.nombre_anterior && details.nombre_nuevo) {
-        changes.push({
-            type: "edited",
-            label: "Nombre cambiado",
-            items: [`De "${details.nombre_anterior}" a "${details.nombre_nuevo}"`],
-        });
+    for (const key in details) {
+        const change = details[key];
+        if (
+            change &&
+            typeof change === 'object' &&
+            'before' in change &&
+            'after' in change &&
+            !['descriptions'].includes(key)
+        ) {
+            changes.push({
+                type: "edited",
+                label: `Cambio en ${key}`,
+                items: [`De "${change.before}" a "${change.after}"`],
+            });
+        }
     }
-
-    if (details.tipo_anterior && details.tipo_nuevo) {
-        changes.push({
-            type: "edited",
-            label: "Tipo cambiado",
-            items: [`De "${details.tipo_anterior}" a "${details.tipo_nuevo}"`],
-        });
-    }
-
-    if (details.estado_anterior && details.estado_nuevo) {
-        changes.push({
-            type: "edited",
-            label: "Estado cambiado",
-            items: [`De "${details.estado_anterior}" a "${details.estado_nuevo}"`],
-        });
-    }
-
     // Asociar/desasociar subcomponentes
     if (selectedRecord.action?.toLowerCase() === "asociar subcomponente") {
         changes.push({

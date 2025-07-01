@@ -9,6 +9,7 @@ import SideBar from "../components/SideBar";
 import TabPanel from "../components/TabPanel";
 import { DataGrid, GridCloseIcon } from "@mui/x-data-grid";
 import AddCharacteristicModal from "../components/AddCharacteristModal";
+import { CapitalizeFirst } from "../utils/CapitalizeFirst";
 
 const ComponentDetail = () => {
 
@@ -253,8 +254,8 @@ const ComponentDetail = () => {
 
   const handleAddDescripcion = async () => {
     const payload = {
-      name: newNombre,
-      description: newDescripcion,
+      name: CapitalizeFirst(newNombre),
+      description: CapitalizeFirst(newDescripcion),
     };
     
     mainDescriptions.push(payload);
@@ -344,6 +345,7 @@ const ComponentDetail = () => {
     setTipo("");
     setEstado("activo");
     setCaracteristicas([]);
+    setNewSubCharacteristics([]);
   };
   
   const handleCloseNewChildModal = () => {
@@ -363,8 +365,8 @@ const ComponentDetail = () => {
   
   const handleAddNewSubCharacteristics = () => {
     const newSubDesc = {
-      name: newSubName.trim(),
-      description: newSubDescription.trim()
+      name: CapitalizeFirst(newSubName.trim()),
+      description: CapitalizeFirst(newSubDescription.trim())
     };
 
     setNewSubCharacteristics([...newSubCharacteristics, newSubDesc]);
@@ -395,8 +397,8 @@ const ComponentDetail = () => {
       const filteredDescriptions = mainDescriptions;
   
       const payload = {
-        name: mainComponentName,
-        type: mainComponentType,
+        name: CapitalizeFirst(mainComponentName),
+        type: CapitalizeFirst(mainComponentType),
         descriptions: filteredDescriptions,
       };
   
@@ -410,8 +412,8 @@ const ComponentDetail = () => {
   
         setComponent({
           ...component,
-          name: mainComponentName,
-          type: mainComponentType,
+          name: CapitalizeFirst(mainComponentName),
+          type: CapitalizeFirst(mainComponentType),
           descriptions: mainDescriptions,
         });
         setChanges(false);
@@ -439,8 +441,8 @@ const ComponentDetail = () => {
       (c) => c.name.trim() && c.description.trim()
     );
     const payload = {
-        name: nombre.trim(),
-        type: tipo.trim(),
+        name: CapitalizeFirst(nombre.trim()),
+        type: CapitalizeFirst(tipo.trim()),
         status: estado,
         parent: component._id,
         descriptions: validDescriptions.length > 0 ? validDescriptions : undefined
@@ -457,6 +459,8 @@ const ComponentDetail = () => {
         ...prev,
         components: nuevosComponentes,
       }));
+      
+      setNewSubCharacteristics([]);
       handleCloseChildModal();
       handleCloseNewChildModal();
     } catch (error) {

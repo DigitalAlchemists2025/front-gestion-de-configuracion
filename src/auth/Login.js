@@ -95,13 +95,19 @@ function Login() {
       const _user = result.user;
       try {
         const response = await axios.get(`${BACKEND_URL}/api/v1/auth/email/${_user.email}`);
+        console.log(response)
         localStorage.setItem('token', response.data.access_token);
         localStorage.setItem('role', response.data.role === 'administrador' ? '0' : '1');
+        alert(`¡Bienvenido/a ${_user.displayName.split(' ')[0] || _user.email}!`);
+        window.location.replace("/home");
       } catch(error) {
-        console.error("Email no encontrado", error);
+        console.error("Error al iniciar sesión con google", error);
+        if (error.response.data.error.statusCode === 404) {
+          alert("Correo no registrado, registrese para continuar")
+          localStorage.setItem("EMAIL_TEMP", _user.email);
+          window.location.replace("/register");
+        }
       }
-      alert(`¡Bienvenido/a ${_user.displayName.split(' ')[0] || _user.email}!`);
-      window.location.replace("/home");
     }).catch((error) => {
       const errorCode = error.code;
       const errorMessage = error.message;

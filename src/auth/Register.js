@@ -12,7 +12,11 @@ function Register() {
   const [isLoading, setLoading] = useState(false);
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
-
+  const tempEmail = localStorage.getItem("EMAIL_TEMP") ;
+  if (tempEmail) {
+    setRegister({...register, email: tempEmail});
+    localStorage.removeItem("EMAIL_TEMP");
+  }
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);

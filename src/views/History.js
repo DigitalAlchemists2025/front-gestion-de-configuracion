@@ -386,9 +386,9 @@ const History = () => {
               </Typography>
               <IconButton
                 onClick={handleCloseDetail}
-                sx={{ position: "absolute", top: 18, right: 18, color: "var(--color-text-base)" }}
+                sx={{ position: "absolute", top: 18, right: 18, color: "var(--color-title-secondary)" }}
               >
-                <CloseIcon />
+                <CloseIcon/>
               </IconButton>
             </Box>
             {/* Datos del histórico */}
@@ -447,7 +447,7 @@ const History = () => {
                       <List dense>
                           <Box sx={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-start", gap: 1 }}>
                             {change.items.map((item, i) => (
-                              <ListItem disablePadding>
+                              <ListItem disablePadding key={i}>
                                 <Paper
                                   elevation={1}
                                   sx={{

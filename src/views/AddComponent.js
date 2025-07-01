@@ -14,6 +14,7 @@ import axios from "axios";
 import LoadingCircle from "../components/LoadingCircle";
 import SideBar from "../components/SideBar";
 import AddCharasteristicModal from "../components/AddCharacteristModal";
+import { CapitalizeFirst } from "../utils/CapitalizeFirst";
 
 const AddComponent = () => {
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
@@ -42,8 +43,8 @@ const AddComponent = () => {
     );
   
     const payload = {
-      name: nombre.trim(),
-      type: tipo.trim(),
+      name: CapitalizeFirst(nombre.trim()),
+      type: CapitalizeFirst(tipo.trim()),
       status: estado,
       descriptions: validDescriptions.length > 0 ? validDescriptions : undefined
     };

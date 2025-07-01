@@ -17,8 +17,9 @@ const ManageUsers = () => {
 
   const [onChangePassword, setOnChangePassword] = useState(false)
 
-  const [editUser, setEditUser] = useState({ username: "", email: "", password: "", role: "usuario" });
-  const [saving, setSaving] = useState(false);
+  const [editUser, setEditUser] = useState({ username: "", email: "", password: "", confirmPassword: "", role: "usuario" });
+  const [errors, setErrors] = useState({});  const [saving, setSaving] = useState(false);
+  const passwordRegex = /^(?=.*\d).{6,}$/;
   const [isEditMode, setIsEditMode] = useState(false); // Cuando no edita, crea
   const allRoles = ["usuario", "administrador"];
   const roleOptions = useMemo(() => {
@@ -50,152 +51,180 @@ const ManageUsers = () => {
     fetchUsers();
   }, [token])
     
-    const columns = useMemo(
-      () => [
-        {
-          field: "username",
-          headerName: "Usuario",
-          flex: 1,
-          renderCell: (params) => (
-            params.value.charAt(0).toUpperCase() + params.value.slice(1)
-          ),
-        },
-        {
-          field: "email",
-          headerName: "Correo Electrónico",
-          flex: 1,
-        },
-        {
-          field: "role",
-          headerName: "Rol",
-          flex: 1,
-          renderCell: (params) => (
-            params.value || "—"
-          ),
-        },
-      ],
-      []
-    );
+  const columns = useMemo(
+    () => [
+      {
+        field: "username",
+        headerName: "Usuario",
+        flex: 1,
+        renderCell: (params) => (
+          params.value.charAt(0).toUpperCase() + params.value.slice(1)
+        ),
+      },
+      {
+        field: "email",
+        headerName: "Correo Electrónico",
+        flex: 1,
+      },
+      {
+        field: "role",
+        headerName: "Rol",
+        flex: 1,
+        renderCell: (params) => (
+          params.value || "—"
+        ),
+      },
+    ],
+    []
+  );
 
-    const handleAddUser = () => {
-      setEditUser({ username: "", email: "", password: "", role: "usuario" });
-      setIsEditMode(false);
-      setUserModalOpen(true);
-    };
+  const handleAddUser = () => {
+    setEditUser({ username: "", email: "", password: "", confirmPassword: "", role: "usuario" });
+    setIsEditMode(false);
+    setOnChangePassword(false);
+    setErrors({});
+    setUserModalOpen(true);
+  };
+  
+  const handleRowClick = (params) => {
+    setSelectedUser(params.row);
+    setEditUser({ 
+      username: params.row.username || "",
+      email: params.row.email || "",
+      password: params.row.password || "",
+      confirmPassword: "",
+      role: params.row.role || "",
+    });
+    setIsEditMode(true);
+    setOnChangePassword(false);
+    setErrors({});
+    setUserModalOpen(true);
+  };
+  
+  const handleCloseUser = () => {
+    setUserModalOpen(false);
+    setSelectedUser(null);
+    setEditUser({ username: "", email: "", password: "", role: "usuario" });
+    setSaving(false);
+  };
 
-    const handleRowClick = (params) => {
-      setSelectedUser(params.row);
-      setEditUser({ 
-          username: params.row.username || "",
-          email: params.row.email || "",
-          password: params.row.password || "",
-          role: params.row.role || "",
+  const handleEditChange = (field, value) => {
+    setEditUser((prev) => ({ ...prev, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: undefined }));
+  };
+
+  const hasUserChanged = () => {
+    if (!selectedUser) return true; // En modo creación, sí hay cambios
+    if (editUser.username.trim() !== (selectedUser.username || '').trim()) return true;
+    if (editUser.email.trim() !== (selectedUser.email || '').trim()) return true;
+    if (editUser.role !== (selectedUser.role || '')) return true;
+    if (onChangePassword && editUser.password.trim() !== '') return true;
+
+    return false;
+  };
+
+  // Validación de errores en inputs
+  const validateFields = () => {
+    const newErrors = {};
+    if (!editUser.username.trim()) newErrors.username = "El nombre de usuario es obligatorio.";
+    if (!editUser.email.trim()) newErrors.email = "El correo es obligatorio.";
+    if ((!isEditMode || onChangePassword)) {
+      if (!editUser.password || !passwordRegex.test(editUser.password)) {
+        newErrors.password = "Debe tener al menos 6 caracteres y un número.";
+      }
+      if (editUser.password !== editUser.confirmPassword) {
+        newErrors.confirmPassword = "Las contraseñas no coinciden.";
+      }
+      if (!editUser.confirmPassword) {
+        newErrors.confirmPassword = "Confirma tu contraseña.";
+      }
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+      
+  const handleSaveUser = async () => {
+    setSaving(true);
+    setLoadingButtons(true);
+
+    if (!hasUserChanged()) {
+      alert("No hay cambios para guardar.");
+      setSaving(false);
+      setLoadingButtons(false);
+      return;
+    }
+    if (!validateFields()) {
+      setSaving(false);
+      setLoadingButtons(false);
+      return;
+    }
+    if (!editUser.username.trim()) {
+      alert("El nombre de usuario es obligatorio.");
+      setSaving(false);
+      setLoadingButtons(false);
+      return;
+    }
+    if (!editUser.email.trim()) {
+      alert("El correo es obligatorio.");
+      setSaving(false);
+      setLoadingButtons(false);
+      return;
+    }
+    if (!["usuario", "administrador"].includes(editUser.role)) {
+      alert("Rol inválido.");
+      setSaving(false);
+      setLoadingButtons(false);
+      return;
+    }
+
+    try {
+      const userPayload = {
+        username: editUser.username.trim(),
+        email: editUser.email.trim(),
+        role: editUser.role,
+      };
+
+      if (onChangePassword && editUser.password.trim() !== "") {
+        userPayload.password = editUser.password.trim();
+      }
+
+      if (isEditMode && selectedUser) {
+        await axios.put(
+          `${BACKEND_URL}/users/${selectedUser._id}`,
+          userPayload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        ).catch((err) => console.error("Error actualizando: ", err));
+        alert(`Usuario ${userPayload.username} editado correctamente`);
+      } else {
+        if (!userPayload.password) {
+          alert("Debe ingresar una contraseña para crear un usuario.");
+          setSaving(false);
+          setLoadingButtons(false);
+          return;
+        }
+        await axios.post(
+          `${BACKEND_URL}/users`,
+          userPayload,
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        alert(`Usuario ${userPayload.username} creado correctamente`);
+      }
+      const response = await axios.get(`${BACKEND_URL}/users`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      setIsEditMode(true);
-      setUserModalOpen(true);
-    };
-    
-    const handleCloseUser = () => {
+      setUsers(response.data);
+      setOnChangePassword(false);
       setUserModalOpen(false);
       setSelectedUser(null);
-      setEditUser({ username: "", email: "", password: "", role: "usuario" });
+      setEditUser({ username: "", email: "", password: "", confirmPassword: "", role: "usuario" });
+    } catch (err) {
+      alert("Error guardando usuario:", err);
+      console.error(err);
+    } finally {
+      setLoadingButtons(false);
       setSaving(false);
-    };
-
-      const handleEditChange = (field, value) => {
-          setEditUser((prev) => ({ ...prev, [field]: value }));
-      };
-
-      const hasUserChanged = () => {
-        if (!selectedUser) return true; // En modo creación, sí hay cambios
-
-        if (editUser.username.trim() !== (selectedUser.username || '').trim()) return true;
-        if (editUser.email.trim() !== (selectedUser.email || '').trim()) return true;
-        if (editUser.role !== (selectedUser.role || '')) return true;
-        if (onChangePassword && editUser.password.trim() !== '') return true;
-
-        return false;
-      };
-    
-      const handleSaveUser = async () => {
-        setSaving(true);
-        setLoadingButtons(true);
-
-        if (!hasUserChanged()) {
-          alert("No hay cambios para guardar.");
-          setSaving(false);
-          setLoadingButtons(false);
-          return;
-        }
-
-        // Validación de campos obligatorios
-        if (!editUser.username.trim()) {
-          alert("El nombre de usuario es obligatorio.");
-          setSaving(false);
-          setLoadingButtons(false);
-          return;
-        }
-        if (!editUser.email.trim()) {
-          alert("El correo es obligatorio.");
-          setSaving(false);
-          setLoadingButtons(false);
-          return;
-        }
-        if (!["usuario", "administrador"].includes(editUser.role)) {
-          alert("Rol inválido.");
-          setSaving(false);
-          setLoadingButtons(false);
-          return;
-        }
-
-        try {
-          const userPayload = {
-            username: editUser.username.trim(),
-            email: editUser.email.trim(),
-            role: editUser.role,
-          };
-
-          if (onChangePassword && editUser.password.trim() !== "") {
-            userPayload.password = editUser.password.trim();
-          }
-
-          if (isEditMode && selectedUser) {
-            await axios.put(
-              `${BACKEND_URL}/users/${selectedUser._id}`,
-              userPayload,
-              { headers: { Authorization: `Bearer ${token}` } }
-            ).catch((err) => console.error("Error actualizando: ", err));
-            alert(`Usuario ${userPayload.username} editado correctamente`);
-          } else {
-            if (!userPayload.password) {
-              alert("Debe ingresar una contraseña para crear un usuario.");
-              setSaving(false);
-              setLoadingButtons(false);
-              return;
-            }
-            await axios.post(
-              `${BACKEND_URL}/users`,
-              userPayload,
-              { headers: { Authorization: `Bearer ${token}` } }
-            );
-            alert(`Usuario ${userPayload.username} creado correctamente`);
-          }
-          const response = await axios.get(`${BACKEND_URL}/users`, {
-            headers: { Authorization: `Bearer ${token}` },
-          });
-          setUsers(response.data);
-          setOnChangePassword(false);
-          setUserModalOpen(false);
-          setSelectedUser(null);
-          setEditUser({ username: "", email: "", password: "", role: "usuario" });
-        } catch (err) {
-          alert("Error guardando usuario:", err);
-          console.error(err);
-        } finally {
-          setLoadingButtons(false);
-          setSaving(false);
-        }
-      };
+    }
+  };
 
       return (
         <Box sx={{
@@ -415,7 +444,7 @@ const ManageUsers = () => {
                           type="password"
                           value={editUser.password}
                           onChange={e => handleEditChange("password", e.target.value)}
-                          disabled={!onChangePassword}
+                          disabled={isEditMode && !onChangePassword}
                           style={{
                             width: "100%",
                             padding: "10px",
@@ -426,19 +455,48 @@ const ManageUsers = () => {
                             fontSize: "1rem"
                           }}
                           autoComplete="off"
+                          placeholder={isEditMode && onChangePassword ? "Nueva contraseña" : "Contraseña"}
                         />
                         {/* 
                           La contraseña solo se cambiará si se selecciona este botón.
                           Al intentar cambiarla se borrará la actual contraseña para crear una nueva.
                         */}
-                        <Button sx={{fontSize: "0.5em"}} onClick={() => {
-                          setEditUser((prev) => ({ ...prev, password: "" }));
-                          setOnChangePassword(true);
-                        }}>
-                          Cambiar Contraseña
-                        </Button>
+                        {isEditMode && (
+                          <Button sx={{ fontSize: "0.5em" }} onClick={() => {
+                            setEditUser(prev => ({ ...prev, password: "", confirmPassword: "" }));
+                            setOnChangePassword(true);
+                          }}>
+                            Cambiar Contraseña
+                          </Button>
+                        )}
                       </Box>
+                      {errors.password && <Typography color="error" sx={{ fontSize: "0.9em" }}>{errors.password}</Typography>}
                     </Box>
+                    {(!isEditMode || onChangePassword) && (
+                      <Box>
+                        <Typography variant="body2" sx={{ color: "var(--color-title-primary)", fontWeight: 600, mb: 0.5, fontFamily: "var(--font-montserrat)" }}>
+                          Confirmar Contraseña
+                        </Typography>
+                        <input
+                          type="password"
+                          value={editUser.confirmPassword}
+                          onChange={e => handleEditChange("confirmPassword", e.target.value)}
+                          disabled={isEditMode && !onChangePassword}
+                          style={{
+                            width: "100%",
+                            padding: "10px",
+                            borderRadius: "10px",
+                            border: "1px solid #e0e0e0",
+                            background: "var(--bg-inputs)",
+                            fontFamily: "var(--font-source)",
+                            fontSize: "1rem"
+                          }}
+                          autoComplete="off"
+                          placeholder="Repite la contraseña"
+                        />
+                        {errors.confirmPassword && <Typography color="error" sx={{ fontSize: "0.9em" }}>{errors.confirmPassword}</Typography>}
+                      </Box>
+                    )}
                     <Box>
                       <Typography variant="body2" sx={{ color: "var(--color-title-primary)", fontWeight: 600, mb: 0.5, fontFamily: "var(--font-montserrat)" }}>
                         Rol

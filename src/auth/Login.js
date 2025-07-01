@@ -11,11 +11,21 @@ function Login() {
   const [login, setLogin] = useState({ email: '', password: '' });
   const [isLoading, setLoading] = useState(false);
   const [id, setId] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  const handleSubmit = async (e) => {
+   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!emailRegex.test(login.email)) {
+      setErrors(prev => ({
+        ...prev,
+        email: 'Correo inválido',
+      }));
+      return;
+    }
+
     setLoading(true);
     try {
       const resp = await axios.post(`${BACKEND_URL}/api/v1/auth/signin`, {
@@ -120,10 +130,17 @@ function Login() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setLogin({
-      ...login,
+    setLogin(prev => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+
+    if (name === 'email') {
+      setErrors(prev => ({
+        ...prev,
+        email: !emailRegex.test(value) ? 'Correo inválido' : undefined,
+      }));
+    }
   };
 
   return (
@@ -221,15 +238,16 @@ function Login() {
 
         <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>O iniciar sesión con credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-          <TextField
-            type="email"
+           <TextField
             name="email"
             value={login.email}
             onChange={handleChange}
             fullWidth
             size="small"
             label="Correo"
-            sx={{ '& .MuiInputBase-input': { height: '1.5rem' } }}
+            error={!!errors.email}
+            helperText={errors.email}
+            sx={{ '& .MuiInputBase-input': { height: '1.5rem' }, textJustify: "center" }}
           />
           <TextField
             type="password"
@@ -248,7 +266,7 @@ function Login() {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={isLoading || login.password === "" || login.email === ""}
+          disabled={ isLoading || !login.email || !login.password || !!errors.email } 
           sx={{
             mt: 4,
             py: 1.5,

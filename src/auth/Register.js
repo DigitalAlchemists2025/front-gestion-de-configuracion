@@ -1,24 +1,44 @@
 import { useState } from 'react';
 import { Box, Button, Divider, Link, Paper, TextField, Typography } from '@mui/material';
 import axios from 'axios';
-import { GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
-import { auth, provider } from '../firebase/config';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faGoogle } from '@fortawesome/free-brands-svg-icons';
-
 
 function Register() {
-  const [register, setRegister] = useState({ username: '', email: '', password: '' });
+  const [register, setRegister] = useState({ username: '', email: '', password: '', confirmPassword: '' });
+  const [errors, setErrors] = useState({});
   const [isLoading, setLoading] = useState(false);
 
   const BACKEND_URL = process.env.REACT_APP_BACK_URL;
-  const tempEmail = localStorage.getItem("EMAIL_TEMP") ;
-  if (tempEmail) {
-    setRegister({...register, email: tempEmail});
+  const tempEmail = localStorage.getItem("EMAIL_TEMP");
+  if (tempEmail && register.email === "") {
+    setRegister(prev => ({ ...prev, email: tempEmail }));
     localStorage.removeItem("EMAIL_TEMP");
   }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const passwordRegex = /^(?=.*\d).{6,}$/;
+
+  const validate = () => {
+    const newErrors = {};
+    if (!register.username.trim()) {
+      newErrors.username = 'El nombre de usuario es obligatorio';
+    }
+    if (!register.email.trim() || !emailRegex.test(register.email)) {
+      newErrors.email = 'Correo inválido';
+    }
+    if (!register.password || !passwordRegex.test(register.password)) {
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres y un número';
+    }
+    if (register.password !== register.confirmPassword) {
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
+
     setLoading(true);
     try {
       await axios.post(`${BACKEND_URL}/api/v1/auth/signup`, {
@@ -36,44 +56,21 @@ function Register() {
       setLoading(false);
     }
   };
-  
-  // Popup de auth de google - no registra una cuenta
-  const handleGoogleLogin = () => {
-    setLoading(true);
-    signInWithPopup(auth, provider).then(async (result) => {
-      const _user = result.user;
-      try {
-        const response = await axios.get(`${BACKEND_URL}/api/v1/auth/email/${_user.email}`);
-        localStorage.setItem('token', response.data.access_token);
-        localStorage.setItem('role', response.data.role === 'administrador' ? '0' : '1');
-      } catch(error) {
-        console.log("Email no encontrado");
-      }
-      alert(`¡Bienvenido/a ${_user.displayName.split(' ')[0] || _user.email}!`);
-      window.location.replace("/home");
-    }).catch((error) => {
-      const errorCode = error.code;
-      const errorMessage = error.message;
-      const credential = GoogleAuthProvider.credentialFromError(error);
-      alert("Error al iniciar sesión con Google. Intenta más tarde.");
-      console.error("Error de Google:", errorCode, errorMessage, credential);
-    });
-    setLoading(false);
-  }; 
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setRegister({
-      ...register,
+    setRegister(prev => ({
+      ...prev,
       [name]: value,
-    });
+    }));
+    setErrors(prev => ({ ...prev, [name]: undefined }));
   };
 
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
+    <Box sx={{
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
       justifyContent: 'center',
       background: 'var(--color-bg-secondary)',
       height: '100vh',
@@ -90,8 +87,8 @@ function Register() {
         alignItems: "center",
         my: 2,
       }}>
-        <img style={{ width: "5rem", objectFit: "contain", }} src="/logoUCN.png"></img>
-        <img style={{ width: "10rem", objectFit: "contain", }} src="/logoEIC.png"></img>
+        <img style={{ width: "5rem", objectFit: "contain", }} src="/logoUCN.png" alt="Logo UCN" />
+        <img style={{ width: "10rem", objectFit: "contain", }} src="/logoEIC.png" alt="Logo EIC" />
       </Box>
       <Typography
         variant="h1"
@@ -132,54 +129,30 @@ function Register() {
           Registrarse
         </Typography>
 
-        {/* Es un inicio de sesión igual que el login, no se registra la cuenta asociada a google */}
-        <Button
-          onClick={handleGoogleLogin}
-          variant="outlined"
-          disabled={isLoading}
-          color="secondary"
-          fullWidth
-          sx={{ 
-            flex: 1, 
-            my: 1,
-            flexDirection: 'row', 
-            justifyContent: 'center', 
-            color: 'var(--login-button-hover)',
-            border: '1px solid var(--login-button-hover)',
-            gap: 1, 
-            borderRadius: 50,
-            fontFamily: 'var(--font-source)',
-            '&:hover': { 
-              backgroundColor: 'var(--login-button-hover)', color: 'white' 
-            } 
-          }}
-        >
-          <FontAwesomeIcon icon={faGoogle} style={{ color: "var(--color-title-primary)"}} />
-            Inicia sesión con Google
-        </Button>
-
         <Divider sx={{ borderColor: 'black', my: '2rem' }} />
 
         <Typography sx={{ ml: 1, mb: 2, fontFamily: 'var(--font-source)', }}>Ingresa tus credenciales:</Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <TextField
-            type="string"
             name="username"
             value={register.username}
             onChange={handleChange}
             fullWidth
             size="small"
             label="Nombre de usuario"
+            error={!!errors.username}
+            helperText={errors.username}
             sx={{ '& .MuiInputBase-input': { height: '1.5rem' } }}
           />
           <TextField
-            type="email"
             name="email"
             value={register.email}
             onChange={handleChange}
             fullWidth
             size="small"
             label="Correo"
+            error={!!errors.email}
+            helperText={errors.email}
             sx={{ '& .MuiInputBase-input': { height: '1.5rem' }, textJustify: "center" }}
           />
           <TextField
@@ -190,6 +163,20 @@ function Register() {
             fullWidth
             size="small"
             label="Contraseña"
+            error={!!errors.password}
+            helperText={errors.password}
+            sx={{ '& .MuiInputBase-input': { height: '24px' } }}
+          />
+          <TextField
+            type="password"
+            name="confirmPassword"
+            value={register.confirmPassword}
+            onChange={handleChange}
+            fullWidth
+            size="small"
+            label="Confirmar Contraseña"
+            error={!!errors.confirmPassword}
+            helperText={errors.confirmPassword}
             sx={{ '& .MuiInputBase-input': { height: '24px' } }}
           />
         </Box>
@@ -199,22 +186,30 @@ function Register() {
           variant="contained"
           color="primary"
           onClick={handleSubmit}
-          disabled={isLoading || register.username === "" || register.password === "" || register.email === ""}
+          disabled={
+            isLoading ||
+            !register.username ||
+            !register.email ||
+            !register.password ||
+            !register.confirmPassword
+          }
           sx={{
             mt: 4,
             py: 1.5,
             borderRadius: 50,
             backgroundColor: 'var(--color-bg-secondary)',
-            fontFamily: 'var(--font-source)', 
+            fontFamily: 'var(--font-source)',
             '&:hover': {
               backgroundColor: 'var(--login-button-hover)',
             },
           }}
           fullWidth
         >
-          {isLoading ? 'Cargando...' : 'Ingresar'}
+          {isLoading ? 'Cargando...' : 'Crear Cuenta'}
         </Button>
-        <Typography sx={{ ml: 1, my: 2, fontFamily: 'var(--font-source)', justifySelf: "center"}}>Ya tiene cuenta? <Link href="/login">Inicie sesión aquí</Link></Typography>
+        <Typography sx={{ ml: 1, my: 2, fontFamily: 'var(--font-source)', justifySelf: "center" }}>
+          ¿Ya tienes cuenta? <Link href="/login">Inicia sesión aquí</Link>
+        </Typography>
       </Paper>
     </Box>
   );
